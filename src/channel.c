@@ -52,11 +52,37 @@ struct channel
 typedef struct channel channel_t;
 
 
-
-
-/*void main(int argc, char **argv)
+struct channel *channel_create(int eltsize, int size, int flags)
 {
+    /// @todo create
+    return NULL;
+}
 
 
-    return 0;
-}*/
+void channel_destroy(struct channel *channel)
+{
+    /// @todo destroy
+}
+
+
+int channel_send(struct channel *channel, const void *data)
+{
+    /// @todo send
+    return -1;
+}
+
+
+int channel_close(struct channel *channel)
+{
+    /// @todo close
+    return -1;
+}
+
+
+int channel_recv(struct channel *channel, void *data)
+{
+    /// @todo close
+    return -1;
+}
+
+
