@@ -1,7 +1,10 @@
 struct channel;
 
 /* flags */
-#define CHANNEL_PROCESS_SHARED 1
+#define CHANNEL_PROCESS_SHARED      1
+#define CHANNEL_PROCESS_SYNCHRONOUS 2
+#define CHANNEL_PROCESS_NONBLOCK    4
+#define CHANNEL_PROCESS_LOCKFREE    8
 
 struct channel *channel_create(int eltsize, int size, int flags);
 void channel_destroy(struct channel *channel);
