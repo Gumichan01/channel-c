@@ -2,7 +2,7 @@
 
 #include "data_queue.h"
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -84,7 +84,7 @@ void data_queue_destroy(struct data_queue_t *queue)
 }
 
 /*
-    Add a data in the channel
+    Write data in the channel
     return value : 0 on success, -1 on failure
 */
 int data_queue_write(struct data_queue_t *queue, const void *data)
@@ -126,7 +126,7 @@ int data_queue_write(struct data_queue_t *queue, const void *data)
 }
 
 /*
-    Receive from the queue
+    Read data from the queue
     returnn value : 1 - data extracted, 0 - no data, -1 - failure
 */
 int data_queue_read(struct data_queue_t *queue, void *data)
@@ -148,58 +148,11 @@ int data_queue_read(struct data_queue_t *queue, void *data)
 
     if(queue->head == NULL)
     {
-        // There was on data
+        // There was one data node
         queue->tail = queue->head;
     }
 
     return 1;
 }
-
-
-
-int main(void)
-{
-    int p;
-    int i;
-    struct data_queue_t *q = NULL;
-
-    q = data_queue_create(sizeof(int));
-
-    if(q == NULL)
-    {
-        perror("queue create");
-        return -1;
-    }
-
-
-    for(i = 0; i < 5; i++)
-    {
-        p = i+1;
-        data_queue_write(q,&p);
-        printf("sent data %d\n", p);
-    }
-
-    p = 0;  // dump value
-
-    while(data_queue_read(q,&p) == 1)
-    {
-        printf("received data %d\n", p);
-    }
-
-    data_queue_destroy(q);
-
-    return 0;
-}
-
-
-
-
-
-
-
-
-
-
-
 
 
