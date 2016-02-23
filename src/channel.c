@@ -7,8 +7,8 @@
 #include <pthread.h>
 
 
-/// Linked list of threads
-struct thread_t
+// Linked list of threads
+/*struct thread_t
 {
     pthread_t id;
     struct thread_t * next;
@@ -18,7 +18,7 @@ struct thread_queue_t
 {
     struct thread_t * head;
     struct thread_t * queue;
-};
+};*/
 
 /// Linked list of data
 struct data_t
@@ -43,8 +43,8 @@ struct channel
     int closed;
 
     struct data_queue_t dataq;      // Linked list of data
-    struct thread_queue_t recvq;    // Is that useful?
-    struct thread_queue_t sendq;    // Is that useful?
+    //struct thread_queue_t recvq;    // Is that useful?
+    //struct thread_queue_t sendq;    // Is that useful?
 
     pthread_mutex_t lock;           // mutex for atomic operations
 };
