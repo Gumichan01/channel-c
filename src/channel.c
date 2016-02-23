@@ -1,55 +1,65 @@
 
 
 #include "channel.h"
-#include "lib/data_queue.h"
 
-#include <stdio.h>
+#include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
 
 /// Channel
-struct channel
+struct channel_t
 {
-    /// @todo Implement the channel
     int eltsize;                    // Size of an element
     int size;                       // Number of elements
     int closed;
 
-    struct data_queue_t dataq;      // Linked list of data
+    void **dataq;                   // Data queue
     pthread_mutex_t lock;           // mutex for atomic operations
+    pthread_cond_t cond;            // condition variable
 };
 
-typedef struct channel channel_t;
+
+void ** allocate_array(int eltsize, int size)
+{
+    /// @todo allocation
+    return NULL;
+}
 
 
-struct channel *channel_create(int eltsize, int size, int flags)
+void free_array(int eltsize, int size)
+{
+    /// @todo free
+}
+
+
+struct channel_t *channel_create(int eltsize, int size, int flags)
 {
     /// @todo create
     return NULL;
 }
 
 
-void channel_destroy(struct channel *channel)
+void channel_destroy(struct channel_t *channel)
 {
     /// @todo destroy
 }
 
 
-int channel_send(struct channel *channel, const void *data)
+int channel_send(struct channel_t *channel, const void *data)
 {
     /// @todo send
     return -1;
 }
 
 
-int channel_close(struct channel *channel)
+int channel_close(struct channel_t *channel)
 {
     /// @todo close
     return -1;
 }
 
 
-int channel_recv(struct channel *channel, void *data)
+int channel_recv(struct channel_t *channel, void *data)
 {
     /// @todo close
     return -1;
