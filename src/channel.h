@@ -20,5 +20,6 @@ int channel_send(struct channel_t *channel, const void *data);
 int channel_close(struct channel_t *channel);
 int channel_recv(struct channel_t *channel, void *data);
 
+typedef struct channel_t channel_t;
 
 #endif // CHANNEL_H

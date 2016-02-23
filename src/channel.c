@@ -2,6 +2,9 @@
 
 #include "channel.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -11,9 +14,13 @@ struct channel_t
 {
     int eltsize;                    // Size of an element
     int size;                       // Number of elements
+    int flags;
     int closed;
 
-    void **dataq;                   // Data queue
+    int rd;                         // Read cursor
+    int wr;                         // Write cursor
+    void **data;                    // Data queue
+
     pthread_mutex_t lock;           // mutex for atomic operations
     pthread_cond_t cond;            // condition variable
 };
@@ -21,27 +28,111 @@ struct channel_t
 
 void ** allocate_array(int eltsize, int size)
 {
-    /// @todo allocation
-    return NULL;
+    int i;
+    void ** array = NULL;
+
+    array = malloc(sizeof(void*) * size);
+
+    if(array == NULL)
+        return NULL;
+
+    memset(array,0,size);
+
+    for(i = 0; i < size; i++)
+    {
+        array[i] = malloc(sizeof(void) * eltsize);
+
+        if(array[i] == NULL)
+        {
+            i -= 1;
+            while(i > 0)
+                free(array[i]);
+
+            free(array);
+            return NULL;
+        }
+    }
+
+    return array;
 }
 
 
-void free_array(int eltsize, int size)
+void free_array(void **array, int size)
 {
-    /// @todo free
+    int i;
+
+    for(i = 0; i < size; i++)
+    {
+        free(array[i]);
+    }
+
+    free(array);
 }
 
 
 struct channel_t *channel_create(int eltsize, int size, int flags)
 {
     /// @todo create
-    return NULL;
+    int err;
+
+    struct channel_t *chan = NULL;
+    chan = malloc(sizeof(struct channel_t));
+
+    if(chan == NULL)
+        return NULL;
+
+    chan->eltsize = eltsize;
+    chan->size = size;
+    chan->flags = flags;
+
+    chan->rd = 0;
+    chan->wr = 0;
+
+    chan->data = allocate_array(eltsize,size);
+
+    if(chan->data == NULL)
+    {
+        free(chan);
+        return NULL;
+    }
+
+    err = pthread_mutex_init(&chan->lock,NULL);
+
+    if(err != 0)
+    {
+        free_array(chan->data,size);
+        free(chan);
+        return NULL;
+    }
+
+    err = pthread_cond_init(&chan->cond,NULL);
+
+    if(err != 0)
+    {
+        pthread_mutex_destroy(&chan->lock);
+        free_array(chan->data,size);
+        free(chan);
+        return NULL;
+    }
+
+    return chan;
 }
 
-
+/*
+    If the channel is invalid or already destoyed,
+    then the behaviour is undefined
+*/
 void channel_destroy(struct channel_t *channel)
 {
     /// @todo destroy
+    if(channel != NULL)
+    {
+        pthread_cond_destroy(&channel->cond);
+        pthread_mutex_destroy(&channel->lock);
+        free_array(channel->data,channel->size);
+        free(channel);
+        channel = NULL;
+    }
 }
 
 
@@ -65,4 +156,17 @@ int channel_recv(struct channel_t *channel, void *data)
     return -1;
 }
 
+
+// Uncomment it to test the implementation
+/*
+int main(void)
+{
+    struct channel_t *chan = NULL;
+    chan = channel_create(sizeof(int),8,0);
+
+    sleep(1);
+
+    channel_destroy(chan);
+    return 0;
+}*/
 
