@@ -84,6 +84,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
     chan->eltsize = eltsize;
     chan->size = size;
     chan->flags = flags;
+    chan->closed = 0;
 
     chan->rd = 0;
     chan->wr = 0;
@@ -143,22 +144,32 @@ int channel_send(struct channel_t *channel, const void *data)
 }
 
 
+// If channel is not null but invalid, the behaviour is unspecified
 int channel_close(struct channel_t *channel)
 {
-    /// @todo close
-    return -1;
+    if(channel == NULL)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if(channel->closed == 1)
+        return 0;
+
+    channel->closed = 1;
+    return 0;
 }
 
 
 int channel_recv(struct channel_t *channel, void *data)
 {
-    /// @todo close
+    /// @todo recv
     return -1;
 }
 
 
 // Uncomment it to test the implementation
-/*
+
 int main(void)
 {
     struct channel_t *chan = NULL;
@@ -166,7 +177,8 @@ int main(void)
 
     sleep(1);
 
+    channel_close(chan);
     channel_destroy(chan);
     return 0;
-}*/
+}
 
