@@ -15,13 +15,9 @@ typedef struct data_queue_t
 
 } data_queue_t;
 
-
 struct data_queue_t *data_queue_create(const int eltsize);
 void data_queue_destroy(struct data_queue_t *queue);
 int data_queue_write(struct data_queue_t *queue, const void *data);
 int data_queue_read(struct data_queue_t *queue, void *data);
-
-
-
 
 #endif // DATA_QUEUE_H
