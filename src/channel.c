@@ -24,7 +24,7 @@ struct thread_queue_t
 struct data_t
 {
     void * data;
-    struct thread_t * next;
+    struct data_t * next;
 };
 
 struct data_queue_t
