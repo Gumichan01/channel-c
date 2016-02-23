@@ -21,4 +21,4 @@ int channel_close(struct channel_t *channel);
 int channel_recv(struct channel_t *channel, void *data);
 
 
-#endif // DEFINE_H
+#endif // CHANNEL_H
