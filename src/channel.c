@@ -37,7 +37,7 @@ struct data_queue_t
 /// Channel
 struct channel
 {
-    /// @todo implémenter le channel
+    /// @todo Implement the channel
     int eltsize;                    // Size of an element
     int size;                       // Number of elements
     int closed;
