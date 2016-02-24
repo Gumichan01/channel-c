@@ -146,6 +146,12 @@ void channel_destroy(struct channel_t *channel)
 int channel_send(struct channel_t *channel, const void *data)
 {
     /// @todo send
+    if(channel == NULL || data == NULL)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
     return -1;
 }
 
@@ -173,6 +179,12 @@ int channel_close(struct channel_t *channel)
 int channel_recv(struct channel_t *channel, void *data)
 {
     /// @todo recv
+    if(channel == NULL || data == NULL)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
     return -1;
 }
 
@@ -190,7 +202,7 @@ int main(void)
         return -1;
     }
 
-    sleep(1);
+    channel_send(chan,NULL);
 
     channel_close(chan);
     channel_destroy(chan);
