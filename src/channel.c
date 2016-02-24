@@ -74,8 +74,15 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
 {
     /// @todo create
     int err;
-
     struct channel_t *chan = NULL;
+
+    if(size == 0)
+    {
+        // Synchronous channel
+        errno = ENOSYS;
+        return NULL;
+    }
+
     chan = malloc(sizeof(struct channel_t));
 
     if(chan == NULL)
@@ -173,7 +180,13 @@ int channel_recv(struct channel_t *channel, void *data)
 int main(void)
 {
     struct channel_t *chan = NULL;
-    chan = channel_create(sizeof(int),8,0);
+    chan = channel_create(sizeof(int),0,0);
+
+    if(chan == NULL)
+    {
+        perror("create_channel");
+        return -1;
+    }
 
     sleep(1);
 
