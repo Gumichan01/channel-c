@@ -72,13 +72,12 @@ void free_array(void **array, int size)
 
 struct channel_t *channel_create(int eltsize, int size, int flags)
 {
-    /// @todo create
     int err;
     struct channel_t *chan = NULL;
 
-    if(size == 0)
+    if(size == 0 || (flags&CHANNEL_PROCESS_SHARED) == CHANNEL_PROCESS_SHARED)
     {
-        // Synchronous channel
+        // Synchronous channel || Shared channel
         errno = ENOSYS;
         return NULL;
     }
@@ -180,7 +179,7 @@ int channel_recv(struct channel_t *channel, void *data)
 int main(void)
 {
     struct channel_t *chan = NULL;
-    chan = channel_create(sizeof(int),0,0);
+    chan = channel_create(sizeof(int),5,CHANNEL_PROCESS_SHARED);
 
     if(chan == NULL)
     {
