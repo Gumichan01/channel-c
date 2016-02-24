@@ -127,12 +127,11 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
 }
 
 /*
-    If the channel is invalid or already destoyed,
-    then the behaviour is undefined
+    If the channel is not null but invalid,
+    then the behaviour is undefined.
 */
 void channel_destroy(struct channel_t *channel)
 {
-    /// @todo destroy
     if(channel != NULL)
     {
         pthread_cond_destroy(&channel->cond);
@@ -146,18 +145,30 @@ void channel_destroy(struct channel_t *channel)
 
 int channel_send(struct channel_t *channel, const void *data)
 {
-    /// @todo send
+    /// @todo channel_send
     if(channel == NULL || data == NULL)
     {
         errno = EINVAL;
         return -1;
     }
 
+    pthread_mutex_lock(&channel->lock);
+    if(channel->closed == 1)
+    {
+        pthread_mutex_unlock(&channel->lock);
+        errno = EPIPE;
+        return -1;
+    }
+
+    /// @todo send according to rd, wr and nbdata -> Monday 29th february
+
+    pthread_mutex_unlock(&channel->lock);
+
     return -1;
 }
 
 
-// If channel is not null but invalid, the behaviour is unspecified
+// If channel is not null but invalid, then the behaviour is unspecified
 int channel_close(struct channel_t *channel)
 {
     if(channel == NULL)
@@ -179,12 +190,29 @@ int channel_close(struct channel_t *channel)
 
 int channel_recv(struct channel_t *channel, void *data)
 {
-    /// @todo recv
+    /// @todo channel_recv
     if(channel == NULL || data == NULL)
     {
         errno = EINVAL;
         return -1;
     }
+
+    pthread_mutex_lock(&channel->lock);
+    if(channel->nbdata == 0)    // @note replace the if-else statment by while()
+    {
+        if(channel->closed == 1)
+        {
+            pthread_mutex_unlock(&channel->lock);
+            return 0;
+        }
+
+        /// @todo reception with nbdata = 0 -> Monday 29th february
+    }
+    else                        // @note remove else and its brackets
+    {
+        /// @todo reception with nbdata != 0 -> Monday 29th february
+    }
+    pthread_mutex_unlock(&channel->lock);
 
     return -1;
 }
