@@ -19,6 +19,7 @@ struct channel_t
 
     int rd;                         // Read cursor
     int wr;                         // Write cursor
+    int nbdata;
     void **data;                    // Data queue
 
     pthread_mutex_t lock;           // mutex for atomic operations
@@ -94,7 +95,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
 
     chan->rd = 0;
     chan->wr = 0;
-
+    chan->nbdata = 0;
     chan->data = allocate_array(eltsize,size);
 
     if(chan->data == NULL)
