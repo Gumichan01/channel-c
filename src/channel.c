@@ -162,7 +162,10 @@ int channel_close(struct channel_t *channel)
     if(channel->closed == 1)
         return 0;
 
+    pthread_mutex_lock(&channel->lock);
     channel->closed = 1;
+    pthread_mutex_unlock(&channel->lock);
+
     return 0;
 }
 
@@ -179,7 +182,7 @@ int channel_recv(struct channel_t *channel, void *data)
 int main(void)
 {
     struct channel_t *chan = NULL;
-    chan = channel_create(sizeof(int),5,CHANNEL_PROCESS_SHARED);
+    chan = channel_create(sizeof(int),5,0);
 
     if(chan == NULL)
     {
