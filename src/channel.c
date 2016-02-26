@@ -204,7 +204,7 @@ int channel_recv(struct channel_t *channel, void *data)
     }
 
     pthread_mutex_lock(&channel->lock);
-    /// @todo send according to rd, wr and nbdata -> Monday 29th february
+    /// @todo recv according to rd, wr and nbdata -> Monday 29th february
     pthread_mutex_unlock(&channel->lock);
 
     return -1;
