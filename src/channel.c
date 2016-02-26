@@ -197,21 +197,14 @@ int channel_recv(struct channel_t *channel, void *data)
         return -1;
     }
 
-    pthread_mutex_lock(&channel->lock);
-    if(channel->nbdata == 0)    // @note replace the if-else statment by while()
+    if(channel->closed == 1 && channel->nbdata == 0)
     {
-        if(channel->closed == 1)
-        {
-            pthread_mutex_unlock(&channel->lock);
-            return 0;
-        }
+        errno = EACCES;
+        return -1;
+    }
 
-        /// @todo reception with nbdata = 0 -> Monday 29th february
-    }
-    else                        // @note remove else and its brackets
-    {
-        /// @todo reception with nbdata != 0 -> Monday 29th february
-    }
+    pthread_mutex_lock(&channel->lock);
+    /// @todo send according to rd, wr and nbdata -> Monday 29th february
     pthread_mutex_unlock(&channel->lock);
 
     return -1;
@@ -222,6 +215,7 @@ int channel_recv(struct channel_t *channel, void *data)
 
 int main(void)
 {
+    int err;
     struct channel_t *chan = NULL;
     chan = channel_create(sizeof(int),5,0);
 
@@ -231,9 +225,12 @@ int main(void)
         return -1;
     }
 
-    channel_send(chan,NULL);
-
     channel_close(chan);
+    err = channel_recv(chan,&err);
+
+    if(err == -1)
+        perror("error recv");
+
     channel_destroy(chan);
     return 0;
 }
