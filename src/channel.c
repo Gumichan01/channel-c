@@ -182,7 +182,7 @@ int channel_send(struct channel_t *channel, const void *data)
 
     pthread_mutex_unlock(&channel->lock);
 
-    return -1;
+    return 0;
 }
 
 
@@ -223,11 +223,30 @@ int channel_recv(struct channel_t *channel, void *data)
 
     pthread_mutex_lock(&channel->lock);
     /// @todo recv according to rd, wr and nbdata -> Monday 29th february
+
+    while((channel->rd == channel->wr) && (channel->nbdata == 0)){
+      pthread_cond_wait(&channel->cond, &channel->lock);
+    }
+    if(channel->nbdata <= 0){
+      errno = EPIPE;
+      return -1;
+    }
+    
+    memcpy(data, channel->data[channel->rd], channel->eltsize);
+    if(channel->rd == channel->size-1){
+      channel->rd = 0;
+    }else{
+      channel->rd++;
+    }
+    channel->nbdata--;
+    if(channel->nbdata == channel->size-1){
+      pthread_cond_broadcast(&channel->cond);
+    }
+
     pthread_mutex_unlock(&channel->lock);
 
-    return -1;
+    return 0;
 }
-
 
 // Uncomment it to test the implementation
 
