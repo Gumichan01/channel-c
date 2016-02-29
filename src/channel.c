@@ -168,7 +168,7 @@ int channel_send(struct channel_t *channel, const void *data)
       errno = EPIPE;
       return -1;
     }
-    
+
     memcpy(channel->data[channel->wr], data, channel->eltsize);
     if(channel->wr == channel->size-1){
       channel->wr = 0;
@@ -231,7 +231,7 @@ int channel_recv(struct channel_t *channel, void *data)
       errno = EPIPE;
       return -1;
     }
-    
+
     memcpy(data, channel->data[channel->rd], channel->eltsize);
     if(channel->rd == channel->size-1){
       channel->rd = 0;
@@ -252,34 +252,28 @@ int channel_recv(struct channel_t *channel, void *data)
 
 int main(void)
 {
-  int p = 1;
-  int err;
-  struct channel_t *chan = NULL;
-  chan = channel_create(sizeof(int),5,0);
+    int n = 4, m = 1, p = 8, q;
+    struct channel_t *chan = NULL;
+    chan = channel_create(sizeof(int),5,0);
 
-  if(chan == NULL)
+    if(chan == NULL)
     {
-      perror("create_channel");
-      return -1;
+        perror("create_channel");
+        return -1;
     }
-  
-  err = channel_send(chan, &p);
 
-  p = 151;
-  
-  if(err == -1)
-    {
-      perror("erreur send");
-    }
-  
-  err = channel_recv(chan,&p);
+    channel_send(chan,&n);
+    channel_send(chan,&m);
+    channel_send(chan,&p);
 
-  printf("%d\n",p);
-  
-  if(err == -1)
-    perror("error recv");
-  
-  channel_destroy(chan);
-  return 0;
+    channel_recv(chan,&q);
+    printf("received from the channel: %d \n",q);  // 4
+    channel_recv(chan,&q);
+    printf("received from the channel: %d \n",q);  // 1
+    channel_recv(chan,&q);
+    printf("received from the channel: %d \n",q);  // 8
+
+    channel_close(chan);
+    channel_destroy(chan);
+    return 0;
 }
-
