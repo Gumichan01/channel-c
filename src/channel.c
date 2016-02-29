@@ -252,23 +252,34 @@ int channel_recv(struct channel_t *channel, void *data)
 
 int main(void)
 {
-    int err;
-    struct channel_t *chan = NULL;
-    chan = channel_create(sizeof(int),5,0);
+  int p = 1;
+  int err;
+  struct channel_t *chan = NULL;
+  chan = channel_create(sizeof(int),5,0);
 
-    if(chan == NULL)
+  if(chan == NULL)
     {
-        perror("create_channel");
-        return -1;
+      perror("create_channel");
+      return -1;
     }
+  
+  err = channel_send(chan, &p);
 
-    channel_close(chan);
-    err = channel_recv(chan,&err);
+  p = 151;
+  
+  if(err == -1)
+    {
+      perror("erreur send");
+    }
+  
+  err = channel_recv(chan,&p);
 
-    if(err == -1)
-        perror("error recv");
-
-    channel_destroy(chan);
-    return 0;
+  printf("%d\n",p);
+  
+  if(err == -1)
+    perror("error recv");
+  
+  channel_destroy(chan);
+  return 0;
 }
 
