@@ -161,6 +161,24 @@ int channel_send(struct channel_t *channel, const void *data)
     }
 
     /// @todo send according to rd, wr and nbdata -> Monday 29th february
+    while((channel->rd == channel->wr) && (channel->nbdata == channel->size)){
+      pthread_cond_wait(&channel->cond, &channel->lock);
+    }
+    if(channel->nbdata >= channel->size){
+      errno = EPIPE;
+      return -1;
+    }
+    
+    memcpy(channel->data[channel->wr], data, channel->eltsize);
+    if(channel->wr == channel->size-1){
+      channel->wr = 0;
+    }else{
+      channel->wr++;
+    }
+    channel->nbdata++;
+    if(channel->nbdata == 1){
+      pthread_cond_broadcast(&channel->cond);
+    }
 
     pthread_mutex_unlock(&channel->lock);
 
