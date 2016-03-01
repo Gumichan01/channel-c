@@ -22,7 +22,7 @@ channel_t *chan = NULL;
 void * readfile(void* ptr)
 {
   int fd;
-  int r;
+  int r, err;
   char file[FILENAME_SIZE];
   char buffer[BUFSIZE];
 
@@ -38,7 +38,6 @@ void * readfile(void* ptr)
   }
 
   do{
-    int err;
     memset(buffer,0,BUFSIZE);
     r = read(fd,buffer,BUFSIZE);
 
@@ -48,7 +47,7 @@ void * readfile(void* ptr)
     if(err == 1)
       perror("channel_send");
 
-  }while(r > 0);
+  }while(r > 0 && && err != 1);
 
   channel_close(chan);
   close(fd);
