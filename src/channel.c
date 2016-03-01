@@ -62,6 +62,9 @@ void free_array(void **array, int size)
 {
     int i;
 
+    if(array == NULL)
+      return;
+
     for(i = 0; i < size; i++)
     {
         free(array[i]);
@@ -133,19 +136,18 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
 void channel_destroy(struct channel_t *channel)
 {
     if(channel != NULL)
-    {
-        pthread_cond_destroy(&channel->cond);
-        pthread_mutex_destroy(&channel->lock);
-        free_array(channel->data,channel->size);
-        free(channel);
-        channel = NULL;
-    }
+      return;
+
+    pthread_cond_destroy(&channel->cond);
+    pthread_mutex_destroy(&channel->lock);
+    free_array(channel->data,channel->size);
+    free(channel);
+    channel = NULL;
 }
 
 
 int channel_send(struct channel_t *channel, const void *data)
 {
-    /// @todo channel_send
     if(channel == NULL || data == NULL)
     {
         errno = EINVAL;
@@ -160,7 +162,6 @@ int channel_send(struct channel_t *channel, const void *data)
         return -1;
     }
 
-    /// @todo send according to rd, wr and nbdata -> Monday 29th february
     while((channel->rd == channel->wr) && (channel->nbdata == channel->size)){
       pthread_cond_wait(&channel->cond, &channel->lock);
     }
@@ -208,7 +209,6 @@ int channel_close(struct channel_t *channel)
 
 int channel_recv(struct channel_t *channel, void *data)
 {
-    /// @todo channel_recv
     if(channel == NULL || data == NULL)
     {
         errno = EINVAL;
@@ -222,7 +222,6 @@ int channel_recv(struct channel_t *channel, void *data)
     }
 
     pthread_mutex_lock(&channel->lock);
-    /// @todo recv according to rd, wr and nbdata -> Monday 29th february
 
     while(channel->rd == channel->wr && channel->nbdata == 0)
     {
