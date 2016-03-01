@@ -135,7 +135,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
 */
 void channel_destroy(struct channel_t *channel)
 {
-    if(channel != NULL)
+    if(channel == NULL)
       return;
 
     pthread_cond_destroy(&channel->cond);
@@ -255,7 +255,7 @@ int channel_recv(struct channel_t *channel, void *data)
 
 // Uncomment it to test the implementation
 
-int main(void)
+/*int main(void)
 {
     int n = 4, m = 1, p = 8, q;
     struct channel_t *chan = NULL;
@@ -281,4 +281,4 @@ int main(void)
     channel_close(chan);
     channel_destroy(chan);
     return 0;
-}
+}*/
