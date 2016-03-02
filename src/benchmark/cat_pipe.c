@@ -10,63 +10,66 @@
 
 int pfd[2];
 
-void * readfile(void* f){
+void * readfile(void* f)
+{
   int fd, r;
   char file[FILENAMESIZE];
   char buf[BUFSIZE];
 
   memcpy(file, f, FILENAMESIZE);
-
   fd = open(file, O_RDONLY);
-  if(fd < 0){
+  if(fd < 0)
+  {
     perror("open");
-    exit(EXIT_FAILURE);
+    pthread_exit(NULL);
   }
 
-  do{
+  do
+  {
     memset(buf, 0, BUFSIZE);
-
     r = read(fd, buf, BUFSIZE);
-    if(r < 0){
-      perror("read");
-      exit(EXIT_FAILURE);
-    }    
+
+    if(r > 0)
+      write(pfd[1], buf, r);
+
   }while(r > 0);
 
   close(fd);
-  pthread_exit(NULL);  
+  close(pfd[1]);
+  pthread_exit(NULL);
 }
 
 void * printfile(void* f){
   char buf[BUFSIZE];
   int r;
-  
-  do{
+
+  do
+  {
     memset(buf, 0, BUFSIZE);
-    r = read(pfd[0], buf, BUFSIZE); 
-    if(r < 0){
-      perror("read");
-      exit(EXIT_FAILURE);
-    }
-    write(STDIN_FILENO, buf, BUFSIZE);
+    r = read(pfd[0], buf, BUFSIZE);
+
+    if(r > 0)
+      write(STDIN_FILENO, buf, r);
+
   }while(r > 0);
-  
-  close(pfd[0]);
+
   pthread_exit(NULL);
-  
 }
 
-int main(int argc, char ** argv){
+int main(int argc, char ** argv)
+{
   int err;
   pthread_t thr, thp;
-  
+
   if(argc != 2){
     printf("usage: %s <file_name>\n",argv[0]);
     return EXIT_FAILURE;
   }
 
   err = pipe(pfd);
-  if(err < 0){
+
+  if(err < 0)
+  {
     perror("pipe");
     exit(EXIT_FAILURE);
   }
@@ -76,7 +79,6 @@ int main(int argc, char ** argv){
   pthread_join(thr,NULL);
   pthread_join(thp,NULL);
 
-  close(pfd[1]);
-  
+  close(pfd[0]);
   return 0;
 }
