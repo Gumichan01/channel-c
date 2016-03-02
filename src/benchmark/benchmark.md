@@ -13,7 +13,7 @@
 - Petit fichier
 
  * Version canal        : **real** 0.003s; **user**	0.000s; **sys**	0.000s;
- * Version tube         : *TODO*
+ * Version tube         : **real** 0.003s; **user** 0.000s; **sys**	0.000s
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
@@ -21,13 +21,14 @@
 - Gros fichier
 
  * Version canal        : **real**	18.104s; **user**	0.016s; **sys**	2.212s;
- * Version tube         : *TODO*
+ * Version tube         : **real**	18.142s; **user**	0.009s; **sys**	1.980s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
 
 ### Conclusion ###
 
+Peu de différence quelque soit le fichier donné
 *TODO*
 
 ## Programme Copy ##
@@ -61,11 +62,11 @@ La différence est très minime entre les canaux et les tubes. *TODO*
 
 ## Programme Forward ##
 
-  Ce programme va permettre la communication entre un groupe de threads écrivains
-et un groupe de threads lecteurs. On ne se péoccupe pas de savoir qui dans
-le groupe de lecteurs va recevoir le message.
-On sait juste que n'importe quel message envoyé par un ecrivain sera reçu
-par un lecteur quelconque.
+  Le programme *fwd* va permettre la communication entre
+un groupe de threads écrivains et un groupe de threads lecteurs.
+On ne se péoccupe pas de savoir qui dans le groupe de lecteurs va recevoir
+le message. On sait juste que n'importe quel message envoyé par un ecrivain
+sera reçu par un lecteur quelconque.
 
 La communication entre ces deux groupes sera assuré par un
 thread "transmetteur". Concrétement, tous les écrivains écriront un message
@@ -75,10 +76,12 @@ les enverra au groupe de lecteurs.
 Le message aura la forme (id_thread,id_processus,contenu_message[16]).  
 Le nombre de lecteurs/écrivains sera déterminé par l'utilisateur.  
 Il y aura toujours un seul thread "transmetteur".  
-Le thread "transmetteur" attend 1 seconde avant d'effectuer la transmission. Cette attente va permettre la contention.
+Le thread "transmetteur" attend 1 seconde avant d'effectuer la transmission.
+Cette attente va permettre la contention.  
 
 Pour la version implémentant les canaux, les tests seront effectués avec
-au maximum 256 messages par canal, afin d'avoir un tampon de taille équivalente à celui d'un tube.
+au maximum 256 messages par canal, et ceux afin d'avoir
+un tampon de taille équivalente à celui d'un tube.
 
 
 ### Comparaison ###
