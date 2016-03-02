@@ -13,11 +13,10 @@
 #include <pthread.h>
 
 #define BUFSIZE 1024
+#define SIZE 8
 #define FILENAME_SIZE 256
 
-
 channel_t *chan = NULL;
-
 
 void * readfile(void* ptr)
 {
@@ -38,10 +37,9 @@ void * readfile(void* ptr)
   }
 
   do{
+
     memset(buffer,0,BUFSIZE);
     r = read(fd,buffer,BUFSIZE);
-
-    // écrire dans le canal
     err = channel_send(chan,buffer);
 
     if(err == 1)
@@ -62,7 +60,7 @@ void * writefile(void* ptr)
   char file[FILENAME_SIZE];
 
   memcpy(file,ptr,FILENAME_SIZE);
-  f = open("toto",O_CREAT|O_TRUNC|O_WRONLY,0777);
+  f = open(file,O_CREAT|O_TRUNC|O_WRONLY,0600);
 
   if(f == -1)
   {
@@ -95,7 +93,7 @@ int main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  chan = channel_create(1024*sizeof(char),1024,0);
+  chan = channel_create(BUFSIZE*sizeof(char),SIZE,0);
 
   if(chan == NULL)
   {
