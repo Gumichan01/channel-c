@@ -13,11 +13,10 @@
 #include <pthread.h>
 
 #define BUFSIZE 1024
+#define SIZE 8
 #define FILENAME_SIZE 256
 
-
 channel_t *chan = NULL;
-
 
 void * readfile(void* ptr)
 {
@@ -27,7 +26,6 @@ void * readfile(void* ptr)
   char buffer[BUFSIZE];
 
   memcpy(file,ptr,FILENAME_SIZE);
-
   fd = open(file,O_RDONLY);
 
   if(fd == -1)
@@ -38,16 +36,15 @@ void * readfile(void* ptr)
   }
 
   do{
+
     memset(buffer,0,BUFSIZE);
     r = read(fd,buffer,BUFSIZE);
-
-    // écrire dans le canal
     err = channel_send(chan,buffer);
 
     if(err == 1)
       perror("channel_send");
 
-  }while(r > 0 && && err != 1);
+  }while(r > 0 && err != 1);
 
   channel_close(chan);
   close(fd);
@@ -58,8 +55,6 @@ void * print(void* ptr)
 {
   int err;
   char buffer[BUFSIZE];
-
-  // lire le canal et vérifier
 
   do{
     memset(buffer,0,BUFSIZE);
@@ -84,7 +79,7 @@ int main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  chan = channel_create(1024*sizeof(char),1024,0);
+  chan = channel_create(BUFSIZE*sizeof(char),SIZE,0);
 
   if(chan == NULL)
   {
@@ -94,10 +89,8 @@ int main(int argc, char **argv)
 
   pthread_create(&thr,NULL,readfile,argv[1]);
   pthread_create(&thp,NULL,print,NULL);
-
   pthread_join(thr,NULL);
   pthread_join(thp,NULL);
-
   channel_destroy(chan);
 
   return EXIT_SUCCESS;
