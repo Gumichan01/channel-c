@@ -162,11 +162,13 @@ int channel_send(struct channel_t *channel, const void *data)
         return -1;
     }
 
-    while((channel->rd == channel->wr) && (channel->nbdata == channel->size)){
+    while((channel->rd == channel->wr) && (channel->nbdata == channel->size))
+    {
       pthread_cond_wait(&channel->cond, &channel->lock);
     }
-    if(channel->nbdata >= channel->size){
 
+    if(channel->nbdata >= channel->size || channel->closed == 1)
+    {
       pthread_mutex_unlock(&channel->lock);
       errno = EPIPE;
       return -1;
@@ -213,24 +215,32 @@ int channel_recv(struct channel_t *channel, void *data)
 {
     if(channel == NULL || data == NULL)
     {
-        errno = EINVAL;
-        return -1;
+      errno = EINVAL;
+      return -1;
     }
 
     if(channel->closed == 1 && channel->nbdata == 0)
     {
-        return 0;
+      return 0;
     }
 
     pthread_mutex_lock(&channel->lock);
 
-    while(channel->rd == channel->wr && channel->nbdata == 0)
+    while(channel->rd == channel->wr && channel->nbdata == 0 && channel->closed == 0)
     {
       pthread_cond_wait(&channel->cond, &channel->lock);
     }
 
-    if(channel->nbdata <= 0)
+    // Redundant
+    if(channel->closed == 1 && channel->nbdata == 0)
     {
+      pthread_mutex_unlock(&channel->lock);
+      return 0;
+    }
+
+    if(channel->nbdata == 0)
+    {
+      pthread_mutex_unlock(&channel->lock);
       errno = EPIPE;
       return -1;
     }
