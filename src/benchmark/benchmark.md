@@ -13,15 +13,15 @@
 - Petit fichier
 
  * Version canal        : **real** 0.003s; **user**	0.000s; **sys**	0.000s;
- * Version tube         : **real** 0.003s; **user** 0.000s; **sys**	0.000s
+ * Version tube         : **real** 0.003s; **user** 0.000s; **sys**	0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
 
 - Gros fichier
 
- * Version canal        : **real**	18.104s; **user**	0.016s; **sys**	2.212s;
- * Version tube         : **real**	18.142s; **user**	0.009s; **sys**	1.980s;
+ * Version canal        : **real** 18.104s; **user**	0.016s; **sys**	2.212s;
+ * Version tube         : **real** 18.142s; **user**	0.009s; **sys**	1.980s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
@@ -43,7 +43,7 @@ thread d'écriture du fichier destination.
 
  * Version canal        : **real** 0.003s; **user**	0.004s; **sys**	0.000s;
  * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version socket Unix  : *TODO*
+ * Version socket Unix  : **real** 0.004s; **user** 0.000s; **sys** 0.000s;
  * Programme Go equiv.  : *TODO*
 
 
@@ -51,13 +51,15 @@ thread d'écriture du fichier destination.
 
  * Version canal        : **real** 0.101s; **user**	0.008s; **sys**	0.124s;
  * Version tube         : **real** 0.093s; **user** 0.016s; **sys** 0.116s;
- * Version socket Unix  : *TODO*
+ * Version socket Unix  : **real** 0.598s; **user** 0.008s; **sys** 0.096s;
  * Programme Go equiv.  : *TODO*
 
 
 ### Conclusion ###
 
-La différence est très minime entre les canaux et les tubes. *TODO*
+La différence est très minime entre les canaux et les tubes.  
+En revanche les performances son bien meilleures que
+les versions utilisant les sockets de la famille Unix. *TODO*
 
 
 ## Programme Forward ##
