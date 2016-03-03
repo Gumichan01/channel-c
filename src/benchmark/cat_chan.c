@@ -60,10 +60,10 @@ void * print(void* ptr)
     memset(buffer,0,BUFSIZE);
     err = channel_recv(chan,buffer);
 
-    if(err != -1)
+    if(err > 0)
       write(STDIN_FILENO,buffer,BUFSIZE);
 
-  }while(err != -1);
+  }while(err > 0);
 
   pthread_exit(NULL);
 }

@@ -73,10 +73,10 @@ void * writefile(void* ptr)
     memset(buffer,0,BUFSIZE);
     err = channel_recv(chan,buffer);
 
-    if(err != -1)
+    if(err > 0)
       err = write(f,buffer,BUFSIZE);
 
-  }while(err != -1);
+  }while(err > 0);
 
   close(f);
   pthread_exit(NULL);
