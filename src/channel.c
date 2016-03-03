@@ -166,6 +166,8 @@ int channel_send(struct channel_t *channel, const void *data)
       pthread_cond_wait(&channel->cond, &channel->lock);
     }
     if(channel->nbdata >= channel->size){
+
+      pthread_mutex_unlock(&channel->lock);
       errno = EPIPE;
       return -1;
     }
@@ -174,9 +176,9 @@ int channel_send(struct channel_t *channel, const void *data)
     if(channel->wr == channel->size-1)
       channel->wr = 0;
     else
-      channel->wr++;
+      channel->wr += 1;
 
-    channel->nbdata++;
+    channel->nbdata += 1;
 
     if(channel->nbdata == 1)
       pthread_cond_broadcast(&channel->cond);
@@ -217,8 +219,7 @@ int channel_recv(struct channel_t *channel, void *data)
 
     if(channel->closed == 1 && channel->nbdata == 0)
     {
-        errno = EACCES;
-        return -1;
+        return 0;
     }
 
     pthread_mutex_lock(&channel->lock);
@@ -239,9 +240,9 @@ int channel_recv(struct channel_t *channel, void *data)
     if(channel->rd == channel->size-1)
       channel->rd = 0;
     else
-      channel->rd++;
+      channel->rd += 1;
 
-    channel->nbdata--;
+    channel->nbdata -= 1;
 
     if(channel->nbdata == channel->size-1)
     {
@@ -250,7 +251,7 @@ int channel_recv(struct channel_t *channel, void *data)
 
     pthread_mutex_unlock(&channel->lock);
 
-    return 0;
+    return 1;
 }
 
 // Uncomment it to test the implementation
