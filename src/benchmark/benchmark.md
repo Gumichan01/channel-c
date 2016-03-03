@@ -75,8 +75,12 @@ thread "transmetteur". Concrétement, tous les écrivains écriront un message
 au thread médiateur. Ce thread, qui aura reçu les messages,
 les enverra au groupe de lecteurs.
 
-Le message aura la forme (id_thread,id_processus,contenu_message[16]).  
+Le message aura la forme (id_processus,contenu_message[16]).  
 Le nombre de lecteurs/écrivains sera déterminé par l'utilisateur.  
+Un groupe d'écrivains enverra au maximum 15 000 messages.
+Un groupe de lecteurs recevra autant de messages que possible.
+Le thread transmetteur devra transiter au maximum 30 000 messages.
+Au-delà, il ferme les canaux de transmission.
 Il y aura toujours un seul thread "transmetteur".  
 Le thread "transmetteur" attend 1 seconde avant d'effectuer la transmission.
 Cette attente va permettre la contention.  
