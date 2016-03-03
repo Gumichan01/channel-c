@@ -25,10 +25,11 @@
 
 void * readfile(void * ptr)
 {
+  int r, fd;
   int sock, err;
   socklen_t sz;
   int buffer[BUFSIZE];
-
+  char file[FILENAME_SIZE];
   struct sockaddr_un un;
 
   memset(buffer,0,BUFSIZE);
@@ -40,7 +41,7 @@ void * readfile(void * ptr)
     pthread_exit(NULL);
   }
 
-  // Set the unix socket address
+  // Configure the socket setting the unix socket address
   memset(&un,0,sizeof(struct sockaddr_un));
   un.sun_family = AF_UNIX;
   strncpy(un.sun_path, SOCK_PATH, sizeof(un.sun_path) - 1);
@@ -58,15 +59,36 @@ void * readfile(void * ptr)
 
   printf("Connect OK\n");
 
+  // Read the file and send its content
+  memcpy(file,ptr,FILENAME_SIZE);
+  fd = open(file,O_RDONLY);
+
+  if(fd == -1)
+  {
+    perror("write - open");
+    close(sock);
+    unlink(SOCK_PATH);
+    pthread_exit(NULL);
+  }
+
+  while((r = read(fd,buffer,BUFSIZE)) > 0)
+  {
+    send(sock,buffer,r,MSG_NOSIGNAL);
+    memset(buffer,0,BUFSIZE);
+  }
+
+  close(fd);
   close(sock);
   pthread_exit(NULL);
 }
 
 void * writefile(void * ptr)
 {
-  int sock, sockclt, err;
+  int sock, sockclt;
+  int err, r, fd;
   socklen_t sz;
   int buffer[BUFSIZE];
+  char file[FILENAME_SIZE];
 
   struct sockaddr_un un;
   struct sockaddr_un *clt;
@@ -80,6 +102,7 @@ void * writefile(void * ptr)
     pthread_exit(NULL);
   }
 
+  // Configure the socket
   memset(&un,0,sizeof(struct sockaddr_un));
   un.sun_family = AF_UNIX;
   strncpy(un.sun_path, SOCK_PATH, sizeof(un.sun_path) - 1);
@@ -92,8 +115,8 @@ void * writefile(void * ptr)
   if(err == -1)
   {
     perror("error bind");
-    unlink(SOCK_PATH);
     close(sock);
+    unlink(SOCK_PATH);
     pthread_exit(NULL);
   }
 
@@ -120,20 +143,43 @@ void * writefile(void * ptr)
 
   printf("Accept OK\n");
 
+  // file opening and writing
+  memcpy(file,ptr,FILENAME_SIZE);
+  fd = open(file,O_CREAT|O_TRUNC|O_WRONLY,0600);
+
+  if(fd == -1)
+  {
+    perror("write - open");
+    close(sock);
+    unlink(SOCK_PATH);
+    pthread_exit(NULL);
+  }
+
+  while((r = recv(sockclt,buffer,BUFSIZE,0)) > 0)
+  {
+    write(fd,buffer,r);
+    memset(buffer,0,BUFSIZE);
+  }
+
+  close(fd);
   close(sock);
   unlink(SOCK_PATH);
-
   pthread_exit(NULL);
 }
 
 
 int main(int argc, char **argv)
 {
-  //pthread_t thr;
   pthread_t thr, thw;
 
-  pthread_create(&thr,NULL,readfile,NULL);
-  pthread_create(&thw,NULL,writefile,NULL);
+  if(argc != 3)
+  {
+    printf("usage: %s <file_src> <file_dest>\n",argv[0]);
+    return EXIT_FAILURE;
+  }
+
+  pthread_create(&thr,NULL,readfile,argv[1]);
+  pthread_create(&thw,NULL,writefile,argv[2]);
   pthread_join(thr,NULL);
   pthread_join(thw,NULL);
 
