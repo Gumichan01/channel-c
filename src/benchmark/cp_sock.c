@@ -5,14 +5,10 @@
 
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/fcntl.h>
 
-#include <netdb.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include <pthread.h>
 
@@ -56,8 +52,6 @@ void * readfile(void * ptr)
       close(sock);
       pthread_exit(NULL);
   }
-
-  printf("Connect OK\n");
 
   // Read the file and send its content
   memcpy(file,ptr,FILENAME_SIZE);
@@ -140,8 +134,6 @@ void * writefile(void * ptr)
     unlink(SOCK_PATH);
     pthread_exit(NULL);
   }
-
-  printf("Accept OK\n");
 
   // file opening and writing
   memcpy(file,ptr,FILENAME_SIZE);
