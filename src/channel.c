@@ -29,9 +29,12 @@ struct channel_t
 /// @todo define a function to test if a channel is closed and empty
 // Define some macros to check the flags
 
+#define CHAN_ISSHARED(flags) \
+  (( (flags) & CHANNEL_PROCESS_SHARED ) == CHANNEL_PROCESS_SHARED)
+
 /// Private functions
 
-int channel_closed_emtpy(struct channel_t *chan)
+int channel_closed_empty(struct channel_t *chan)
 {
   return (chan->closed == 1 && chan->nbdata == 0);
 }
@@ -89,7 +92,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
     int err;
     struct channel_t *chan = NULL;
 
-    if(size == 0 || (flags&CHANNEL_PROCESS_SHARED) == CHANNEL_PROCESS_SHARED)
+    if(size == 0 || CHAN_ISSHARED(flags))
     {
         // Synchronous channel || Shared channel
         errno = ENOSYS;
@@ -236,7 +239,7 @@ int channel_recv(struct channel_t *channel, void *data)
       pthread_cond_wait(&channel->cond, &channel->lock);
     }
 
-    if(channel_closed_emtpy(channel))
+    if(channel_closed_empty(channel))
     {
       pthread_mutex_unlock(&channel->lock);
       return 0;
