@@ -77,13 +77,12 @@ les enverra au groupe de lecteurs.
 
 Le message aura la forme (id_processus,contenu_message[16]).  
 Le nombre de lecteurs/écrivains sera déterminé par l'utilisateur.  
-Un groupe d'écrivains enverra au maximum 15 000 messages.
+Un groupe d'écrivains enverra au maximum 30 000 messages.
 Un groupe de lecteurs recevra autant de messages que possible.
-Le thread transmetteur devra transiter au maximum 30 000 messages.
+Le thread transmetteur devra transiter au maximum 15 000 messages.
 Au-delà, il ferme les canaux de transmission.
 Il y aura toujours un seul thread "transmetteur".  
-Le thread "transmetteur" attend 1 seconde avant d'effectuer la transmission.
-Cette attente va permettre la contention.  
+Aucun message ne sera affiché, et ce, afin d'éviter des résultats parasites.
 
 Pour la version implémentant les canaux, les tests seront effectués avec
 au maximum 256 messages par canal, et ceux afin d'avoir
@@ -129,13 +128,6 @@ un tampon de taille équivalente à celui d'un tube.
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
- - 65535 lecteurs / 65535 écrivains (Si le système d'exploitation le permet)
-
- * Version canal        : *TODO*
- * Version tube         : *TODO*
- * Version socket Unix  : *TODO*
- * Programme Go equiv.  : *TODO*
-
 
 #### Plus d'écrivains que de lecteurs ####
 
@@ -161,13 +153,6 @@ un tampon de taille équivalente à celui d'un tube.
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 10 000 écrivains
-
- * Version canal        : *TODO*
- * Version tube         : *TODO*
- * Version socket Unix  : *TODO*
- * Programme Go equiv.  : *TODO*
-
- - 1 lecteur / 65535 écrivains (Si le système d'exploitation le permet)
 
  * Version canal        : *TODO*
  * Version tube         : *TODO*
@@ -205,12 +190,6 @@ un tampon de taille équivalente à celui d'un tube.
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
- - 65535 lecteurs / 1 écrivain (Si le système d'exploitation le permet)
-
- * Version canal        : *TODO*
- * Version tube         : *TODO*
- * Version socket Unix  : *TODO*
- * Programme Go equiv.  : *TODO*
 
 ### Conclusion ###
 
