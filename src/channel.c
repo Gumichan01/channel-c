@@ -26,6 +26,15 @@ struct channel_t
     pthread_cond_t cond;            // condition variable
 };
 
+/// @todo define a function to test if a channel is closed and empty
+// Define some macros to check the flags
+
+/// Private functions
+
+int channel_closed_emtpy(struct channel_t *chan)
+{
+  return (chan->closed == 1 && chan->nbdata == 0);
+}
 
 void ** allocate_array(int eltsize, int size)
 {
@@ -73,6 +82,7 @@ void free_array(void **array, int size)
     free(array);
 }
 
+/// Public functions
 
 struct channel_t *channel_create(int eltsize, int size, int flags)
 {
@@ -219,11 +229,6 @@ int channel_recv(struct channel_t *channel, void *data)
       return -1;
     }
 
-    if(channel->closed == 1 && channel->nbdata == 0)
-    {
-      return 0;
-    }
-
     pthread_mutex_lock(&channel->lock);
 
     while(channel->rd == channel->wr && channel->nbdata == 0 && channel->closed == 0)
@@ -231,8 +236,7 @@ int channel_recv(struct channel_t *channel, void *data)
       pthread_cond_wait(&channel->cond, &channel->lock);
     }
 
-    // Redundant
-    if(channel->closed == 1 && channel->nbdata == 0)
+    if(channel_closed_emtpy(channel))
     {
       pthread_mutex_unlock(&channel->lock);
       return 0;
