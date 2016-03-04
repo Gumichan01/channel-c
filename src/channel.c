@@ -104,6 +104,14 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
     if(chan == NULL)
         return NULL;
 
+    chan->data = allocate_array(eltsize,size);
+
+    if(chan->data == NULL)
+    {
+        free(chan);
+        return NULL;
+    }
+
     chan->eltsize = eltsize;
     chan->size = size;
     chan->flags = flags;
@@ -112,13 +120,6 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
     chan->rd = 0;
     chan->wr = 0;
     chan->nbdata = 0;
-    chan->data = allocate_array(eltsize,size);
-
-    if(chan->data == NULL)
-    {
-        free(chan);
-        return NULL;
-    }
 
     err = pthread_mutex_init(&chan->lock,NULL);
 
