@@ -11,7 +11,7 @@
 
 #include <pthread.h>
 
-#define SIZE_MSG 16
+#define SIZE_MSG 64
 #define NB_MSG 256
 #define MAX_MSG 30000
 #define MAX_FWD_MSG 15000
@@ -35,7 +35,6 @@ void * receive(void * ptr)
   while(1)
   {
     err = channel_recv(chan_r,&tmp);
-    //printf("\nrecv\n");
     if(err == -1)
     {
       break;
@@ -49,17 +48,14 @@ void * receive(void * ptr)
 
 void * sendm(void * ptr)
 {
-  int val;
   int err, nb = 0;
   msg_t tmp;
 
-  val = rand()%100;
   tmp.pid = getpid();
-  sprintf(tmp.content,"%d@%d : hi!\n",val,tmp.pid);
+  sprintf(tmp.content," %ld @ %d !\n",pthread_self(),tmp.pid);
 
   while(nb < MAX_MSG)
   {
-    //printf("send\n");
     err = channel_send(chan_s,&tmp);
 
     if(err == -1)
@@ -78,11 +74,8 @@ void * forward(void * ptr)
   int err;
   msg_t tmp;
 
-  //sleep(1);
-
   while((err = channel_recv(chan_s,&tmp)) != 0)
   {
-      //printf("fwd\n");
       if(err == -1)
       {
         perror("FWD - error channel_recv");
@@ -102,7 +95,6 @@ void * forward(void * ptr)
       }
 
       n += 1;
-      //printf("forwarded: %d messages\n",n);
 
       if(n >= MAX_FWD_MSG)
       {
