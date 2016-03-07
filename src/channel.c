@@ -38,6 +38,10 @@ int channel_closed_empty(struct channel_t *chan)
     return (chan->closed == 1 && chan->nbdata == 0);
 }
 
+int channel_is_full(struct channel_t *chan)
+{
+    return (chan->rd == chan->wr) && (chan->nbdata == chan->size);
+}
 
 void ** allocate_array(int eltsize, int size, int flags)
 {
@@ -239,8 +243,7 @@ int channel_send(struct channel_t *channel, const void *data)
         return -1;
     }
 
-    while((channel->rd == channel->wr) && (channel->nbdata == channel->size)
-            && channel->closed == 0)
+    while(channel_is_full(channel) && channel->closed == 0)
     {
         pthread_cond_wait(&channel->cond, &channel->lock);
     }
