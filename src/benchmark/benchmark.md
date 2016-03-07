@@ -95,36 +95,36 @@ un tampon de taille équivalente à celui d'un tube.
 
  - 1 lecteur / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 lecteurs / 10 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 100 lecteurs / 100 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 000 lecteurs / 1 000 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 000 lecteurs / 10 000 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
@@ -133,29 +133,29 @@ un tampon de taille équivalente à celui d'un tube.
 
  - 1 lecteur / 10 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 100 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 1 000 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 10 000 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
@@ -164,29 +164,29 @@ un tampon de taille équivalente à celui d'un tube.
 
  - 10 lecteurs / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 100 lecteurs / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 000 lecteurs / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 000 lecteurs / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
