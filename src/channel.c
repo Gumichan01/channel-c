@@ -43,6 +43,11 @@ int channel_is_full(struct channel_t *chan)
     return (chan->rd == chan->wr) && (chan->nbdata == chan->size);
 }
 
+int channel_is_empty(struct channel_t *chan)
+{
+    return (chan->rd == chan->wr) && (chan->nbdata == 0);
+}
+
 void ** allocate_array(int eltsize, int size, int flags)
 {
     int i, err;
@@ -86,7 +91,6 @@ void ** allocate_array(int eltsize, int size, int flags)
 
     return array;
 }
-
 
 void free_array(void **array, int eltsize, int size, int flags)
 {
@@ -302,7 +306,7 @@ int channel_recv(struct channel_t *channel, void *data)
 
     pthread_mutex_lock(&channel->lock);
 
-    while(channel->rd == channel->wr && channel->nbdata == 0 && channel->closed == 0)
+    while(channel_is_empty(channel) && channel->closed == 0)
     {
         pthread_cond_wait(&channel->cond, &channel->lock);
     }
