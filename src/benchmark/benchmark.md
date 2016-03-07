@@ -28,7 +28,7 @@
 
 ### Conclusion ###
 
-Peu de différence quelque soit le fichier donné
+Peu de différences quelque soit le fichier donné.
 *TODO*
 
 ## Programme Copy ##
