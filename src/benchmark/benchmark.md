@@ -12,9 +12,9 @@
 
 - Petit fichier
 
- * Version canal        : **real** 0.003s; **user**	0.000s; **sys**	0.000s;
- * Version tube         : **real** 0.003s; **user** 0.000s; **sys**	0.000s;
- * Version socket Unix  : *TODO*
+ * Version canal        : **real** 0.003s; **user**  0.000s; **sys**	0.000s;
+ * Version tube         : **real** 0.003s; **user**  0.000s; **sys**	0.000s;
+ * Version socket Unix  : **real** 0.005s; **user**  0.004s; **sys**    0.000s;
  * Programme Go equiv.  : *TODO*
 
 
@@ -22,7 +22,7 @@
 
  * Version canal        : **real** 18.104s; **user**	0.016s; **sys**	2.212s;
  * Version tube         : **real** 18.142s; **user**	0.009s; **sys**	1.980s;
- * Version socket Unix  : *TODO*
+ * Version socket Unix  : **real** 19.880s; **user**    0.008s; **sys** 1.272s;
  * Programme Go equiv.  : *TODO*
 
 
