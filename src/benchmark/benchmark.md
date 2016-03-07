@@ -95,36 +95,36 @@ un tampon de taille équivalente à celui d'un tube.
 
  - 1 lecteur / 1 écrivain
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 0.750s; **user** 0.108s; **sys** 0.268s;
+ * Version tube         : **real** 0.716s; **user** 0.028s; **sys** 0.136s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 lecteurs / 10 écrivains
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 0.771s; **user** 0.060s; **sys** 0.252s;
+ * Version tube         : **real** 0.718s; **user** 0.028s; **sys** 0.308s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 100 lecteurs / 100 écrivains
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 0.796s; **user** 0.076s; **sys** 0.508s;
+ * Version tube         : **real** 0.989s; **user** 0.052s; **sys** 1.132s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 000 lecteurs / 1 000 écrivains
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 9.610s; **user** 2.364s; **sys** 12.017s;
+ * Version tube         : **real** 42.386s; **user** 0.200s; **sys** 2:20.037s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 000 lecteurs / 10 000 écrivains
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 1:29.151s; **user** 12.321s; **sys** 2:6.788s;
+ * Version tube         : **real** 10:8.340s; **user** 0.352s; **sys** 27:39.060s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
