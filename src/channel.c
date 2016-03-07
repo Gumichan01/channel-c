@@ -27,8 +27,6 @@ struct channel_t
     pthread_cond_t cond;            // condition variable
 };
 
-/// @todo define a function to test if a channel is closed and empty
-// Define some macros to check the flags
 
 #define CHAN_ISSHARED(flags) \
   (( (flags) & CHANNEL_PROCESS_SHARED ) == CHANNEL_PROCESS_SHARED)
