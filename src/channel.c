@@ -239,7 +239,8 @@ int channel_send(struct channel_t *channel, const void *data)
         return -1;
     }
 
-    while((channel->rd == channel->wr) && (channel->nbdata == channel->size))
+    while((channel->rd == channel->wr) && (channel->nbdata == channel->size)
+            && channel->closed == 0)
     {
         pthread_cond_wait(&channel->cond, &channel->lock);
     }
