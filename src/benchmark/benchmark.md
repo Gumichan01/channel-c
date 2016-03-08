@@ -128,7 +128,9 @@ un tampon de taille équivalente à celui d'un tube.
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
-Moralité :
+*Moralité* : Avec peu de lecteurs/écrivains, la différence de performance est très minime
+entre les deux premières implémentations.
+Pour un grand nombre de lecteurs/écrivains, les canaux sont plus efficaces que les tubes.
 
 #### Plus d'écrivains que de lecteurs ####
 
@@ -160,6 +162,10 @@ Moralité :
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
+ *Moralité* : Pour un petit nombre d'écrivains, les tubes sont légèrement plus efficaces
+ que les canaux, en particuliers pour 1000 écrivains.  
+ En revanche, lorsque le nombre d'écrivains devient plus important,
+ les tubes deviennent beaucoup moins efficaces.
 
 #### Plus de lecteurs que d'écrivains ####
 
@@ -191,12 +197,20 @@ Moralité :
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
+*Moralité* : Sur un petit nombre de lecteurs/écrivains le constat est le même
+que pour le cas précédent. En revanche, l'implémentation avec les tubes
+fait encore pire que le cas précédent dans avec un grand nombre de lecteurs/écrivains.
 
 ### Conclusion ###
 
-*TODO* nombre de lecteurs = nombre d'écrivains.  
-*TODO* nombre de lecteurs < nombre d'écrivains.  
-*TODO* nombre de lecteurs > nombre d'écrivains.  
+Sur des groupes de lecteurs/écrivains relativement petits,
+diffusant une grande quantité de données
+(notamment dans la troisième suites de tests, avec contention),
+les performances des implémentations avec les canaux et les tubes sont semblables.
+En revanche, avec un très grand nombre de threads, un programme avec une communication
+inter-thread basée les canaux est bien plus efficace qu'un programme basé sur les tubes.
+
+*TODO* COmparaison avec le Go.
 
 
 
