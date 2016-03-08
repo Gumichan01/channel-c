@@ -128,34 +128,35 @@ un tampon de taille équivalente à celui d'un tube.
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
+Moralité :
 
 #### Plus d'écrivains que de lecteurs ####
 
  - 1 lecteur / 10 écrivains
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 0.717s; **user** 0.068s; **sys** 0.288s;
+ * Version tube         : **real** 0.700s; **user** 0.024s; **sys** 0.216s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 100 écrivains
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 0.753s; **user** 0.092s; **sys** 0.476s;
+ * Version tube         : **real** 0.683s; **user** 0.028s; **sys** 0.432s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 1 000 écrivains
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 4.906s; **user** 0.900s; **sys** 3.576s;
+ * Version tube         : **real** 1.897s; **user** 0.020s; **sys** 6.200s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 10 000 écrivains
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 40.204s; **user** 9.289s; **sys** 26.402s;
+ * Version tube         : **real** 2:50.995s; **user** 0.084s; **sys** 8:52.313s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
@@ -164,29 +165,29 @@ un tampon de taille équivalente à celui d'un tube.
 
  - 10 lecteurs / 1 écrivain
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 0.756s; **user** 0.088s; **sys** 0.196s;
+ * Version tube         : **real** 0.714s; **user** 0.008s; **sys** 0.192s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 100 lecteurs / 1 écrivain
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 0.771s; **user** 0.060s; **sys** 0.296s;
+ * Version tube         : **real** 0.866s; **user** 0.044s; **sys** 0.720s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 000 lecteurs / 1 écrivain
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 4.500s; **user** 0.892s; **sys** 3.652s;
+ * Version tube         : **real** 31.379s; **user** 0.144s; **sys** 1:42.442s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 000 lecteurs / 1 écrivain
 
- * Version canal        : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
+ * Version canal        : **real** 1:0.638s; **user** 6.648s; **sys** 52.083s;
+ * Version tube         : **real** 6:46.751s; **user** 0.260s; **sys** 16:46.751s;
  * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
