@@ -291,7 +291,7 @@ int channel_send(struct channel_t *channel, const void *data)
 
     pthread_mutex_unlock(&channel->lock);
 
-    return 0;
+    return 1;
 }
 
 
@@ -311,7 +311,7 @@ int channel_close(struct channel_t *channel)
     channel->closed = 1;
     pthread_mutex_unlock(&channel->lock);
 
-    return 0;
+    return 1;
 }
 
 
