@@ -1,5 +1,5 @@
 
-#include "../channel.h"
+#include "../../channel.h"
 
 #include <stdio.h>
 #include <stdlib.h>
