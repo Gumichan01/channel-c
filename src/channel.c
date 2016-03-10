@@ -55,7 +55,7 @@ void ** allocate_array(int eltsize, int size, int flags)
 
     if(CHAN_ISSHARED(flags))
     {
-      // TODO Allocate the shared structure using mmap()      
+      // TODO Allocate the shared structure using mmap()
       array = mmap(NULL, (sizeof(void*) * size), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
       if(array == MAP_FAILED)
 	return NULL;
@@ -74,14 +74,14 @@ void ** allocate_array(int eltsize, int size, int flags)
         {
             // TODO Allocate a shared element using mmap()
 	  array[i] = mmap(NULL, (sizeof(void) * eltsize), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-	    
+
 	  if(array[i] == MAP_FAILED)
             {
 	      err = errno;
 	      i -= 1;
 	      while(i >= 0)
 		munmap(array[i--], (sizeof(void) * eltsize));
-	      
+
 	      munmap(array, (sizeof(void*) * size));
 	      errno = err;
 	      return NULL;
@@ -175,7 +175,7 @@ void channel_free(struct channel_t *chan,int shared)
     if(shared == 1)
     {
         // TODO Free the shared structure using munmap()
-      munmap(chan, sizeof(struct channel_t)); 
+      munmap(chan, sizeof(struct channel_t));
     }
     else
         free(chan);
@@ -191,7 +191,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
     int err;
     struct channel_t *chan = NULL;
 
-    if(size == 0 || CHAN_ISSHARED(flags))
+    if(size == 0)
     {
         // Synchronous channel || Shared channel
         errno = ENOSYS;
