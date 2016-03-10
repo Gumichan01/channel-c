@@ -39,8 +39,8 @@ void * receive(void * ptr)
     {
       break;
     }
-    else if(err > 0)
-      printf("%s",tmp.content);
+    /*else if(err > 0)
+      printf("%s",tmp.content);*/
   }
 
   pthread_exit(NULL);
@@ -138,6 +138,8 @@ int main(int argc, char **argv)
 
   pthread_create(&th,NULL,forward,NULL);
 
+  printf("Working...\n");
+
   // Wait for every threads
   for(i = 0; i < nb_writers; i++)
   {
@@ -150,7 +152,7 @@ int main(int argc, char **argv)
   }
 
   pthread_join(th,NULL);
-
+  printf("End of program\n");
   channel_destroy(chan_s);
   channel_destroy(chan_r);
 
