@@ -42,10 +42,10 @@ void * readfile(void* ptr)
     r = read(fd,buffer,BUFSIZE);
     err = channel_send(chan,buffer);
 
-    if(err == 1)
+    if(err == -1)
       perror("read thread - channel_send");
 
-  }while(r > 0 && err != 1);
+  }while(r > 0 && err != -1);
 
   channel_close(chan);
   close(fd);
