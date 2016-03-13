@@ -1,1 +1,48 @@
-Projet Système 2016
+
+# Projet Système 2016 #
+
+Etudiants : *TODO*. ~~Flemme de mettre les noms (-.-')~~
+
+## Présentation ##
+
+Ce proget consiste en une implémentation d'un moyen de communication entre
+différents threads/processus à travers les canaux à la [*Go*](https://golang.org/).
+
+## Fonctionnalités ##
+
+ - Canaux de base pour la communication inter-thread
+ - Canaux globaux pour la communication inter-processus
+ - ~~Canaux avec communication par lots~~
+ - ~~Canaux synchrone~~
+ - ~~Canaux à une seule copie~~
+ - ~~Canaux sans verrou ??~~
+ - ~~Canaux non-bloquant~~
+ - ~~Canaux avec une petite primitive d'ordonnancement~~
+
+## Compilation ##
+
+Pour générer le fichier bibliothèque associé au canal... ***TODO***
+
+Pour compiler le programme *mandelbrot*, exécuter la commande suivante :
+
+    $ make mandelbrot
+
+En ce qui concerne le benchmark, allez dans l'un des sous-repertoires suivants :
+ - threads/
+ - process/
+
+Dans chacun de ces repertoires vous trouverez un *Makefile*. La commande :
+
+    $ make
+
+devrait suffir pour compiler l'ensemble des programmes benchmark.
+
+
+## Benchmark ##
+
+***TODO***
+
+
+## Bugs ##
+
+***TODO***
