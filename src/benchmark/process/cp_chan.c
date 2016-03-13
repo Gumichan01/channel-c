@@ -41,7 +41,7 @@ void readfile(char *ptr,channel_t * chan)
         if(err == -1)
             perror("channel_send");
 
-    }while(r > 0 && err != 1);
+    }while(r > 0 && err != -1);
 
     channel_close(chan);
     close(fd);
