@@ -29,7 +29,7 @@ struct channel_t
 
 
 #define CHAN_ISSHARED(flags) \
-  (( (flags) & CHANNEL_PROCESS_SHARED ) == CHANNEL_PROCESS_SHARED)
+    (( (flags) & CHANNEL_PROCESS_SHARED ) == CHANNEL_PROCESS_SHARED)
 
 /// Private functions
 
@@ -48,6 +48,7 @@ int channel_is_empty(struct channel_t *chan)
     return (chan->rd == chan->wr) && (chan->nbdata == 0);
 }
 
+
 void ** allocate_array(int eltsize, int size, int flags)
 {
     int i, err;
@@ -55,15 +56,17 @@ void ** allocate_array(int eltsize, int size, int flags)
 
     if(CHAN_ISSHARED(flags))
     {
-      // TODO Allocate the shared structure using mmap()
-      array = mmap(NULL, (sizeof(void*) * size), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-      if(array == MAP_FAILED)
-	return NULL;
+        array = mmap(NULL, (sizeof(void*) * size), PROT_READ|PROT_WRITE,
+                        MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+
+        if(array == MAP_FAILED)
+            return NULL;
     }
-    else{
+    else
+    {
         array = malloc(sizeof(void*) * size);
-	if(array == NULL)
-	  return NULL;
+        if(array == NULL)
+            return NULL;
     }
 
     memset(array,0,size);
@@ -72,20 +75,22 @@ void ** allocate_array(int eltsize, int size, int flags)
     {
         if(CHAN_ISSHARED(flags))
         {
-            // TODO Allocate a shared element using mmap()
-	  array[i] = mmap(NULL, (sizeof(void) * eltsize), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+            array[i] = mmap(NULL, sizeof(void) * eltsize, PROT_READ|PROT_WRITE,
+                            MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
-	  if(array[i] == MAP_FAILED)
+            if(array[i] == MAP_FAILED)
             {
-	      err = errno;
-	      i -= 1;
-	      while(i >= 0)
-		munmap(array[i--], (sizeof(void) * eltsize));
+                err = errno;
+                i -= 1;
+                while(i >= 0)
+                {
+                    munmap(array[i--], (sizeof(void) * eltsize));
+                }
 
-	      munmap(array, (sizeof(void*) * size));
-	      errno = err;
-	      return NULL;
-	   }
+                munmap(array, (sizeof(void*) * size));
+                errno = err;
+                return NULL;
+            }
         }
         else
         {
@@ -108,19 +113,19 @@ void ** allocate_array(int eltsize, int size, int flags)
     return array;
 }
 
+
 void free_array(void **array, int eltsize, int size, int flags)
 {
     int i;
 
     if(array == NULL)
-      return;
+        return;
 
     for(i = 0; i < size; i++)
     {
         if(CHAN_ISSHARED(flags))
         {
-            // TODO Free the shared element using munmap()
-	  munmap(array[i], (sizeof(void) * eltsize));
+            munmap(array[i], (sizeof(void) * eltsize));
         }
         else
             free(array[i]);
@@ -128,8 +133,7 @@ void free_array(void **array, int eltsize, int size, int flags)
 
     if(CHAN_ISSHARED(flags))
     {
-        // TODO Free the shared structure using munmap()
-      munmap(array, (sizeof(void*) * size));
+        munmap(array, (sizeof(void*) * size));
     }
     else
         free(array);
@@ -143,8 +147,8 @@ struct channel_t * channel_allocate(int eltsize, int size, int flags)
 
   if(CHAN_ISSHARED(flags))
   {
-      // TODO allocate a shared channel -> CHANNEL_PROCESS_SHARED
-      chan = mmap(NULL, sizeof(struct channel_t), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+      chan = mmap(NULL, sizeof(struct channel_t), PROT_READ|PROT_WRITE,
+                    MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
       if(chan == MAP_FAILED)
         return NULL;
@@ -170,11 +174,11 @@ struct channel_t * channel_allocate(int eltsize, int size, int flags)
   return chan;
 }
 
+
 void channel_free(struct channel_t *chan,int shared)
 {
     if(shared == 1)
     {
-        // TODO Free the shared structure using munmap()
       munmap(chan, sizeof(struct channel_t));
     }
     else
@@ -280,14 +284,14 @@ int channel_send(struct channel_t *channel, const void *data)
 
     memcpy(channel->data[channel->wr], data, channel->eltsize);
     if(channel->wr == channel->size-1)
-      channel->wr = 0;
+        channel->wr = 0;
     else
-      channel->wr += 1;
+        channel->wr += 1;
 
     channel->nbdata += 1;
 
     if(channel->nbdata == 1)
-      pthread_cond_broadcast(&channel->cond);
+        pthread_cond_broadcast(&channel->cond);
 
     pthread_mutex_unlock(&channel->lock);
 
@@ -346,9 +350,9 @@ int channel_recv(struct channel_t *channel, void *data)
     memcpy(data, channel->data[channel->rd], channel->eltsize);
 
     if(channel->rd == channel->size-1)
-      channel->rd = 0;
+        channel->rd = 0;
     else
-      channel->rd += 1;
+        channel->rd += 1;
 
     channel->nbdata -= 1;
 
