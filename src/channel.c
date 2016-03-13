@@ -25,6 +25,8 @@ struct channel_t
 
     pthread_mutex_t lock;           // mutex for atomic operations
     pthread_cond_t cond;            // condition variable
+    pthread_mutexattr_t attrlock;
+    pthread_condattr_t attrcond;
 };
 
 
@@ -46,6 +48,51 @@ int channel_is_full(struct channel_t *chan)
 int channel_is_empty(struct channel_t *chan)
 {
     return (chan->rd == chan->wr) && (chan->nbdata == 0);
+}
+
+
+int channel_mutex_init(struct channel_t *chan, int flags)
+{
+    int err = pthread_mutexattr_init(&chan->attrlock);
+
+    if(err != 0)
+        return err;
+
+    if(CHAN_ISSHARED(flags))
+    {
+        err = pthread_mutexattr_setpshared(&chan->attrlock,PTHREAD_PROCESS_SHARED);
+        return (err == 0) ? pthread_mutex_init(&chan->lock,&chan->attrlock) : err;
+    }
+
+    return pthread_mutex_init(&chan->lock,NULL);
+}
+
+int channel_cond_init(struct channel_t *chan, int flags)
+{
+    int err = pthread_condattr_init(&chan->attrcond);
+
+    if(err != 0)
+        return err;
+
+    if(CHAN_ISSHARED(flags))
+    {
+        err = pthread_condattr_setpshared(&chan->attrcond,PTHREAD_PROCESS_SHARED);
+        return (err == 0) ? pthread_cond_init(&chan->cond,&chan->attrcond) : err;
+    }
+
+    return pthread_cond_init(&chan->cond,NULL);
+}
+
+void channel_mutex_destroy(struct channel_t *chan)
+{
+    pthread_mutexattr_destroy(&chan->attrlock);
+    pthread_mutex_destroy(&chan->lock);
+}
+
+void channel_cond_destroy(struct channel_t *chan)
+{
+    pthread_condattr_destroy(&chan->attrcond);
+    pthread_cond_destroy(&chan->cond);
 }
 
 
@@ -175,11 +222,11 @@ struct channel_t * channel_allocate(int eltsize, int size, int flags)
 }
 
 
-void channel_free(struct channel_t *chan,int shared)
+void channel_free(struct channel_t *chan, int shared)
 {
     if(shared == 1)
     {
-      munmap(chan, sizeof(struct channel_t));
+        munmap(chan, sizeof(struct channel_t));
     }
     else
         free(chan);
@@ -197,7 +244,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
 
     if(size == 0)
     {
-        // Synchronous channel || Shared channel
+        // Synchronous channel
         errno = ENOSYS;
         return NULL;
     }
@@ -216,7 +263,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
     chan->wr = 0;
     chan->nbdata = 0;
 
-    err = pthread_mutex_init(&chan->lock,NULL);
+    err = channel_mutex_init(chan,flags);
 
     if(err != 0)
     {
@@ -225,11 +272,11 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
         return NULL;
     }
 
-    err = pthread_cond_init(&chan->cond,NULL);
+    err = channel_cond_init(chan,flags);
 
     if(err != 0)
     {
-        pthread_mutex_destroy(&chan->lock);
+        channel_mutex_destroy(chan);
         free_array(chan->data,eltsize,size,flags);
         free(chan);
         return NULL;
@@ -247,8 +294,8 @@ void channel_destroy(struct channel_t *channel)
     if(channel == NULL)
       return;
 
-    pthread_cond_destroy(&channel->cond);
-    pthread_mutex_destroy(&channel->lock);
+    channel_cond_destroy(channel);
+    channel_mutex_destroy(channel);
     free_array(channel->data,channel->eltsize,channel->size,channel->flags);
     channel_free(channel, CHAN_ISSHARED(channel->flags));
 }
