@@ -1,10 +1,10 @@
 
 CC=gcc
-CFLAGS=-Wall -O3 -pthread
+CFLAGS=-g -Wall -O3 -pthread
 LFLAGS=
 
 
-EXE=cat_chan cp_chan
+EXE=cat_chan cp_chan fwd_chan
 CHAN_HEADER=../../src/channel.h
 CHAN_SRC=../../src/channel.c
 CHAN_OBJ=../channel.o
@@ -58,9 +58,22 @@ cp_pipe.o : cp_pipe.c
 fwd_pipe.o : fwd_pipe.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
 
+# Socket
+cat_sock : cat_sock.o
+	$(CC) $(CFLAGS) $< -o $@ $(LFLAGS)
+
+cp_sock : cp_sock.o
+	$(CC) $(CFLAGS) $< -o $@ $(LFLAGS)
+
+cat_sock.o : cat_sock.c
+	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
+
+cp_sock.o : cp_sock.c
+	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
+
 # Clean
 clean :
-	rm -rf *.o
+	rm -rf *.o $(CHAN_OBJ)
 
 clear : clean
 	rm -rf $(EXE)
