@@ -1,7 +1,7 @@
 # Makefile
 
 CC=gcc
-MANDEL_CFLAGS=-g -O3 -ffast-math -Wall -pthread `pkg-config --cflags gtk+-3.0`
+MANDEL_CFLAGS=-g -O3 -std=gnu99 -ffast-math -Wall -pthread `pkg-config --cflags gtk+-3.0`
 MANDEL_LFLAGS=`pkg-config --libs gtk+-3.0` -lm
 CFLAGS=-Wall -O3 -pthread
 LFLAGS=
