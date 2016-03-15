@@ -355,10 +355,13 @@ int channel_close(struct channel_t *channel)
         return -1;
     }
 
-    if(channel->closed == 1)
-        return 0;
-
     pthread_mutex_lock(&channel->lock);
+    if(channel->closed == 1)    // Problème de cohérence sur la valeur de closed
+    {
+        pthread_mutex_unlock(&channel->lock);
+        return 0;
+    }
+
     channel->closed = 1;
     pthread_mutex_unlock(&channel->lock);
 
