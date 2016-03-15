@@ -292,7 +292,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
 void channel_destroy(struct channel_t *channel)
 {
     if(channel == NULL)
-      return;
+        return;
 
     channel_cond_destroy(channel);
     channel_mutex_destroy(channel);
@@ -356,13 +356,14 @@ int channel_close(struct channel_t *channel)
     }
 
     pthread_mutex_lock(&channel->lock);
-    if(channel->closed == 1)    // Problème de cohérence sur la valeur de closed
+    if(channel->closed == 1)
     {
         pthread_mutex_unlock(&channel->lock);
         return 0;
     }
 
     channel->closed = 1;
+    pthread_cond_broadcast(&channel->cond);
     pthread_mutex_unlock(&channel->lock);
 
     return 1;
