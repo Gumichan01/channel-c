@@ -1,4 +1,4 @@
-# Benchmark #
+# Benchmark - Canaux minimaux #
 
 ## Condition de test ##
 
@@ -15,10 +15,11 @@ un processeur Intel Core I3 quadri-coeurs à 2.53GHz, 4 Gio de mémoire vive,
 sur la distribution Ubuntu 12.04 64bits.
 Une machine témoin *TODO configuration machine* a également été utilisée pour
 affiner les résultats.  
-En terme de calcul, le commande *time* est utilisée.
-Afin d'éviter les fausses messures inhérents à la politique d'ordonnancement
+En terme de calcul, le commande */bin/time* est utilisée. Mais un script sera utilisé
+afin d'automatiser les tests.
+Afin d'éviter les fausses mesures inhérents à la politique d'ordonnancement
 du noyau, une série de 8 mesures est effectué.
-Seule le meilleur résultat est retenu.
+Seul le meilleur résultat est retenu.
 
 
 ## Programme Cat ##
@@ -49,9 +50,9 @@ Seule le meilleur résultat est retenu.
 
 ### Conclusion ###
 
-Peu de différences quelque soit le fichier donné.  
-L'ajout ou non de l'option d'optimisation ne change rien.
-*TODO*
+Peu de différences quelque soit le fichier donné. Cette suite de tests n'importe
+rien de très pertinent.
+*TODO comparaison avec go*
 
 ## Programme Copy ##
 
@@ -79,10 +80,11 @@ thread d'écriture du fichier destination.
 
 ### Conclusion ###
 
-La différence est très minime entre les 3 premières implémentations. *TODO*
+Même constat .
+*TODO comparaison avec go*
 
 
-## Programme Forward ##
+## Programme Forward (***TODO refaire le Benchmark***) ##
 
   Le programme *fwd* va permettre la communication entre
 un groupe de threads écrivains et un groupe de threads lecteurs.
@@ -92,7 +94,7 @@ sera reçu par un lecteur quelconque.
 
 La communication entre ces deux groupes sera assuré par un
 thread "transmetteur". Concrétement, tous les écrivains écriront un message
-au thread médiateur. Ce thread, qui aura reçu les messages,
+au thread transmetteur. Ce thread, qui aura reçu les messages,
 les enverra au groupe de lecteurs.
 
 Le message aura la forme (id_processus,contenu_message[16]).  
@@ -102,11 +104,13 @@ Un groupe de lecteurs recevra autant de messages que possible.
 Le thread transmetteur devra transiter au maximum 15 000 messages.
 Au-delà, il ferme les canaux de transmission.
 Il y aura toujours un seul thread "transmetteur".  
-Aucun message ne sera affiché, et ce, afin d'éviter des résultats parasites.
+*NB*: Dans le cadre du benchmark, aucun message relatif au messages reçus
+ne sera affiché, à part les messages "Working..." et "End of program",
+et ce, afin d'éviter des résultats parasites.
 
 Pour la version implémentant les canaux, les tests seront effectués avec
 au maximum 256 messages par canal, et ceux afin d'avoir
-un tampon de taille équivalente à celui d'un tube.
+un tampon de taille équivalente à celui d'un tube (au moins 8192 d'après POSIX).
 
 
 ### Comparaison ###
@@ -117,40 +121,37 @@ un tampon de taille équivalente à celui d'un tube.
 
  * Version canal        : **real** 0.010s; **user** 0.000s; **sys** 0.020s;
  * Version tube         : **real** 0.025s; **user** 0.004s; **sys** 0.048s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 lecteurs / 10 écrivains
 
  * Version canal        : **real** 0.108s; **user** 0.040s; **sys** 0.228s;
  * Version tube         : **real** 0.183s; **user** 0.000s; **sys** 0.444s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 100 lecteurs / 100 écrivains
 
  * Version canal        : **real** 1.204s; **user** 0.360s; **sys** 1.936s;
  * Version tube         : **real** 1.185s; **user** 0.000s; **sys** 4.368s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 000 lecteurs / 1 000 écrivains
 
- * Version canal        : **real** 10.899s; **user** 3.012s; **sys** 17.893s;
+ * Version canal        : **real** 10.708s; **user** 2.636s; **sys** 16.593s;
  * Version tube         : **real** 42.039s; **user** 0.060s; **sys** 2:37.962s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 000 lecteurs / 10 000 écrivains (*TODO*)
 
  * Version canal        : **real** 2:12.984s; **user** 34.010s; **sys** 3:39.622s;
  * Version tube         : **real** 10:8.340s; **user** 0.352s; **sys** 27:39.060s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
 *Moralité* : Avec peu de lecteurs/écrivains, la différence de performance est très minime
 entre les deux premières implémentations.
 Pour un grand nombre de lecteurs/écrivains, les canaux sont plus efficaces que les tubes.
+De plus, on constate que les versions avec les canaux passent moins de temps
+à faire des appels système que les version utilisant les tubes.
 
 #### Plus d'écrivains que de lecteurs ####
 
@@ -158,34 +159,32 @@ Pour un grand nombre de lecteurs/écrivains, les canaux sont plus efficaces que 
 
  * Version canal        : **real** 0.717s; **user** 0.068s; **sys** 0.288s;
  * Version tube         : **real** 0.700s; **user** 0.024s; **sys** 0.216s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 100 écrivains
 
  * Version canal        : **real** 0.753s; **user** 0.092s; **sys** 0.476s;
  * Version tube         : **real** 0.683s; **user** 0.028s; **sys** 0.432s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 1 000 écrivains
 
  * Version canal        : **real** 4.906s; **user** 0.900s; **sys** 3.576s;
  * Version tube         : **real** 1.897s; **user** 0.020s; **sys** 6.200s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 10 000 écrivains
 
  * Version canal        : **real** 40.204s; **user** 9.289s; **sys** 26.402s;
  * Version tube         : **real** 2:50.995s; **user** 0.084s; **sys** 8:52.313s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
- *Moralité* : Pour un petit nombre d'écrivains, les tubes sont légèrement plus efficaces
- que les canaux, en particuliers pour 1000 écrivains.  
+ *Moralité* : Pour un petit nombre d'écrivains, les tubes sont légèrement plus
+ efficaces que les canaux, en particuliers pour 1000 écrivains.
+ Cependant, cela se fait  au prix d'un temps plus important
+ consacré aux appels systèmes.  
  En revanche, lorsque le nombre d'écrivains devient plus important,
- les tubes deviennent beaucoup moins efficaces.
+ les tubes deviennent inefficaces.
  Il s'est d'ailleurs avéré qu'à partir de ~1500 écrivains,
  les performances de l'implémentation à base de tube s'éffondraient.
 
@@ -195,33 +194,29 @@ Pour un grand nombre de lecteurs/écrivains, les canaux sont plus efficaces que 
 
  * Version canal        : **real** 0.756s; **user** 0.088s; **sys** 0.196s;
  * Version tube         : **real** 0.714s; **user** 0.008s; **sys** 0.192s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 100 lecteurs / 1 écrivain
 
  * Version canal        : **real** 0.771s; **user** 0.060s; **sys** 0.296s;
  * Version tube         : **real** 0.866s; **user** 0.044s; **sys** 0.720s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 1 000 lecteurs / 1 écrivain
 
  * Version canal        : **real** 4.500s; **user** 0.892s; **sys** 3.652s;
  * Version tube         : **real** 31.379s; **user** 0.144s; **sys** 1:42.442s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
  - 10 000 lecteurs / 1 écrivain
 
  * Version canal        : **real** 1:0.638s; **user** 6.648s; **sys** 52.083s;
  * Version tube         : **real** 6:46.751s; **user** 0.260s; **sys** 16:46.751s;
- * Version socket Unix  : *TODO*
  * Programme Go equiv.  : *TODO*
 
 *Moralité* : Sur un petit nombre de lecteurs/écrivains le constat est le même
 que pour le cas précédent. En revanche, l'implémentation avec les tubes
-fait encore pire que le cas précédent dans avec un grand nombre de lecteurs/écrivains.
+fait encore pire que le cas précédent dans avec un grand nombre de lecteurs.
 
 ### Conclusion ###
 
