@@ -1,6 +1,6 @@
 
 CC=gcc
-CFLAGS=-g -Wall -O3 -pthread
+CFLAGS=-g -Wall -O3
 LFLAGS=
 
 
@@ -20,13 +20,13 @@ $(CHAN_OBJ) : $(CHAN_SRC) $(CHAN_HEADER)
 
 # Channel
 cat_chan : cat_chan.o $(CHAN_OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LFLAGS)
+	$(CC) $(CFLAGS) -pthread $^ -o $@ $(LFLAGS)
 
 cp_chan : cp_chan.o $(CHAN_OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LFLAGS)
+	$(CC) $(CFLAGS) -pthread $^ -o $@ $(LFLAGS)
 
 fwd_chan : fwd_chan.o $(CHAN_OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LFLAGS)
+	$(CC) $(CFLAGS) -pthread $^ -o $@ $(LFLAGS)
 
 
 cat_chan.o : cat_chan.c $(CHAN_HEADER)
