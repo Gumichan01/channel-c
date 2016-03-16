@@ -27,7 +27,7 @@ Extensions :
 
 **Luxon**
 
-- Benchmark multi-processus forward (fwd_chan, fwd_pipe)
+- Benchmark multi-processus forward (~~fwd_chan~~, fwd_pipe)
 - Programme test performance (petites données avec/sans contention,
     grosses données) + comparaison avec les tubes
 - ***Canaux synchrones***
