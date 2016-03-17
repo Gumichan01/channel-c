@@ -269,6 +269,12 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
     int err;
     struct channel_t *chan = NULL;
 
+    if(eltsize <= 0 || size < 0)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
+
     if(size == 0)
     {
         // Synchronous channel
@@ -373,7 +379,7 @@ int channel_send(struct channel_t *channel, const void *data)
 }
 
 
-// If channel is not null but invalid, then the behaviour is unspecified
+// If the channel is not null but invalid, then the behaviour is unspecified
 int channel_close(struct channel_t *channel)
 {
     if(channel == NULL)
