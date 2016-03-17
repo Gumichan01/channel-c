@@ -503,7 +503,7 @@ int channel_vsend(struct channel_t *channel, const void *array, int size)
 
     for(i = 0; i < n; i++)
     {
-        if(channel_bsend(channel,&array[i]) == -1)
+        if(channel_bsend(channel,&array[i*channel->eltsize]) == -1)
         {
             pthread_mutex_unlock(&channel->lock);
             return -1;
