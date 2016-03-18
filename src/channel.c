@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 /// Channel
-struct channel_t
+struct channel
 {
     int eltsize;                    // Size of an element
     int size;                       // Number of elements
@@ -35,23 +35,23 @@ struct channel_t
 
 /// Private functions
 
-int channel_closed_empty(struct channel_t *chan)
+int channel_closed_empty(struct channel *chan)
 {
     return (chan->closed == 1 && chan->nbdata == 0);
 }
 
-int channel_is_full(struct channel_t *chan)
+int channel_is_full(struct channel *chan)
 {
     return (chan->rd == chan->wr) && (chan->nbdata == chan->size);
 }
 
-int channel_is_empty(struct channel_t *chan)
+int channel_is_empty(struct channel *chan)
 {
     return (chan->rd == chan->wr) && (chan->nbdata == 0);
 }
 
 
-int channel_mutex_init(struct channel_t *chan, int flags)
+int channel_mutex_init(struct channel *chan, int flags)
 {
     int err = pthread_mutexattr_init(&chan->attrlock);
 
@@ -67,7 +67,7 @@ int channel_mutex_init(struct channel_t *chan, int flags)
     return pthread_mutex_init(&chan->lock,NULL);
 }
 
-int channel_cond_init(struct channel_t *chan, int flags)
+int channel_cond_init(struct channel *chan, int flags)
 {
     int err = pthread_condattr_init(&chan->attrcond);
 
@@ -83,13 +83,13 @@ int channel_cond_init(struct channel_t *chan, int flags)
     return pthread_cond_init(&chan->cond,NULL);
 }
 
-void channel_mutex_destroy(struct channel_t *chan)
+void channel_mutex_destroy(struct channel *chan)
 {
     pthread_mutexattr_destroy(&chan->attrlock);
     pthread_mutex_destroy(&chan->lock);
 }
 
-void channel_cond_destroy(struct channel_t *chan)
+void channel_cond_destroy(struct channel *chan)
 {
     pthread_condattr_destroy(&chan->attrcond);
     pthread_cond_destroy(&chan->cond);
@@ -187,14 +187,14 @@ void free_array(void **array, int eltsize, int size, int flags)
 }
 
 
-struct channel_t * channel_allocate(int eltsize, int size, int flags)
+struct channel * channel_allocate(int eltsize, int size, int flags)
 {
   int err;
-  struct channel_t *chan = NULL;
+  struct channel *chan = NULL;
 
   if(CHAN_ISSHARED(flags))
   {
-      chan = mmap(NULL, sizeof(struct channel_t), PROT_READ|PROT_WRITE,
+      chan = mmap(NULL, sizeof(struct channel), PROT_READ|PROT_WRITE,
                     MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
       if(chan == MAP_FAILED)
@@ -202,7 +202,7 @@ struct channel_t * channel_allocate(int eltsize, int size, int flags)
   }
   else
   {
-      chan = malloc(sizeof(struct channel_t));
+      chan = malloc(sizeof(struct channel));
 
       if(chan == NULL)
         return NULL;
@@ -222,11 +222,11 @@ struct channel_t * channel_allocate(int eltsize, int size, int flags)
 }
 
 
-void channel_free(struct channel_t *chan, int shared)
+void channel_free(struct channel *chan, int shared)
 {
     if(shared == 1)
     {
-        munmap(chan, sizeof(struct channel_t));
+        munmap(chan, sizeof(struct channel));
     }
     else
         free(chan);
@@ -237,10 +237,10 @@ void channel_free(struct channel_t *chan, int shared)
 
 /// Public functions
 
-struct channel_t *channel_create(int eltsize, int size, int flags)
+struct channel *channel_create(int eltsize, int size, int flags)
 {
     int err;
-    struct channel_t *chan = NULL;
+    struct channel *chan = NULL;
 
     if(size == 0)
     {
@@ -289,7 +289,7 @@ struct channel_t *channel_create(int eltsize, int size, int flags)
     If the channel is not null but invalid,
     then the behaviour is undefined.
 */
-void channel_destroy(struct channel_t *channel)
+void channel_destroy(struct channel *channel)
 {
     if(channel == NULL)
         return;
@@ -301,7 +301,7 @@ void channel_destroy(struct channel_t *channel)
 }
 
 
-int channel_send(struct channel_t *channel, const void *data)
+int channel_send(struct channel *channel, const void *data)
 {
     if(channel == NULL || data == NULL)
     {
@@ -347,7 +347,7 @@ int channel_send(struct channel_t *channel, const void *data)
 
 
 // If channel is not null but invalid, then the behaviour is unspecified
-int channel_close(struct channel_t *channel)
+int channel_close(struct channel *channel)
 {
     if(channel == NULL)
     {
@@ -370,7 +370,7 @@ int channel_close(struct channel_t *channel)
 }
 
 
-int channel_recv(struct channel_t *channel, void *data)
+int channel_recv(struct channel *channel, void *data)
 {
     if(channel == NULL || data == NULL)
     {
@@ -421,7 +421,7 @@ int channel_recv(struct channel_t *channel, void *data)
 /*int main(void)
 {
     int n = 4, m = 1, p = 8, q;
-    struct channel_t *chan = NULL;
+    struct channel *chan = NULL;
     chan = channel_create(sizeof(int),5,0);
 
     if(chan == NULL)
