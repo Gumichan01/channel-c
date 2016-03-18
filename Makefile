@@ -25,7 +25,7 @@ channel.o : $(CHAN_SRC) $(CHAN_HEADER)
 
 
 mandelbrot : $(MANDEL_SRC) $(CHAN_SRC)
-	$(CC) $(MANDEL_CFLAGS) $^ $(MANDEL_LFLAGS)
+	$(CC) $(MANDEL_CFLAGS) $^ -o $@ $(MANDEL_LFLAGS)
 
 # Clean
 clean :
