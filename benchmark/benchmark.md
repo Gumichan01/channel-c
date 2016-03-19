@@ -1,16 +1,18 @@
-# Benchmark - Canaux minimaux #
+# Benchmark #
 
-## Condition de test ##
+## Canaux minimaux ##
+
+### Condition de test ###
 
 - Compilateur utilisé : *gcc*.
 - Options gcc : *-Wall -O3*.
 
-Sauf mention contraire, tous les tests sont effectué avec
+  Sauf mention contraire, tous les tests sont effectué avec
 l'option d'optimisation *-O3*.
 Pour les programme multithreads, l'option *-pthread* a été ajouté.
 Pour le programme équivalent en Go,... *TODO*
 
-Les tests on été effectués sur sur machine x86-64 avec
+  Les tests on été effectués sur sur machine x86-64 avec
 un processeur Intel Core I3 quadri-coeurs à 2.53GHz, 4 Gio de mémoire vive,
 sur la distribution Ubuntu 12.04 64bits.
 Une machine témoin *TODO configuration machine* a également été utilisée pour
@@ -22,15 +24,15 @@ du noyau, une série de 8 mesures est effectué.
 Seul le meilleur résultat est retenu.
 
 
-## Programme Cat ##
+### Programme Cat ###
 
   Le programme *cat* multithread permet d'afficher le contenu d'un fichier
-  en utilisant deux threads :
+en utilisant deux threads :
   - un thread de lecture
   - un thread d'affichage.
 
 
-### Comparaison ###
+#### Comparaison ####
 
 - Petit fichier
 
@@ -48,19 +50,19 @@ Seul le meilleur résultat est retenu.
  * Programme Go equiv.  : *TODO*
 
 
-### Conclusion ###
+#### Moralité ####
 
-Peu de différences quelque soit le fichier donné. Cette suite de tests n'importe
+  Peu de différences quelque soit le fichier donné. Cette suite de tests n'importe
 rien de très pertinent.
 *TODO comparaison avec go*
 
-## Programme Copy ##
+### Programme Copy ###
 
-Le programme *copy* multithread copie un fichier vers un autre.
+  Le programme *copy* multithread copie un fichier vers un autre.
 Il utilise un thread de lecture du fichier source et un
 thread d'écriture du fichier destination.
 
-### Comparaison ###
+#### Comparaison ####
 
 - Petit fichier
 
@@ -78,13 +80,13 @@ thread d'écriture du fichier destination.
   * Programme Go equiv.  : *TODO*
 
 
-### Conclusion ###
+#### Moralité ####
 
-Même constat .
+Même constat.
 *TODO comparaison avec go*
 
 
-## Programme Forward (***TODO refaire le Benchmark***) ##
+### Programme Forward (***TODO refaire le Benchmark***) ###
 
   Le programme *fwd* va permettre la communication entre
 un groupe de threads écrivains et un groupe de threads lecteurs.
@@ -113,9 +115,9 @@ au maximum 256 messages par canal, et ceux afin d'avoir
 un tampon de taille équivalente à celui d'un tube (au moins 8192 d'après POSIX).
 
 
-### Comparaison ###
+#### Comparaison ####
 
-#### Autant de lecteurs que d'écrivains ####
+##### Autant de lecteurs que d'écrivains #####
 
  - 1 lecteur / 1 écrivain
 
@@ -153,7 +155,7 @@ Pour un grand nombre de lecteurs/écrivains, les canaux sont plus efficaces que 
 De plus, on constate que les versions avec les canaux passent moins de temps
 à faire des appels système que les version utilisant les tubes.
 
-#### Plus d'écrivains que de lecteurs ####
+##### Plus d'écrivains que de lecteurs #####
 
  - 1 lecteur / 10 écrivains
 
@@ -188,7 +190,7 @@ De plus, on constate que les versions avec les canaux passent moins de temps
  Il s'est d'ailleurs avéré qu'à partir de ~1500 écrivains,
  les performances de l'implémentation à base de tube s'éffondraient.
 
-#### Plus de lecteurs que d'écrivains ####
+##### Plus de lecteurs que d'écrivains #####
 
  - 10 lecteurs / 1 écrivain
 
@@ -218,9 +220,9 @@ De plus, on constate que les versions avec les canaux passent moins de temps
 que pour le cas précédent. En revanche, l'implémentation avec les tubes
 fait encore pire que le cas précédent dans avec un grand nombre de lecteurs.
 
-### Conclusion ###
+#### Moralité ####
 
-Sur des groupes de lecteurs/écrivains relativement petits,
+  Sur des groupes de lecteurs/écrivains relativement petits,
 diffusant une grande quantité de données
 (notamment dans la troisième suites de tests, avec contention),
 les performances des implémentations avec les canaux et les tubes sont semblables.
@@ -229,13 +231,84 @@ inter-thread basée les canaux est bien plus efficace qu'un programme basé sur 
 
 *TODO* COmparaison avec le Go.
 
+## Canaux globaux ##
+
+### Conditions de test ###
+
+  Les conditions de tests sont identiques. La seule différence vient du fait que
+l'on exécute les programmes dans un contexte multi-processus.  
+Pour autant, les programmes multi-processu utilisant les canaux seront compilés
+avec l'option *-pthread*
+
+### Programme Cat - Comparaisons ###
+
+*TODO*
+
+### Programme Copy - Comparaisons ###
+
+*TODO*
+
+### Programme Forward - Comparaisons ###
+
+*TODO*
+
+### Moralité ###
+
+*TODO*
 
 
+## Canaux synchrones ##
+
+### Conditions de test ###
+
+  Il est difficile de faire un benchmark sur ce type de canal dans la mesure où
+les éléments de comparaisons s'utilisent de manière asynchrone. Le seul élément
+de comparaison sur lequel le benchmark peut s'appuyer est la version Go de
+chaque programme. Il est important de noter que selon les options de compilation
+fourni lors de la création de l'exécutable Go peut influer sur les resultats.
+
+### Programme Cat - Comparaisons ###
+
+*TODO*
+
+### Programme Copy - Comparaisons ###
+
+*TODO*
+
+### Programme Forward - Comparaisons ###
+
+*TODO*
+
+### Moralité ###
+
+*TODO*
 
 
+## Communication par lots ##
+
+### Conditions de test ###
+
+*TODO*
+
+### Programme Cat - Comparaisons ###
+
+*TODO*
+
+### Programme Copy - Comparaisons ###
+
+*TODO*
+
+### Programme Forward - Comparaisons ###
+
+*TODO*
 
 
+### Moralité ###
 
+*TODO*
 
+## Conclusion ##
+
+***TODO***
 
 --
