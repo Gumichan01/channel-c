@@ -6,6 +6,7 @@
 - ***Version minimale OK***
 - Benchmark version minimale OK
 - ***Canaux globaux OK***
+- Benchmark multi-processus forward (~~fwd_chan~~, ~~fwd_pipe~~)
 
 ## DOING ##
 
@@ -15,19 +16,22 @@
 
 - Benchmark multi-processus pipe (cat_pipe, cp_pipe)
 
+**Luxon**
+
+- ***Communication par lots***
+
 ## TODO ##
 
 **Non assigné**
 
 Extensions :
-- ***Communication par lots*** +  Benchmark
+- Benchmark Communication par lots
 - ***Canaux à copie unique*** +  Benchmark
 - ***Canaux sans verrou ?*** + Benchmark si réussi
 - ***Canaux non-bloquants*** +  Benchmark
 
 **Luxon**
 
-- Benchmark multi-processus forward (~~fwd_chan~~, fwd_pipe)
 - Programme test performance (petites données avec/sans contention,
     grosses données) + comparaison avec les tubes
 - ***Canaux synchrones***
