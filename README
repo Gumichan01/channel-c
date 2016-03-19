@@ -28,8 +28,8 @@ Pour compiler le programme *mandelbrot*, exécuter la commande suivante :
     $ make mandelbrot
 
 En ce qui concerne le benchmark, allez dans l'un des sous-repertoires suivants :
- - threads/
- - process/
+ - *benchmark/threads/*
+ - *benchmark/process/*
 
 Dans chacun de ces repertoires vous trouverez un *Makefile*. La commande :
 
