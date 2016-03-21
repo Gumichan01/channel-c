@@ -7,16 +7,13 @@
 - Benchmark version minimale OK
 - ***Canaux globaux OK***
 - Benchmark multi-processus forward (~~fwd_chan~~, ~~fwd_pipe~~)
+- Benchmark multi-processus pipe (~~cat_pipe~~, ~~cp_pipe~~)
 
 ## DOING ##
 
 - Benchmark canaux globaux
 
-**Somaya**
-
-- Benchmark multi-processus pipe (cat_pipe, cp_pipe)
-
-**Luxon**
+**Luxon**, **Somaya**
 
 - ***Communication par lots***
 
@@ -25,7 +22,6 @@
 **Non assigné**
 
 Extensions :
-- Benchmark Communication par lots
 - ***Canaux à copie unique*** +  Benchmark
 - ***Canaux sans verrou ?*** + Benchmark si réussi
 - ***Canaux non-bloquants*** +  Benchmark
@@ -33,7 +29,7 @@ Extensions :
 **Luxon**
 
 - Programme test performance (petites données avec/sans contention,
-    grosses données) + comparaison avec les tubes
+    grosses données) + comparaison avec les tubes (faire programme exemple)
 - ***Canaux synchrones***
 
 **Kenny**
