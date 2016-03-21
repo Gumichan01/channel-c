@@ -2,7 +2,7 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
-struct channel_t;
+struct channel;
 
 /* flags */
 #define CHANNEL_PROCESS_SHARED      0x00000001
@@ -13,15 +13,15 @@ struct channel_t;
 #define CHANNEL_PROCESS_SCHEDULER   0x00100000  // channel with scheduling (bonus)
 
 
-struct channel_t *channel_create(int eltsize, int size, int flags);
-void channel_destroy(struct channel_t *channel);
-int channel_send(struct channel_t *channel, const void *data);
-int channel_close(struct channel_t *channel);
-int channel_recv(struct channel_t *channel, void *data);
+struct channel *channel_create(int eltsize, int size, int flags);
+void channel_destroy(struct channel *channel);
+int channel_send(struct channel *channel, const void *data);
+int channel_close(struct channel *channel);
+int channel_recv(struct channel *channel, void *data);
 
-int channel_vsend(struct channel_t *channel, const void *array, int size);
-int channel_vrecv(struct channel_t *channel, void *array, int size);
+int channel_vsend(struct channel *channel, const void *array, int size);
+int channel_vrecv(struct channel *channel, void *array, int size);
 
-typedef struct channel_t channel_t;
+typedef struct channel channel;
 
 #endif // CHANNEL_H
