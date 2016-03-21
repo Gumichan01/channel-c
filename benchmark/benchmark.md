@@ -236,21 +236,131 @@ inter-thread basée les canaux est bien plus efficace qu'un programme basé sur 
 ### Conditions de test ###
 
   Les conditions de tests sont identiques. La seule différence vient du fait que
-l'on exécute les programmes dans un contexte multi-processus.  
+l'on exécute les programmes dans un contexte multi-processus. De plus, il n'y a
+de comparaison avec les implémentations en Go.    
 Pour autant, les programmes multi-processu utilisant les canaux seront compilés
 avec l'option *-pthread*
 
 ### Programme Cat - Comparaisons ###
 
-*TODO*
+- Petit fichier
+
+ * Version canal        : **real** 0.004s; **user** 0.000s; **sys** 0.004s;
+ * Version tube         : **real** 0.003s; **user** 0.000s; **sys** 0.000s;
+ * Version socket Unix  : **real** 0.000s; **user** 0.000s; **sys** 0.000s;*TODO*
+
+
+- Gros fichier
+
+ * Version canal        : **real** 18.058s; **user** 0.020s; **sys** 2.124s;
+ * Version tube         : **real** 18.063s; **user** 0.012s; **sys** 1.668s;
+ * Version socket Unix  : **real** 0.000s; **user** 0.000s; **sys** 0.000s;*TODO*
+
 
 ### Programme Copy - Comparaisons ###
 
-*TODO*
+- Petit fichier
+
+ * Version canal        : **real** 0.002s; **user** 0.000s; **sys** 0.000s;
+ * Version tube         : **real** 0.002s; **user** 0.000s; **sys** 0.000s;
+ * Version socket Unix  : **real** 0.000s; **user** 0.000s; **sys** 0.000s;*TODO*
+
+
+- Gros fichier
+
+ * Version canal        : **real** 0.097s; **user** 0.032s; **sys** 0.068s;
+ * Version tube         : **real** 0.089s; **user** 0.004s; **sys** 0.108s;
+ * Version socket Unix  : **real** 0.000s; **user** 0.000s; **sys** 0.000s;*TODO*
+
 
 ### Programme Forward - Comparaisons ###
 
-*TODO*
+##### Autant de lecteurs que d'écrivains #####
+
+ - 1 lecteur / 1 écrivain
+
+ * Version canal        : **real** 0.026s; **user** 0.008s; **sys** 0.036s;
+ * Version tube         : **real** 0.019s; **user** 0.000s; **sys** 0.036s;
+ * Programme Go equiv.  : *TODO*
+
+ - 10 lecteurs / 10 écrivains
+
+ * Version canal        : **real** 0.948s; **user** 0.280s; **sys** 2.288s;
+ * Version tube         : **real** 0.173s; **user** 0.024s; **sys** 0.416s;
+ * Programme Go equiv.  : *TODO*
+
+ - 100 lecteurs / 100 écrivains
+
+ * Version canal        : **real** 10.236s; **user** 4.096s; **sys** 17.469s;
+ * Version tube         : **real** 1.185s; **user** 0.012s; **sys** 3.876s;
+ * Programme Go equiv.  : *TODO*
+
+ - 1 000 lecteurs / 1 000 écrivains
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+ - 10 000 lecteurs / 10 000 écrivains (*TODO*)
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+
+##### Plus d'écrivains que de lecteurs #####
+
+ - 1 lecteur / 10 écrivains
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+ - 1 lecteur / 100 écrivains
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+ - 1 lecteur / 1 000 écrivains
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+ - 1 lecteur / 10 000 écrivains
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+
+##### Plus de lecteurs que d'écrivains #####
+
+ - 10 lecteurs / 1 écrivain
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+ - 100 lecteurs / 1 écrivain
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+ - 1 000 lecteurs / 1 écrivain
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
+ - 10 000 lecteurs / 1 écrivain
+
+ * Version canal        : *TODO*
+ * Version tube         : *TODO*
+ * Programme Go equiv.  : *TODO*
+
 
 ### Moralité ###
 
