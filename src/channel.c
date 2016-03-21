@@ -457,7 +457,6 @@ int channel_recv(struct channel *channel, void *data)
 */
 int channel_vsend(struct channel *channel, const void *array, int size)
 {
-    // TODO fix a warning -> invalid values inserted into the channel
     int n, i;
     int nbwdata, written = 0;
 
@@ -503,7 +502,7 @@ int channel_vsend(struct channel *channel, const void *array, int size)
 
     for(i = 0; i < n; i++)
     {
-        if(channel_bsend(channel,&array[i*channel->eltsize]) == -1)
+        if(channel_bsend(channel, array + (i * channel->eltsize)) == -1)
         {
             pthread_mutex_unlock(&channel->lock);
             return -1;
