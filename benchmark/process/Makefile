@@ -4,7 +4,7 @@ CFLAGS=-g -Wall -O3
 LFLAGS=
 
 
-EXE=cat_chan cp_chan fwd_chan fwd_pipe
+EXE=cat_chan cp_chan fwd_chan cat_pipe cp_pipe fwd_pipe
 CHAN_HEADER=../../src/channel.h
 CHAN_SRC=../../src/channel.c
 CHAN_OBJ=../channel.o
