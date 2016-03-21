@@ -19,6 +19,9 @@ int channel_send(struct channel *channel, const void *data);
 int channel_close(struct channel *channel);
 int channel_recv(struct channel *channel, void *data);
 
+int channel_vsend(struct channel *channel, const void *array, int size);
+int channel_vrecv(struct channel *channel, void *array, int size);
+
 typedef struct channel channel_t;
 
 #endif // CHANNEL_H
