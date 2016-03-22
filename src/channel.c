@@ -258,6 +258,18 @@ int channel_bsend(struct channel *channel, const void *data)
 
 int channel_brecv(struct channel *channel, void *data)
 {
+    memcpy(data, channel->data[channel->rd], channel->eltsize);
+
+    if(channel->rd == channel->size-1)
+        channel->rd = 0;
+    else
+        channel->rd += 1;
+
+    channel->nbdata -= 1;
+
+    if(channel->nbdata == channel->size-1)
+        pthread_cond_broadcast(&channel->cond);
+
     return 1;
 }
 
@@ -468,14 +480,13 @@ int channel_vsend(struct channel *channel, const void *array, int size)
 
     pthread_mutex_lock(&channel->lock);
 
-    if(channel->closed == 1)
+    if(channel_closed_empty(channel))
     {
         pthread_mutex_unlock(&channel->lock);
-        errno = EPIPE;
-        return -1;
+        return 0;
     }
 
-    if(!CHAN_ISBATCHED(channel->flags)) //vérifie si ca prend en charge la communication par lots
+    if(!CHAN_ISBATCHED(channel->flags))
     {
         pthread_mutex_unlock(&channel->lock);
         errno = EBADE;
@@ -505,7 +516,7 @@ int channel_vsend(struct channel *channel, const void *array, int size)
         if(channel_bsend(channel, array + (i * channel->eltsize)) == -1)
         {
             pthread_mutex_unlock(&channel->lock);
-            return -1;
+            return written;
         }
         written += 1;
     }
@@ -517,54 +528,59 @@ int channel_vsend(struct channel *channel, const void *array, int size)
 
 int channel_vrecv(struct channel *channel, void *array, int size)
 {
-  int n, i;
-  int nbrdata, read = 0;
+    int n, i;
+    int read = 0;
 
-  if(channel == NULL || array == NULL || size <= 0){
-    errno = EINVAL;
-    return -1;
-  }
-  
-  pthread_mutex_lock(&channel->lock);
-  
-  if(channel->closed == 1){
-    pthread_mutex_unlock(&channel->lock);
-    errno = EPIPE;
-    return -1;
-  }
-  
-  if(!CHAN_ISBATCHED(channel->flags)){
-    pthread_mutex_unlock(&channel->lock);
-    errno = EBADE;
-    return -1;
-  }
-  
-  // Test if the call will block
-  if(channel->nbdata <= 0){
-    pthread_mutex_unlock(&channel->lock);
-    errno = EWOULDBLOCK;
-    return -1;
-  }
-  
-  if(channel->size == 0){
-    pthread_mutex_unlock(&channel->lock);
-    errno = EBADE;
-    return -1;
-  }
-  
-  nbrdata = channel->size - channel->nbdata;
-  n = (size > nbrdata) ? nbrdata : size;
-  
-  for(i = 0; i < n; i++){
-    if(channel_brecv(channel, array + (i * channel->eltsize)) == -1){
-      pthread_mutex_unlock(&channel->lock);
-      return -1;
+    if(channel == NULL || array == NULL || size <= 0)
+    {
+        errno = EINVAL;
+        return -1;
     }
-    read += 1;
-  }
 
-  pthread_mutex_unlock(&channel->lock);
-  return read;
+    pthread_mutex_lock(&channel->lock);
+
+    if(channel->closed == 1 && channel->nbdata == 0){
+        pthread_mutex_unlock(&channel->lock);
+        errno = EPIPE;
+        return -1;
+    }
+
+    if(!CHAN_ISBATCHED(channel->flags))
+    {
+        pthread_mutex_unlock(&channel->lock);
+        errno = EBADE;
+        return -1;
+    }
+
+    // Test if the call will block
+    if(channel->nbdata <= 0)
+    {
+        pthread_mutex_unlock(&channel->lock);
+        errno = EWOULDBLOCK;
+        return -1;
+    }
+
+    if(channel->size == 0)
+    {
+        pthread_mutex_unlock(&channel->lock);
+        errno = EBADE;
+        return -1;
+    }
+
+    n = (size < channel->nbdata) ? size : channel->nbdata;
+
+    for(i = 0; i < n; i++)
+    {
+        if(channel_brecv(channel, array + (i * channel->eltsize)) == -1)
+        {
+            pthread_mutex_unlock(&channel->lock);
+            return read;
+        }
+        read += 1;
+    }
+
+    pthread_mutex_unlock(&channel->lock);
+    return read;
 }
 
 
@@ -573,7 +589,8 @@ int channel_vrecv(struct channel *channel, void *array, int size)
 /*int main(void)
 {
     int err, q;
-    int tab[] = {4,1,8};
+    //int tab[] = {4,1,8};
+    int tab[3];
     int tab2[] = {2048,16,64,32};
     struct channel *chan = NULL;
     chan = channel_create(sizeof(int),3,CHANNEL_PROCESS_BATCH);
@@ -584,18 +601,23 @@ int channel_vrecv(struct channel *channel, void *array, int size)
         return -1;
     }
 
-    err = channel_vsend(chan,tab,3);
-    printf("1 - sent %d\n",err);
     err = channel_vsend(chan,tab2,4);
+    printf("1 - sent %d\n",err);
+    err = channel_vsend(chan,tab,3);
     perror("vsend");
     printf("2 - sent %d\n",err);
 
-    channel_recv(chan,&q);
-    printf("received from the channel: %d \n",q);
-    channel_recv(chan,&q);
-    printf("received from the channel: %d \n",q);
-    channel_recv(chan,&q);
-    printf("received from the channel: %d \n",q);
+    //channel_recv(chan,&q);
+    //printf("received from the channel: %d \n",q);
+    //channel_recv(chan,&q);
+    //printf("received from the channel: %d \n",q);
+    //channel_recv(chan,&q);
+    //printf("received from the channel: %d \n",q);
+
+    channel_vrecv(chan,tab,5);
+
+    for(q = 0; q < 3; q++)
+        printf("received from the channel: %d \n",tab[q]);
 
     channel_close(chan);
     channel_destroy(chan);
