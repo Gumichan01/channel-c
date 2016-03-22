@@ -256,9 +256,22 @@ int channel_bsend(struct channel *channel, const void *data)
 }
 
 
-int channel_brecv(struct channel *channel, void *data)
-{
-    return 1;
+int channel_brecv(struct channel *channel, void *data){
+
+  memcpy(data, channel->data[channel->rd], channel->eltsize);
+
+  if(channel->rd == channel->size-1)
+    channel->rd = 0;
+  else
+    channel->rd += 1;
+
+  channel->nbdata -= 1;
+
+  if(channel->nbdata == channel->size-1){
+    pthread_cond_broadcast(&channel->cond);
+  }
+  
+  return 1;
 }
 
 
