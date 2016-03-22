@@ -475,7 +475,7 @@ int channel_vsend(struct channel *channel, const void *array, int size)
         return -1;
     }
 
-    if(!CHAN_ISBATCHED(channel->flags))
+    if(!CHAN_ISBATCHED(channel->flags)) //vérifie si ca prend en charge la communication par lots
     {
         pthread_mutex_unlock(&channel->lock);
         errno = EBADE;
@@ -517,7 +517,54 @@ int channel_vsend(struct channel *channel, const void *array, int size)
 
 int channel_vrecv(struct channel *channel, void *array, int size)
 {
-    return 0;
+  int n, i;
+  int nbrdata, read = 0;
+
+  if(channel == NULL || array == NULL || size <= 0){
+    errno = EINVAL;
+    return -1;
+  }
+  
+  pthread_mutex_lock(&channel->lock);
+  
+  if(channel->closed == 1){
+    pthread_mutex_unlock(&channel->lock);
+    errno = EPIPE;
+    return -1;
+  }
+  
+  if(!CHAN_ISBATCHED(channel->flags)){
+    pthread_mutex_unlock(&channel->lock);
+    errno = EBADE;
+    return -1;
+  }
+  
+  // Test if the call will block
+  if(channel->nbdata <= 0){
+    pthread_mutex_unlock(&channel->lock);
+    errno = EWOULDBLOCK;
+    return -1;
+  }
+  
+  if(channel->size == 0){
+    pthread_mutex_unlock(&channel->lock);
+    errno = EBADE;
+    return -1;
+  }
+  
+  nbrdata = channel->size - channel->nbdata;
+  n = (size > nbrdata) ? nbrdata : size;
+  
+  for(i = 0; i < n; i++){
+    if(channel_brecv(channel, array + (i * channel->eltsize)) == -1){
+      pthread_mutex_unlock(&channel->lock);
+      return -1;
+    }
+    read += 1;
+  }
+
+  pthread_mutex_unlock(&channel->lock);
+  return read;
 }
 
 
