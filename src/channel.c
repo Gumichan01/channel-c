@@ -18,11 +18,18 @@ struct channel
     int flags;
     int closed;
 
+    // Asynchronous channel
     int rd;                         // Read cursor
     int wr;                         // Write cursor
     int nbdata;
     void **data;                    // Data queue
 
+    // Synchronous channel
+    void *tmp;
+    int nbwriters;
+    int nbreaders;
+
+    // Atomic operations
     pthread_mutex_t lock;           // mutex for atomic operations
     pthread_cond_t cond;            // condition variable
     pthread_mutexattr_t attrlock;
@@ -106,7 +113,7 @@ void ** allocate_array(int eltsize, int size, int flags)
 
     if(CHAN_ISSHARED(flags))
     {
-        array = mmap(NULL, (sizeof(void*) * size), PROT_READ|PROT_WRITE,
+        array = mmap(NULL, sizeof(void*) * size, PROT_READ|PROT_WRITE,
                         MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
         if(array == MAP_FAILED)
@@ -134,10 +141,10 @@ void ** allocate_array(int eltsize, int size, int flags)
                 i -= 1;
                 while(i >= 0)
                 {
-                    munmap(array[i--], (sizeof(void) * eltsize));
+                    munmap(array[i--], sizeof(void) * eltsize);
                 }
 
-                munmap(array, (sizeof(void*) * size));
+                munmap(array, sizeof(void*) * size);
                 errno = err;
                 return NULL;
             }
@@ -175,7 +182,7 @@ void free_array(void **array, int eltsize, int size, int flags)
     {
         if(CHAN_ISSHARED(flags))
         {
-            munmap(array[i], (sizeof(void) * eltsize));
+            munmap(array[i], sizeof(void) * eltsize);
         }
         else
             free(array[i]);
@@ -183,45 +190,103 @@ void free_array(void **array, int eltsize, int size, int flags)
 
     if(CHAN_ISSHARED(flags))
     {
-        munmap(array, (sizeof(void*) * size));
+        munmap(array, sizeof(void*) * size);
     }
     else
         free(array);
 }
 
 
+// Functions for synchronous channels
+void *tmp_alloc(int eltsize, int flags)
+{
+    void *p = NULL;
+
+    if(CHAN_ISSHARED(flags))
+    {
+        p = mmap(NULL, sizeof(void) * eltsize, PROT_READ|PROT_WRITE,
+                        MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+
+        return (p == MAP_FAILED) ? NULL : p;
+    }
+    else
+        return malloc(eltsize * sizeof(void));
+}
+
+void tmp_free(void *tmp, int eltsize, int shared)
+{
+    if(tmp == NULL)
+        return;
+
+    if(shared)
+        munmap(tmp, eltsize * sizeof(void));
+    else
+        free(tmp);
+
+    tmp = NULL;
+}
+
+int channel_sync_send(struct channel *channel, const void *data)
+{
+    return 1;
+}
+
+int channel_sync_recv(struct channel *channel, void *data)
+{
+    return 1;
+}
+
+// Creation of the channel
 struct channel * channel_allocate(int eltsize, int size, int flags)
 {
-  int err;
-  struct channel *chan = NULL;
+    int err;
+    struct channel *chan = NULL;
 
-  if(CHAN_ISSHARED(flags))
-  {
-      chan = mmap(NULL, sizeof(struct channel), PROT_READ|PROT_WRITE,
+    if(CHAN_ISSHARED(flags))
+    {
+        chan = mmap(NULL, sizeof(struct channel), PROT_READ|PROT_WRITE,
                     MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
-      if(chan == MAP_FAILED)
+        if(chan == MAP_FAILED)
+            return NULL;
+    }
+    else
+    {
+        chan = malloc(sizeof(struct channel));
+
+        if(chan == NULL)
+            return NULL;
+    }
+
+    if(size == 0)
+    {
+        // The channel is synchronous
+        chan->tmp = tmp_alloc(eltsize,flags);
+
+        if(chan->tmp == NULL)
+            goto fail_chan;
+    }
+    else
+    {
+        // The channel is asynchronous
+        chan->data = allocate_array(eltsize,size,flags);
+
+        if(chan->data == NULL)
+        {
+            goto fail_chan;
+        }
+    }
+
+    return chan;
+
+    // Deal with errors
+    fail_chan :
+    {
+        err = errno;
+        free(chan);
+        errno = err;
         return NULL;
-  }
-  else
-  {
-      chan = malloc(sizeof(struct channel));
-
-      if(chan == NULL)
-        return NULL;
-  }
-
-  chan->data = allocate_array(eltsize,size,flags);
-
-  if(chan->data == NULL)
-  {
-      err = errno;
-      free(chan);
-      errno = err;
-      return NULL;
-  }
-
-  return chan;
+    }
 }
 
 
@@ -237,7 +302,7 @@ void channel_free(struct channel *chan, int shared)
     chan = NULL;
 }
 
-// Atomic operation called by channel_vsend
+// Atomic operations called by channel_vsend
 int channel_bsend(struct channel *channel, const void *data)
 {
     memcpy(channel->data[channel->wr], data, channel->eltsize);
@@ -255,7 +320,7 @@ int channel_bsend(struct channel *channel, const void *data)
     return 1;
 }
 
-
+// Atomic operations called by channel_vrecv
 int channel_brecv(struct channel *channel, void *data)
 {
     memcpy(data, channel->data[channel->rd], channel->eltsize);
@@ -284,13 +349,6 @@ struct channel *channel_create(int eltsize, int size, int flags)
     if(eltsize <= 0 || size < 0)
     {
         errno = EINVAL;
-        return NULL;
-    }
-
-    if(size == 0)
-    {
-        // Synchronous channel
-        errno = ENOSYS;
         return NULL;
     }
 
@@ -341,7 +399,11 @@ void channel_destroy(struct channel *channel)
 
     channel_cond_destroy(channel);
     channel_mutex_destroy(channel);
-    free_array(channel->data,channel->eltsize,channel->size,channel->flags);
+
+    if(channel->size == 0)
+        tmp_free(channel->tmp,channel->eltsize, CHAN_ISSHARED(channel->flags));
+    else
+        free_array(channel->data,channel->eltsize,channel->size,channel->flags);
     channel_free(channel, CHAN_ISSHARED(channel->flags));
 }
 
@@ -353,6 +415,9 @@ int channel_send(struct channel *channel, const void *data)
         errno = EINVAL;
         return -1;
     }
+
+    if(channel->size == 0)
+        return channel_sync_send(channel,data);
 
     pthread_mutex_lock(&channel->lock);
     if(channel->closed == 1)
@@ -394,6 +459,7 @@ int channel_send(struct channel *channel, const void *data)
 // If the channel is not null but invalid, then the behaviour is unspecified
 int channel_close(struct channel *channel)
 {
+    // TODO: what is happening if the channel is synchronous ?
     if(channel == NULL)
     {
         errno = EINVAL;
@@ -422,6 +488,9 @@ int channel_recv(struct channel *channel, void *data)
         errno = EINVAL;
         return -1;
     }
+
+    if(channel->size == 0)
+        return channel_sync_recv(channel,data);
 
     pthread_mutex_lock(&channel->lock);
 
@@ -581,7 +650,7 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     int tab[3];
     int tab2[] = {2048,16,64,32};
     struct channel *chan = NULL;
-    chan = channel_create(sizeof(int),3,CHANNEL_PROCESS_BATCH);
+    chan = channel_create(sizeof(int),0,CHANNEL_PROCESS_BATCH);
 
     if(chan == NULL)
     {
@@ -592,8 +661,8 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     err = channel_vsend(chan,tab2,4);
     printf("1 - sent %d\n",err);
     err = channel_vsend(chan,tab,3);
-    perror("vsend");
     printf("2 - sent %d\n",err);
+    perror("vsend");
 
     //channel_recv(chan,&q);
     //printf("received from the channel: %d \n",q);
