@@ -6,17 +6,17 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/types.h>
-#include <pthread.h>
+#include <sys/wait.h>
 
 #define BUFSIZE 1024
 #define FILENAMESIZE 256
 
 #define SOCK_PATH "/tmp/soquette"
 #define LISTEN_BACKLOG 2
- 
 
 
-void * readfile(void* f){
+void readfile(void* f){
+
   int fd, r, s, c;
   int buffer[BUFSIZE];
   char file[FILENAMESIZE];
@@ -27,43 +27,45 @@ void * readfile(void* f){
   s = socket(PF_UNIX, SOCK_STREAM, 0);
   if(s < 0){
     perror("socket");
-    pthread_exit(NULL);
+    return;
   }
- 
+
   memset(&sun, 0, sizeof(struct sockaddr_un));
   sun.sun_family = AF_UNIX;
   strncpy(sun.sun_path, SOCK_PATH, sizeof(sun.sun_path) - 1);
-  
+
   usleep(1000);
   sz = sizeof(struct sockaddr_un);
   c = connect(s, (struct sockaddr *)&sun, sz);
   if(c < 0){
     perror("connect");
     close(s);
-    pthread_exit(NULL);
+    unlink(SOCK_PATH);
+    return;
   }
-  
+
   memcpy(file, f, FILENAMESIZE);
-    
+
   fd = open(file, O_RDONLY);
   if(fd < 0){
     perror("open");
     close(s);
     unlink(SOCK_PATH);
-    pthread_exit(NULL);
-  } 
+    return;
+  }
 
- 
+
   while(( r = read(fd, buffer, BUFSIZE)) > 0){
     send(s, buffer, r, MSG_NOSIGNAL);
     memset(buffer, 0, BUFSIZE);
   }
   close(fd);
   close(s);
-  pthread_exit(NULL);
+  unlink(SOCK_PATH);
 }
 
-void * printfile(void* f){
+void printfile(void){
+
   int s, bd, lt, ac, r;
   int buffer[BUFSIZE];
   socklen_t sz;
@@ -74,7 +76,7 @@ void * printfile(void* f){
   s = socket(PF_UNIX, SOCK_STREAM, 0);
   if(s < 0){
     perror("socket");
-    pthread_exit(NULL);
+    return;
   }
 
   memset(&sun, 0, sizeof(struct sockaddr_un));
@@ -82,13 +84,13 @@ void * printfile(void* f){
   strncpy(sun.sun_path, SOCK_PATH, sizeof(sun.sun_path) - 1);
 
   sz = sizeof(struct sockaddr_un);
-  
+
   bd = bind(s, (struct sockaddr *) &sun, sz);
   if(bd < 0){
     perror("bind");
     close(s);
     unlink(SOCK_PATH);
-    pthread_exit(NULL);
+    return;
   }
 
   lt = listen(s,LISTEN_BACKLOG);
@@ -96,15 +98,16 @@ void * printfile(void* f){
   if(lt < 0){
     perror("listen");
     close(s);
-    pthread_exit(NULL);
+    unlink(SOCK_PATH);
+    return;
   }
-  
+
   ac = accept(s, (struct sockaddr *) &sun, &sz);
   if (ac < 0){
     perror("accept");
     close(s);
     unlink(SOCK_PATH);
-    pthread_exit(NULL);
+    return;
   }
 
   while((r = recv(ac, buffer, BUFSIZE, 0)) > 0){
@@ -113,7 +116,6 @@ void * printfile(void* f){
   }
   close(s);
   unlink(SOCK_PATH);
-  pthread_exit(NULL);
 }
 
 int main(int argc, char ** argv)
@@ -123,23 +125,21 @@ int main(int argc, char ** argv)
     return EXIT_FAILURE;
   }
 
-  pid_t pid1 = fork();
-  pid_t pid2 = fork();
+  pid_t pid = fork();
 
-  if(pid1 < 0 || pid2 < 0){
+  if(pid < 0){
     perror("erreur pid\n");
     return EXIT_FAILURE;
   }
 
-  else if(pid1 == 0){
+  else if(pid == 0){
     readfile(argv[1]);
-    _exit(0);
+    exit(0);
   }
 
-  else if(pid2 == 0){
-    printfile(NULL);
-    _exit(0);
-  }
-  
+  printfile();
+
+  wait(NULL);
+
   return 0;
 }
