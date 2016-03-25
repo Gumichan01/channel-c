@@ -483,10 +483,11 @@ int channel_vsend(struct channel *channel, const void *array, int size)
     if(channel_closed_empty(channel))
     {
         pthread_mutex_unlock(&channel->lock);
-        return 0;
+        errno = EPIPE;
+        return -1;
     }
 
-    if(!CHAN_ISBATCHED(channel->flags))
+    if(!CHAN_ISBATCHED(channel->flags) || channel->size == 0)
     {
         pthread_mutex_unlock(&channel->lock);
         errno = EBADE;
@@ -501,12 +502,6 @@ int channel_vsend(struct channel *channel, const void *array, int size)
         return -1;
     }
 
-    if(channel->size == 0)
-    {
-        pthread_mutex_unlock(&channel->lock);
-        errno = EBADE;
-        return -1;
-    }
 
     nbwdata = channel->size - channel->nbdata;
     n = (size > nbwdata) ? nbwdata : size;
@@ -545,7 +540,7 @@ int channel_vrecv(struct channel *channel, void *array, int size)
         return -1;
     }
 
-    if(!CHAN_ISBATCHED(channel->flags))
+    if(!CHAN_ISBATCHED(channel->flags) || channel->size == 0)
     {
         pthread_mutex_unlock(&channel->lock);
         errno = EBADE;
@@ -557,13 +552,6 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     {
         pthread_mutex_unlock(&channel->lock);
         errno = EWOULDBLOCK;
-        return -1;
-    }
-
-    if(channel->size == 0)
-    {
-        pthread_mutex_unlock(&channel->lock);
-        errno = EBADE;
         return -1;
     }
 
