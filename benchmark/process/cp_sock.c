@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/fcntl.h>
+#include <sys/wait.h>
 
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -19,7 +20,7 @@
 #define LISTEN_BACKLOG 2
 
 
-void * readfile(void * ptr)
+void readfile(void * ptr)
 {
   int r, fd;
   int sock, err;
@@ -34,7 +35,7 @@ void * readfile(void * ptr)
   if(sock == -1)
   {
     perror("error socket");
-    pthread_exit(NULL);
+    return;
   }
 
   // Configure the socket setting the unix socket address
@@ -50,7 +51,8 @@ void * readfile(void * ptr)
   {
       perror("error connect");
       close(sock);
-      pthread_exit(NULL);
+      unlink(SOCK_PATH);
+      return;
   }
 
   // Read the file and send its content
@@ -62,7 +64,7 @@ void * readfile(void * ptr)
     perror("write - open");
     close(sock);
     unlink(SOCK_PATH);
-    pthread_exit(NULL);
+    return;
   }
 
   while((r = read(fd,buffer,BUFSIZE)) > 0)
@@ -73,10 +75,10 @@ void * readfile(void * ptr)
 
   close(fd);
   close(sock);
-  pthread_exit(NULL);
+  unlink(SOCK_PATH);
 }
 
-void * writefile(void * ptr)
+void writefile(void * ptr)
 {
   int sock, sockclt;
   int err, r, fd;
@@ -93,7 +95,7 @@ void * writefile(void * ptr)
   if(sock == -1)
   {
     perror("error socket");
-    pthread_exit(NULL);
+    return;
   }
 
   // Configure the socket
@@ -111,7 +113,7 @@ void * writefile(void * ptr)
     perror("error bind");
     close(sock);
     unlink(SOCK_PATH);
-    pthread_exit(NULL);
+    return;
   }
 
   /// Listen
@@ -121,7 +123,7 @@ void * writefile(void * ptr)
   {
     perror("error listen");
     close(sock);
-    pthread_exit(NULL);
+    return;
   }
 
   /// Accept
@@ -132,7 +134,7 @@ void * writefile(void * ptr)
     perror("error accept");
     close(sock);
     unlink(SOCK_PATH);
-    pthread_exit(NULL);
+    return;
   }
 
   // file opening and writing
@@ -144,7 +146,7 @@ void * writefile(void * ptr)
     perror("write - open");
     close(sock);
     unlink(SOCK_PATH);
-    pthread_exit(NULL);
+    return;
   }
 
   while((r = recv(sockclt,buffer,BUFSIZE,0)) > 0)
@@ -156,7 +158,6 @@ void * writefile(void * ptr)
   close(fd);
   close(sock);
   unlink(SOCK_PATH);
-  pthread_exit(NULL);
 }
 
 
@@ -167,24 +168,20 @@ int main(int argc, char **argv)
     printf("usage: %s <file_src> <file_dest>\n",argv[0]);
     return EXIT_FAILURE;
   }
-  
-  pid_t pid1 = fork();
-  pid_t pid2 = fork();
-  
-  if(pid1 < 0 || pid2 < 0){
+
+  pid_t pid = fork();
+
+  if(pid < 0){
     perror("erreur pid\n");
     return EXIT_FAILURE;
   }
-
-  else if(pid1 == 0){
+  else if(pid == 0){
     readfile(argv[1]);
     _exit(0);
   }
 
-  else if(pid2 == 0){
-    writefile(argv[2]);
-    _exit(0);
-  }
-  
+  writefile(argv[2]);
+  wait(NULL);
+
   return EXIT_SUCCESS;
 }
