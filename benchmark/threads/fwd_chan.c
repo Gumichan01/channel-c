@@ -152,9 +152,10 @@ int main(int argc, char **argv)
   }
 
   pthread_join(th,NULL);
-  printf("End of program\n");
+  printf("Destroy the channels\n");
   channel_destroy(chan_s);
   channel_destroy(chan_r);
+  printf("End of program\n");
 
   return EXIT_SUCCESS;
 }
