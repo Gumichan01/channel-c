@@ -17,6 +17,8 @@ struct channel
     int size;                       // Number of elements
     int flags;
     int closed;
+    int nbwriters;
+    int nbreaders;
 
     // Asynchronous channel
     int rd;                         // Read cursor
@@ -26,8 +28,6 @@ struct channel
 
     // Synchronous channel
     void *tmp;
-    int nbwriters;
-    int nbreaders;
 
     // Atomic operations
     pthread_mutex_t lock;           // mutex for atomic operations
@@ -314,8 +314,8 @@ int channel_bsend(struct channel *channel, const void *data)
 
     channel->nbdata += 1;
 
-    if(channel->nbdata == 1)
-        pthread_cond_broadcast(&channel->cond);
+    if(channel->nbreaders > 0)
+        pthread_cond_signal(&channel->cond);
 
     return 1;
 }
@@ -332,8 +332,8 @@ int channel_brecv(struct channel *channel, void *data)
 
     channel->nbdata -= 1;
 
-    if(channel->nbdata == channel->size-1)
-        pthread_cond_broadcast(&channel->cond);
+    if(channel->nbwriters > 0)
+        pthread_cond_signal(&channel->cond);
 
     return 1;
 }
@@ -361,6 +361,8 @@ struct channel *channel_create(int eltsize, int size, int flags)
     chan->size = size;
     chan->flags = flags;
     chan->closed = 0;
+    chan->nbwriters = 0;
+    chan->nbreaders = 0;
 
     chan->rd = 0;
     chan->wr = 0;
@@ -429,7 +431,9 @@ int channel_send(struct channel *channel, const void *data)
 
     while(channel_is_full(channel) && channel->closed == 0)
     {
+        channel->nbwriters += 1;
         pthread_cond_wait(&channel->cond, &channel->lock);
+        channel->nbwriters -= 1;
     }
 
     if(channel->nbdata >= channel->size || channel->closed == 1)
@@ -447,8 +451,8 @@ int channel_send(struct channel *channel, const void *data)
 
     channel->nbdata += 1;
 
-    if(channel->nbdata == 1)
-        pthread_cond_broadcast(&channel->cond);
+    if(channel->nbreaders > 0)
+        pthread_cond_signal(&channel->cond);
 
     pthread_mutex_unlock(&channel->lock);
 
@@ -496,7 +500,9 @@ int channel_recv(struct channel *channel, void *data)
 
     while(channel_is_empty(channel) && channel->closed == 0)
     {
+        channel->nbreaders += 1;
         pthread_cond_wait(&channel->cond, &channel->lock);
+        channel->nbreaders -= 1;
     }
 
     if(channel_closed_empty(channel))
@@ -521,10 +527,8 @@ int channel_recv(struct channel *channel, void *data)
 
     channel->nbdata -= 1;
 
-    if(channel->nbdata == channel->size-1)
-    {
-        pthread_cond_broadcast(&channel->cond);
-    }
+    if(channel->nbwriters > 0)
+        pthread_cond_signal(&channel->cond);
 
     pthread_mutex_unlock(&channel->lock);
     return 1;
