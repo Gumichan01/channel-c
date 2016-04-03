@@ -15,6 +15,7 @@
 #define NB_MSG 256
 #define MAX_MSG 30000
 #define MAX_FWD_MSG 15000
+#define MAX_THREADS 16000
 
 typedef struct msg_t
 {
@@ -35,7 +36,7 @@ void * receive(void * ptr)
   while(1)
   {
     err = channel_recv(chan_r,&tmp);
-    if(err == -1)
+    if(err <= 0)
     {
       break;
     }
@@ -109,9 +110,11 @@ void * forward(void * ptr)
 
 int main(int argc, char **argv)
 {
-  int i;
+  int i, err;
   int nb_writers, nb_readers;
   pthread_t th;
+  pthread_t thr[MAX_THREADS];
+  pthread_t thw[MAX_THREADS];
 
   if(argc != 3)
   {
@@ -128,31 +131,39 @@ int main(int argc, char **argv)
   // Create every threads
   for(i = 0; i < nb_writers; i++)
   {
-    pthread_create(&th,NULL,sendm,NULL);
+    err = pthread_create(&thw[i],NULL,sendm,NULL);
+
+    if(err != 0)
+        perror("pthread_create");
   }
 
   for(i = 0; i < nb_readers; i++)
   {
-    pthread_create(&th,NULL,receive,NULL);
+    err =pthread_create(&thr[i],NULL,receive,NULL);
+
+    if(err != 0)
+        perror("pthread_create");
   }
 
-  pthread_create(&th,NULL,forward,NULL);
+  err = pthread_create(&th,NULL,forward,NULL);
+
+  if(err != 0)
+      perror("pthread_create");
 
   printf("Working...\n");
 
   // Wait for every threads
   for(i = 0; i < nb_writers; i++)
   {
-    pthread_join(th,NULL);
+    pthread_join(thw[i],NULL);
   }
 
   for(i = 0; i < nb_readers; i++)
   {
-    pthread_join(th,NULL);
+    pthread_join(thr[i],NULL);
   }
 
   pthread_join(th,NULL);
-  printf("Destroy the channels\n");
   channel_destroy(chan_s);
   channel_destroy(chan_r);
   printf("End of program\n");
