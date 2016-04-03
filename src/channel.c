@@ -27,11 +27,14 @@ struct channel
     void **data;                    // Data queue
 
     // Synchronous channel
+    int wsync;
+    int rsync;
     void *tmp;
 
     // Atomic operations
-    pthread_mutex_t lock;           // mutex for atomic operations
-    pthread_cond_t cond;            // condition variable
+    pthread_mutex_t lock;
+    pthread_cond_t cond;
+    pthread_cond_t sync;            // Only for synchronous channel
     pthread_mutexattr_t attrlock;
     pthread_condattr_t attrcond;
 };
@@ -368,26 +371,31 @@ struct channel *channel_create(int eltsize, int size, int flags)
     chan->wr = 0;
     chan->nbdata = 0;
 
+    chan->rsync = 0;
+    chan->wsync = 0;
+
     err = channel_mutex_init(chan,flags);
 
     if(err != 0)
-    {
-        free_array(chan->data,eltsize,size,flags);
-        free(chan);
-        return NULL;
-    }
+        goto fail_atomic;
 
     err = channel_cond_init(chan,flags);
 
     if(err != 0)
     {
         channel_mutex_destroy(chan);
+        goto fail_atomic;
+    }
+
+    return chan;
+
+    // Deal with errors while creating mutex or condition variable
+    fail_atomic:
+    {
         free_array(chan->data,eltsize,size,flags);
         free(chan);
         return NULL;
     }
-
-    return chan;
 }
 
 /*
@@ -406,6 +414,7 @@ void channel_destroy(struct channel *channel)
         tmp_free(channel->tmp,channel->eltsize, CHAN_ISSHARED(channel->flags));
     else
         free_array(channel->data,channel->eltsize,channel->size,channel->flags);
+
     channel_free(channel, CHAN_ISSHARED(channel->flags));
 }
 
