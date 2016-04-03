@@ -34,9 +34,10 @@ struct channel
     // Atomic operations
     pthread_mutex_t lock;
     pthread_cond_t cond;
-    pthread_cond_t sync;            // Only for synchronous channel
-    pthread_mutexattr_t attrlock;
     pthread_condattr_t attrcond;
+
+    // Only for synchronous channel
+    pthread_cond_t sync;
 };
 
 
@@ -66,18 +67,27 @@ int channel_is_empty(struct channel *chan)
 
 int channel_mutex_init(struct channel *chan, int flags)
 {
-    int err = pthread_mutexattr_init(&chan->attrlock);
+    pthread_mutexattr_t attrlock;
+    int err = pthread_mutexattr_init(&attrlock);
 
     if(err != 0)
         return err;
 
     if(CHAN_ISSHARED(flags))
     {
-        err = pthread_mutexattr_setpshared(&chan->attrlock,PTHREAD_PROCESS_SHARED);
-        return (err == 0) ? pthread_mutex_init(&chan->lock,&chan->attrlock) : err;
-    }
+        if((err = pthread_mutexattr_setpshared(&attrlock,PTHREAD_PROCESS_SHARED)))
+            goto clean_mutex_attr;
 
-    return pthread_mutex_init(&chan->lock,NULL);
+        err = pthread_mutex_init(&chan->lock,&attrlock);
+    }
+    else
+        err = pthread_mutex_init(&chan->lock,NULL);
+
+    clean_mutex_attr :
+    {
+        pthread_mutexattr_destroy(&attrlock);
+        return err;
+    }
 }
 
 int channel_cond_init(struct channel *chan, int flags)
@@ -98,7 +108,6 @@ int channel_cond_init(struct channel *chan, int flags)
 
 void channel_mutex_destroy(struct channel *chan)
 {
-    pthread_mutexattr_destroy(&chan->attrlock);
     pthread_mutex_destroy(&chan->lock);
 }
 
@@ -106,6 +115,9 @@ void channel_cond_destroy(struct channel *chan)
 {
     pthread_condattr_destroy(&chan->attrcond);
     pthread_cond_destroy(&chan->cond);
+
+    if(chan->size == 0)
+        pthread_cond_destroy(&chan->sync);
 }
 
 
