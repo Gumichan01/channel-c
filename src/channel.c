@@ -89,7 +89,15 @@ int channel_cond_init(struct channel *chan, int flags)
     int err;
 
     if(!CHAN_ISSHARED(flags))
-        return pthread_cond_init(&chan->cond,NULL);
+    {
+        err = pthread_cond_init(&chan->cond,NULL);
+
+        if(err != 0)
+            goto clean_cond_attr;
+
+        if(chan->size == 0)
+            err = pthread_cond_init(&chan->sync,NULL);
+    }
 
     // Condition variable for shared channels
     if((err = pthread_condattr_init(&attrcond)) != 0)
@@ -97,11 +105,17 @@ int channel_cond_init(struct channel *chan, int flags)
 
     err = pthread_condattr_setpshared(&attrcond,PTHREAD_PROCESS_SHARED);
 
-    if(err == 0)
-        err = pthread_cond_init(&chan->cond,&attrcond);
+    if(err != 0 || (err = pthread_cond_init(&chan->cond,&attrcond)) != 0)
+        goto clean_cond_attr;
 
-    pthread_condattr_destroy(&attrcond);
-    return err;
+    if(chan->size == 0)
+        err = pthread_cond_init(&chan->sync,&attrcond);
+
+    clean_cond_attr :
+    {
+        pthread_condattr_destroy(&attrcond);
+        return err;
+    }
 }
 
 void channel_mutex_destroy(struct channel *chan)
