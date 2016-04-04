@@ -13,7 +13,7 @@
 
 #define SOCK_PATH "/tmp/soquette"
 #define LISTEN_BACKLOG 2
- 
+
 
 
 void * readfile(void* f){
@@ -29,11 +29,11 @@ void * readfile(void* f){
     perror("socket");
     pthread_exit(NULL);
   }
- 
+
   memset(&sun, 0, sizeof(struct sockaddr_un));
   sun.sun_family = AF_UNIX;
   strncpy(sun.sun_path, SOCK_PATH, sizeof(sun.sun_path) - 1);
-  
+
   usleep(1000);
   sz = sizeof(struct sockaddr_un);
   c = connect(s, (struct sockaddr *)&sun, sz);
@@ -42,18 +42,18 @@ void * readfile(void* f){
     close(s);
     pthread_exit(NULL);
   }
-  
+
   memcpy(file, f, FILENAMESIZE);
-    
+
   fd = open(file, O_RDONLY);
   if(fd < 0){
     perror("open");
     close(s);
     unlink(SOCK_PATH);
     pthread_exit(NULL);
-  } 
+  }
 
- 
+
   while(( r = read(fd, buffer, BUFSIZE)) > 0){
     send(s, buffer, r, MSG_NOSIGNAL);
     memset(buffer, 0, BUFSIZE);
@@ -82,7 +82,7 @@ void * printfile(void* f){
   strncpy(sun.sun_path, SOCK_PATH, sizeof(sun.sun_path) - 1);
 
   sz = sizeof(struct sockaddr_un);
-  
+
   bd = bind(s, (struct sockaddr *) &sun, sz);
   if(bd < 0){
     perror("bind");
@@ -96,9 +96,10 @@ void * printfile(void* f){
   if(lt < 0){
     perror("listen");
     close(s);
+    unlink(SOCK_PATH);
     pthread_exit(NULL);
   }
-  
+
   ac = accept(s, (struct sockaddr *) &sun, &sz);
   if (ac < 0){
     perror("accept");
