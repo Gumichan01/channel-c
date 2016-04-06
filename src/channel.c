@@ -585,7 +585,7 @@ int channel_vsend(struct channel *channel, const void *array, int size)
 
     pthread_mutex_lock(&channel->lock);
 
-    if(channel_closed_empty(channel))
+    if(channel->closed == 1)
     {
         pthread_mutex_unlock(&channel->lock);
         errno = EPIPE;
