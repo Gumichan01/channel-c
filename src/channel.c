@@ -641,8 +641,7 @@ int channel_vrecv(struct channel *channel, void *array, int size)
 
     if(channel->closed == 1 && channel->nbdata == 0){
         pthread_mutex_unlock(&channel->lock);
-        errno = EPIPE;
-        return -1;
+        return 0;
     }
 
     if(!CHAN_ISBATCHED(channel->flags) || channel->size == 0)
