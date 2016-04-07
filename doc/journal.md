@@ -3,35 +3,52 @@
 
 ## DONE ##
 
-- ***Version minimale OK***
-- Benchmark version minimale OK
-- ***Canaux globaux OK***
-- Benchmark multi-processus forward (~~fwd_chan~~, ~~fwd_pipe~~)
-- Benchmark multi-processus pipe (~~cat_pipe~~, ~~cp_pipe~~)
+> - ***Version minimale OK***
+
+> - ***Canaux globaux OK***
+
+> - ***Communication par lots OK***
+
 
 ## DOING ##
 
-- Benchmark canaux globaux
+**Luxon**
+
+> - Programme test performance (petites données avec/sans contention,
+    grosses données) > faire programme exemple
 
 **Luxon**, **Somaya**
 
-- ***Communication par lots***
+- ***Canaux synchrones***
+
+
+
 
 ## TODO ##
 
-**Non assigné**
+**Non assignées**
 
-Extensions :
-- ***Canaux à copie unique*** +  Benchmark
-- ***Canaux sans verrou ?*** + Benchmark si réussi
-- ***Canaux non-bloquants*** +  Benchmark
+> - ***Canaux à copie unique*** +  Benchmark
+
+> - ***Canaux non-bloquants*** +  Benchmark
 
 **Luxon**
 
-- Programme test performance (petites données avec/sans contention,
-    grosses données) + comparaison avec les tubes (faire programme exemple)
-- ***Canaux synchrones***
+> - Programmer en Go
 
-**Kenny**
 
-- Benchmark multi-processus avec socket (cat_sock, cp_sock)
+**Luxon**, **Somaya**
+
+> Benchmark
+
+> - Version minimale (finir certains benchmark)
+
+> - Canaux globaux
+
+> - Communication par lots
+
+> - Canaux synchrones
+
+> - Canaux à une seule copie
+
+> - Canaux non-bloquants
