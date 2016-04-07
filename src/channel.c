@@ -340,9 +340,6 @@ int channel_bsend(struct channel *channel, const void *data)
 
     channel->nbdata += 1;
 
-    if(channel->nbreaders > 0)
-        pthread_cond_signal(&channel->cond);
-
     return 1;
 }
 
@@ -357,9 +354,6 @@ int channel_brecv(struct channel *channel, void *data)
         channel->rd += 1;
 
     channel->nbdata -= 1;
-
-    if(channel->nbwriters > 0)
-        pthread_cond_signal(&channel->cond);
 
     return 1;
 }
@@ -615,11 +609,13 @@ int channel_vsend(struct channel *channel, const void *array, int size)
     {
         if(channel_bsend(channel, array + (i * channel->eltsize)) == -1)
         {
-            pthread_mutex_unlock(&channel->lock);
-            return written;
+            break;
         }
         written += 1;
     }
+
+    if(channel->nbreaders > 0)
+        pthread_cond_signal(&channel->cond);
 
     pthread_mutex_unlock(&channel->lock);
     return written;
@@ -665,11 +661,13 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     {
         if(channel_brecv(channel, array + (i * channel->eltsize)) == -1)
         {
-            pthread_mutex_unlock(&channel->lock);
-            return read;
+            break;
         }
         read += 1;
     }
+
+    if(channel->nbwriters > 0)
+        pthread_cond_signal(&channel->cond);
 
     pthread_mutex_unlock(&channel->lock);
     return read;
