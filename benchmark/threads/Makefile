@@ -4,7 +4,7 @@ CFLAGS=-Wall -O3 -pthread
 LFLAGS=
 
 
-EXE=cat_chan cp_chan fwd_chan cat_pipe cp_pipe fwd_pipe cat_sock cp_sock
+EXE=cat_chan cp_chan fwd_chan cat_pipe cp_pipe fwd_pipe cat_sock cp_sock bfwd_chan
 CHAN_HEADER=../../src/channel.h
 CHAN_SRC=../../src/channel.c
 CHAN_OBJ=../channel.o
@@ -28,6 +28,8 @@ cp_chan : cp_chan.o $(CHAN_OBJ)
 fwd_chan : fwd_chan.o $(CHAN_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LFLAGS)
 
+bfwd_chan : bfwd_chan.o $(CHAN_OBJ)
+	$(CC) $(CFLAGS) $^ -o $@ $(LFLAGS)
 
 cat_chan.o : cat_chan.c $(CHAN_HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
@@ -38,6 +40,8 @@ cp_chan.o : cp_chan.c $(CHAN_HEADER)
 fwd_chan.o : fwd_chan.c $(CHAN_HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
 
+bfwd_chan.o : bfwd_chan.c $(CHAN_HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
 
 # Pipe
 cat_pipe : cat_pipe.o
@@ -75,7 +79,7 @@ cp_sock.o : cp_sock.c
 
 # Clean
 clean :
-	rm -rf *.o
+	rm -rf *.o $(CHAN_OBJ)
 
 clear : clean
 	rm -rf $(EXE)
