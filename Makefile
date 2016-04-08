@@ -32,3 +32,4 @@ clean :
 	rm -rf *.o
 
 clear : clean
+	rm -rf mandelbrot
