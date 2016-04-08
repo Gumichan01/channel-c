@@ -15,6 +15,7 @@
 #define NB_MSG 256
 #define MAX_MSG 30000
 #define MAX_FWD_MSG 15000
+#define MAX_THREADS 16000
 
 typedef struct msg_t
 {
@@ -104,6 +105,8 @@ int main(int argc, char **argv)
   int i;
   int nb_writers, nb_readers;
   pthread_t th;
+  pthread_t thr[MAX_THREADS];
+  pthread_t thw[MAX_THREADS];
 
   if(argc != 3)
   {
@@ -132,12 +135,12 @@ int main(int argc, char **argv)
   // Create every threads
   for(i = 0; i < nb_writers; i++)
   {
-    pthread_create(&th,NULL,sendm,NULL);
+    pthread_create(&thw[i],NULL,sendm,NULL);
   }
 
   for(i = 0; i < nb_readers; i++)
   {
-    pthread_create(&th,NULL,receive,NULL);
+    pthread_create(&thr[i],NULL,receive,NULL);
   }
 
   pthread_create(&th,NULL,forward,NULL);
@@ -146,21 +149,20 @@ int main(int argc, char **argv)
   // Wait for every threads
   for(i = 0; i < nb_writers; i++)
   {
-    pthread_join(th,NULL);
+    pthread_join(thw[i],NULL);
   }
-
+  
   for(i = 0; i < nb_readers; i++)
   {
-    pthread_join(th,NULL);
+    pthread_join(thr[i],NULL);
   }
 
   pthread_join(th,NULL);
-  printf("End of program\n");
-
   close(fdreader[0]);
   close(fdreader[1]);
   close(fdwriter[0]);
   close(fdwriter[1]);
 
+  printf("End of program\n");
   return EXIT_SUCCESS;
 }
