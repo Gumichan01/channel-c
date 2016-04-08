@@ -17,10 +17,15 @@ BENCH_PROC_DIR=$(BENCH_DIR)process/
 CHAN_HEADER=$(SRC_DIR)channel.h
 CHAN_SRC=$(SRC_DIR)channel.c
 MANDEL_SRC=$(SRC_DIR)mandelbrot.c
+CHAN_OBJ=channel.o
+CHANNEL_LIB=channel.a
 
-all: channel.o
+all: $(CHANNEL_LIB)
 
-channel.o : $(CHAN_SRC) $(CHAN_HEADER)
+$(CHANNEL_LIB) : $(CHAN_OBJ)
+	ar rcs $@ $^
+
+$(CHAN_OBJ) : $(CHAN_SRC) $(CHAN_HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
 
 
