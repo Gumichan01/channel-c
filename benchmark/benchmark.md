@@ -172,7 +172,7 @@ en appel système que les version utilisant les tubes.
 *Facteur moyen* : ***~ 100***.
 
 
-##### Plus d'écrivains que de lecteurs (TODO dernier) #####
+##### Plus d'écrivains que de lecteurs #####
 
  - 1 lecteur / 10 écrivains
 
@@ -195,7 +195,7 @@ en appel système que les version utilisant les tubes.
  - 1 lecteur / 10 000 écrivains
 
  * Version canal        : **real** 3.168s; **user** 0.184s; **sys** 4.128s;
- * Version tube         : **real** 2:50.995s; **user** 0.084s; **sys** 8:52.313s;*TODO*
+ * Version tube         : **real** 3:46.253s; **user** 0.052s; **sys** 12:39.359s;
  * Programme Go equiv.  : *TODO*
 
  *Moralité* : Pour un petit nombre d'écrivains, les tubes sont légèrement plus
@@ -206,7 +206,7 @@ en appel système que les version utilisant les tubes.
  les performances de l'implémentation à base de tube était équivalentes à ce que
  faisait les canaux.
 
-##### Plus de lecteurs que d'écrivains (TODO dernier) #####
+##### Plus de lecteurs que d'écrivains #####
 
  - 10 lecteurs / 1 écrivain
 
@@ -229,7 +229,7 @@ en appel système que les version utilisant les tubes.
  - 10 000 lecteurs / 1 écrivain
 
  * Version canal        : **real** 1:0.638s; **user** 6.648s; **sys** 52.083s;
- * Version tube         : **real** 6:46.751s; **user** 0.260s; **sys** 16:46.751s; *TODO*
+ * Version tube         : **real** 5:49.263s; **user** 0.148s; **sys** 19:03.803s;
  * Programme Go equiv.  : *TODO*
 
 *Moralité* : Avec plus de lecteurs que d'écrivans, l'implémentation utilisant
