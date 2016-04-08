@@ -19,9 +19,14 @@ différents threads/processus à travers les canaux à la [*Go*](https://golang.
 
 ## Compilation ##
 
-Pour générer le fichier bibliothèque associé au canal... ***TODO***
+Pour générer le fichier bibliothèque associé au canal,
+exécutez la commande suivante :
 
-Pour compiler le programme *mandelbrot*, exécuter la commande suivante :
+    $ make
+
+Cela générera un fichier *channel.a* qui servira de fichier bibliothèque.
+
+Pour compiler le programme *mandelbrot*, exécutez la commande suivante :
 
     $ make mandelbrot
 
