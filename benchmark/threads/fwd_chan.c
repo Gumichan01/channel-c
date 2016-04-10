@@ -89,10 +89,10 @@ void * forward(void * ptr)
 
         if(err == -1)
         {
-        perror("FWD - error channel_send");
-        channel_close(chan_s);
-        channel_close(chan_r);
-        break;
+            perror("FWD - error channel_send");
+            channel_close(chan_s);
+            channel_close(chan_r);
+            break;
         }
 
         n += 1;
