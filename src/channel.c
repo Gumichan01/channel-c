@@ -292,56 +292,78 @@ int channel_sync_send(struct channel *channel, const void *data)
 {
     pthread_mutex_lock(&channel->lock);
 
-    while(channel->wsync > 0)
+    while(channel->wsync == 1 && channel->closed == 0)
     {
         channel->nbwriters++;
         pthread_cond_wait(&channel->wcond,&channel->lock);
         channel->nbwriters--;
     }
 
-    channel->wsync++;
+    if(channel->closed) { goto broken_channel; }
+    channel->wsync = 1;
 
-    if(channel->rsync == 0)     // Wait for the reader
+    if(channel->rsync == 0)                             // Wait for the reader
         pthread_cond_wait(&channel->sync,&channel->lock);
 
+    if(channel->closed) { goto broken_channel; }        // Interrupt the operation
     memcpy(channel->tmp,data,channel->eltsize);
-    pthread_cond_signal(&channel->sync);                // Data sent
+    pthread_cond_signal(&channel->sync);                // Data was sent
     pthread_cond_wait(&channel->sync,&channel->lock);
 
-    if(channel->nbwriters > 0)
-        pthread_cond_signal(&channel->wcond);
+    if(!channel->closed)
+    {
+        if(channel->nbwriters > 0)
+            pthread_cond_signal(&channel->wcond);
 
-    if(channel->nbreaders > 0)
-        pthread_cond_signal(&channel->rcond);
+        if(channel->nbreaders > 0)
+            pthread_cond_signal(&channel->rcond);
+    }
 
-    channel->wsync--;
+    channel->wsync = 0;
     pthread_mutex_unlock(&channel->lock);
     return 1;
+
+    broken_channel :
+    {
+        channel->wsync = 0;
+        pthread_mutex_unlock(&channel->lock);
+        errno = EPIPE;
+        return -1;
+    }
 }
 
 int channel_sync_recv(struct channel *channel, void *data)
 {
     pthread_mutex_lock(&channel->lock);
 
-    while(channel->rsync > 0)
+    while(channel->rsync == 1 && channel->closed == 0)
     {
         channel->nbreaders++;
         pthread_cond_wait(&channel->rcond,&channel->lock);
         channel->nbreaders--;
     }
 
-    channel->rsync++;
+    channel->rsync = 1;
 
     if(channel->wsync == 1)
         pthread_cond_signal(&channel->sync);
+    else if(channel->closed)
+        goto closed_channel;
 
     pthread_cond_wait(&channel->sync,&channel->lock);   // Wait for the writer
     memcpy(data,channel->tmp,channel->eltsize);
 
-    channel->rsync--;
+    channel->rsync = 0;
     pthread_cond_signal(&channel->sync);                // Acknowledgement
     pthread_mutex_unlock(&channel->lock);
     return 1;
+
+    closed_channel :
+    {
+        channel->rsync = 0;
+        pthread_mutex_unlock(&channel->lock);
+        return 0;
+    }
 }
 
 // Creation of the channel
@@ -587,7 +609,16 @@ int channel_close(struct channel *channel)
     }
 
     channel->closed = 1;
-    pthread_cond_broadcast(&channel->cond);
+
+    if(channel->size > 0)
+        pthread_cond_broadcast(&channel->cond);
+    else
+    {
+        pthread_cond_broadcast(&channel->wcond);
+        pthread_cond_broadcast(&channel->rcond);
+        pthread_cond_broadcast(&channel->sync);
+    }
+
     pthread_mutex_unlock(&channel->lock);
 
     return 1;
