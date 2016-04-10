@@ -4,7 +4,8 @@ CFLAGS=-Wall -O3 -pthread
 LFLAGS=
 
 
-EXE=cat_chan cp_chan fwd_chan cat_pipe cp_pipe fwd_pipe cat_sock cp_sock bfwd_chan
+EXE=cat_chan cp_chan fwd_chan cat_pipe cp_pipe fwd_pipe cat_sock cp_sock \
+bfwd_chan sync_fwd_chan
 CHAN_HEADER=../../src/channel.h
 CHAN_SRC=../../src/channel.c
 CHAN_OBJ=../channel.o
@@ -31,6 +32,10 @@ fwd_chan : fwd_chan.o $(CHAN_OBJ)
 bfwd_chan : bfwd_chan.o $(CHAN_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LFLAGS)
 
+sync_fwd_chan : sync_fwd_chan.o $(CHAN_OBJ)
+	$(CC) $(CFLAGS) $^ -o $@ $(LFLAGS)
+
+
 cat_chan.o : cat_chan.c $(CHAN_HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
 
@@ -41,6 +46,9 @@ fwd_chan.o : fwd_chan.c $(CHAN_HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
 
 bfwd_chan.o : bfwd_chan.c $(CHAN_HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
+
+sync_fwd_chan.o : sync_fwd_chan.c $(CHAN_HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LFLAGS)
 
 # Pipe
