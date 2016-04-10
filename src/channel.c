@@ -25,18 +25,20 @@ struct channel
     int wr;                         // Write cursor
     int nbdata;
     void **data;                    // Data queue
+    pthread_mutex_t lock;
+    pthread_cond_t cond;
 
     // Synchronous channel
     int wsync;
     int rsync;
     void *tmp;
-
-    // Atomic operations
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
-    pthread_cond_t sync;            // Only for synchronous channel
+    pthread_cond_t sync;
+    pthread_cond_t wcond;
+    pthread_cond_t rcond;
 };
 
+#define CHAN_MAX_ERROR(a,b) \
+    ((a > b) ? a : b )
 
 #define CHAN_ISSHARED(flags) \
     (((flags) & CHANNEL_PROCESS_SHARED) == CHANNEL_PROCESS_SHARED)
@@ -83,39 +85,69 @@ int channel_mutex_init(struct channel *chan, int flags)
     return err;
 }
 
-int channel_cond_init(struct channel *chan, int flags)
+// Create the condition variable for synchronous channels
+int channel_sync_cond_init(struct channel *chan,int flags)
 {
+    int werr = 0, rerr = 0, err = 0;
     pthread_condattr_t attrcond;
-    int err;
 
     if(!CHAN_ISSHARED(flags))
     {
-        err = pthread_cond_init(&chan->cond,NULL);
+        werr = pthread_cond_init(&chan->wcond,NULL);
+        rerr = pthread_cond_init(&chan->rcond,NULL);
 
-        if(err != 0)
-            goto clean_cond_attr;
-
-        if(chan->size == 0)
-            err = pthread_cond_init(&chan->sync,NULL);
+        return (werr != 0 || rerr != 0) ? CHAN_MAX_ERROR(werr, rerr) : 0;
     }
 
-    // Condition variable for shared channels
+    // Condition variable creation for synchronous shared channels
+    if((err = pthread_condattr_init(&attrcond)) != 0)
+        return err;
+
+    err = pthread_condattr_setpshared(&attrcond,PTHREAD_PROCESS_SHARED);
+    werr = pthread_cond_init(&chan->wcond,&attrcond);
+    rerr = pthread_cond_init(&chan->rcond,&attrcond);
+
+    pthread_condattr_destroy(&attrcond);
+
+    if(err != 0)
+        return err;
+
+    return CHAN_MAX_ERROR(werr,rerr);
+}
+
+// Create the condition variable for asynchronous channels
+int channel_async_cond_init(struct channel *chan,int flags)
+{
+    int err;
+    pthread_condattr_t attrcond;
+
+    if(!CHAN_ISSHARED(flags))
+        return pthread_cond_init(&chan->cond,NULL);
+
+    // Condition variable creation for asynchronous shared channels
     if((err = pthread_condattr_init(&attrcond)) != 0)
         return err;
 
     err = pthread_condattr_setpshared(&attrcond,PTHREAD_PROCESS_SHARED);
 
-    if(err != 0 || (err = pthread_cond_init(&chan->cond,&attrcond)) != 0)
-        goto clean_cond_attr;
+    if(err != 0)
+        goto async_cond;
 
-    if(chan->size == 0)
-        err = pthread_cond_init(&chan->sync,&attrcond);
+    err = pthread_cond_init(&chan->cond,&attrcond);
 
-    clean_cond_attr :
+    async_cond :
     {
         pthread_condattr_destroy(&attrcond);
         return err;
     }
+}
+
+int channel_cond_init(struct channel *chan, int flags)
+{
+    if(chan->size == 0)
+        return channel_sync_cond_init(chan,flags);
+    else
+        return channel_async_cond_init(chan,flags);
 }
 
 void channel_mutex_destroy(struct channel *chan)
@@ -128,7 +160,11 @@ void channel_cond_destroy(struct channel *chan)
     pthread_cond_destroy(&chan->cond);
 
     if(chan->size == 0)
+    {
         pthread_cond_destroy(&chan->sync);
+        pthread_cond_destroy(&chan->wcond);
+        pthread_cond_destroy(&chan->rcond);
+    }
 }
 
 
@@ -254,11 +290,57 @@ void tmp_free(void *tmp, int eltsize, int shared)
 
 int channel_sync_send(struct channel *channel, const void *data)
 {
+    pthread_mutex_lock(&channel->lock);
+
+    while(channel->wsync > 0)
+    {
+        channel->nbwriters++;
+        pthread_cond_wait(&channel->wcond,&channel->lock);
+        channel->nbwriters--;
+    }
+
+    channel->wsync++;
+
+    if(channel->rsync == 0)     // Wait for the reader
+        pthread_cond_wait(&channel->sync,&channel->lock);
+
+    memcpy(channel->tmp,data,channel->eltsize);
+    pthread_cond_signal(&channel->sync);                // Data sent
+    pthread_cond_wait(&channel->sync,&channel->lock);
+
+    if(channel->nbwriters > 0)
+        pthread_cond_signal(&channel->wcond);
+
+    if(channel->nbreaders > 0)
+        pthread_cond_signal(&channel->rcond);
+
+    channel->wsync--;
+    pthread_mutex_unlock(&channel->lock);
     return 1;
 }
 
 int channel_sync_recv(struct channel *channel, void *data)
 {
+    pthread_mutex_lock(&channel->lock);
+
+    while(channel->rsync > 0)
+    {
+        channel->nbreaders++;
+        pthread_cond_wait(&channel->rcond,&channel->lock);
+        channel->nbreaders--;
+    }
+
+    channel->rsync++;
+
+    if(channel->wsync == 1)
+        pthread_cond_signal(&channel->sync);
+
+    pthread_cond_wait(&channel->sync,&channel->lock);   // Wait for the writer
+    memcpy(data,channel->tmp,channel->eltsize);
+
+    channel->rsync--;
+    pthread_cond_signal(&channel->sync);                // Acknowledgement
+    pthread_mutex_unlock(&channel->lock);
     return 1;
 }
 
@@ -411,6 +493,7 @@ struct channel *channel_create(int eltsize, int size, int flags)
     {
         free_array(chan->data,eltsize,size,flags);
         free(chan);
+        errno = err;
         return NULL;
     }
 }
