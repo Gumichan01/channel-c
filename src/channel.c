@@ -88,13 +88,14 @@ int channel_mutex_init(struct channel *chan, int flags)
 // Create the condition variable for synchronous channels
 int channel_sync_cond_init(struct channel *chan,int flags)
 {
-    int werr = 0, rerr = 0, err = 0;
+    int werr = 0, rerr = 0, serr, err = 0;
     pthread_condattr_t attrcond;
 
     if(!CHAN_ISSHARED(flags))
     {
         werr = pthread_cond_init(&chan->wcond,NULL);
         rerr = pthread_cond_init(&chan->rcond,NULL);
+        serr = pthread_cond_init(&chan->sync,NULL);
 
         return (werr != 0 || rerr != 0) ? CHAN_MAX_ERROR(werr, rerr) : 0;
     }
@@ -106,11 +107,14 @@ int channel_sync_cond_init(struct channel *chan,int flags)
     err = pthread_condattr_setpshared(&attrcond,PTHREAD_PROCESS_SHARED);
     werr = pthread_cond_init(&chan->wcond,&attrcond);
     rerr = pthread_cond_init(&chan->rcond,&attrcond);
+    serr = pthread_cond_init(&chan->sync,&attrcond);
 
     pthread_condattr_destroy(&attrcond);
 
     if(err != 0)
         return err;
+    else if (serr != 0)
+        return serr;
 
     return CHAN_MAX_ERROR(werr,rerr);
 }
@@ -806,22 +810,22 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     }
 
     err = channel_vsend(chan,tab2,4);
-    printf("1 - sent %d\n",err);
+
     err = channel_vsend(chan,tab,3);
-    printf("2 - sent %d\n",err);
+
     perror("vsend");
 
     //channel_recv(chan,&q);
-    //printf("received from the channel: %d \n",q);
+    //
     //channel_recv(chan,&q);
-    //printf("received from the channel: %d \n",q);
+    //
     //channel_recv(chan,&q);
-    //printf("received from the channel: %d \n",q);
+    //
 
     channel_vrecv(chan,tab,5);
 
     for(q = 0; q < 3; q++)
-        printf("received from the channel: %d \n",tab[q]);
+
 
     channel_close(chan);
     channel_destroy(chan);
