@@ -36,6 +36,8 @@
 
 > - Programmer en Go
 
+> - Faire le bfwd_chan en multi-processus
+
 
 **Luxon**, **Somaya**
 
