@@ -293,7 +293,7 @@ int channel_sync_send(struct channel *channel, const void *data)
         pthread_cond_wait(&channel->sync,&channel->lock);
 
     if(channel->closed) { goto broken_channel; }        // Interrupt the operation
-    channel->tmp = data;
+    channel->tmp = (void *) data;
     pthread_cond_signal(&channel->sync);                // Data was sent
     pthread_cond_wait(&channel->sync,&channel->lock);
 
@@ -552,7 +552,7 @@ int channel_send(struct channel *channel, const void *data)
     }
 
     if(CHAN_ISSINGLE(channel->flags))
-        channel->data[channel->wr] = data;
+        channel->data[channel->wr] = (void *) data;
     else
         memcpy(channel->data[channel->wr], data, channel->eltsize);
 
