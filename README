@@ -13,8 +13,8 @@ différents threads/processus à travers les canaux à la [*Go*](https://golang.
  - Canaux de base pour la communication inter-thread
  - Canaux globaux pour la communication inter-processus
  - Communication par lots
- - ~~Canaux synchrones~~
- - ~~Canaux à copie unique~~
+ - Canaux synchrones
+ - Canaux à copie unique (! ne fonctionnera probablement pas avec des threads "deamon")
  - ~~Canaux non-bloquants~~
 
 ## Compilation ##
