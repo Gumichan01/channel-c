@@ -7,7 +7,7 @@ struct channel;
 /* flags */
 #define CHANNEL_PROCESS_SHARED      1
 #define CHANNEL_PROCESS_BATCH       2
-#define CHANNEL_PROCESS_PTR         4
+#define CHANNEL_PROCESS_SINGLE_COPY 4
 #define CHANNEL_PROCESS_NONBLOCK    8      // Non-blocking channel (bonus)
 
 

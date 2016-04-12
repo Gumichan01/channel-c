@@ -46,6 +46,9 @@ struct channel
 #define CHAN_ISBATCHED(flags) \
     (((flags) & CHANNEL_PROCESS_BATCH) == CHANNEL_PROCESS_BATCH)
 
+#define CHAN_ISSINGLE(flags) \
+    (((flags) & CHANNEL_PROCESS_SINGLE_COPY) == CHANNEL_PROCESS_SINGLE_COPY)
+
 /// Private functions
 
 int channel_closed_empty(struct channel *chan)
@@ -194,8 +197,12 @@ void ** allocate_array(int eltsize, int size, int flags)
 
     memset(array,0,size);
 
+    if(CHAN_ISSINGLE(flags))
+        goto channel_allocation;
+
     for(i = 0; i < size; i++)
     {
+
         if(CHAN_ISSHARED(flags))
         {
             array[i] = mmap(NULL, sizeof(void) * eltsize, PROT_READ|PROT_WRITE,
@@ -233,7 +240,8 @@ void ** allocate_array(int eltsize, int size, int flags)
         }
     }
 
-    return array;
+    channel_allocation :
+        return array;
 }
 
 
@@ -246,12 +254,15 @@ void free_array(void **array, int eltsize, int size, int flags)
 
     for(i = 0; i < size; i++)
     {
-        if(CHAN_ISSHARED(flags))
+        if(!CHAN_ISSINGLE(flags))
         {
-            munmap(array[i], sizeof(void) * eltsize);
+            if(CHAN_ISSHARED(flags))
+            {
+                munmap(array[i], sizeof(void) * eltsize);
+            }
+            else
+                free(array[i]);
         }
-        else
-            free(array[i]);
     }
 
     if(CHAN_ISSHARED(flags))
@@ -578,7 +589,11 @@ int channel_send(struct channel *channel, const void *data)
         return -1;
     }
 
-    memcpy(channel->data[channel->wr], data, channel->eltsize);
+    if(CHAN_ISSINGLE(channel->flags))
+        channel->data[channel->wr] = data;
+    else
+        memcpy(channel->data[channel->wr], data, channel->eltsize);
+
     if(channel->wr == channel->size-1)
         channel->wr = 0;
     else
