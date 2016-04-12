@@ -275,34 +275,6 @@ void free_array(void **array, int eltsize, int size, int flags)
 
 
 // Functions for synchronous channels
-void *tmp_alloc(int eltsize, int flags)
-{
-    void *p = NULL;
-
-    if(CHAN_ISSHARED(flags))
-    {
-        p = mmap(NULL, sizeof(void) * eltsize, PROT_READ|PROT_WRITE,
-                        MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-
-        return (p == MAP_FAILED) ? NULL : p;
-    }
-    else
-        return malloc(eltsize * sizeof(void));
-}
-
-void tmp_free(void *tmp, int eltsize, int shared)
-{
-    if(tmp == NULL)
-        return;
-
-    if(shared)
-        munmap(tmp, eltsize * sizeof(void));
-    else
-        free(tmp);
-
-    tmp = NULL;
-}
-
 int channel_sync_send(struct channel *channel, const void *data)
 {
     pthread_mutex_lock(&channel->lock);
@@ -321,7 +293,7 @@ int channel_sync_send(struct channel *channel, const void *data)
         pthread_cond_wait(&channel->sync,&channel->lock);
 
     if(channel->closed) { goto broken_channel; }        // Interrupt the operation
-    memcpy(channel->tmp,data,channel->eltsize);
+    channel->tmp = data;
     pthread_cond_signal(&channel->sync);                // Data was sent
     pthread_cond_wait(&channel->sync,&channel->lock);
 
@@ -403,15 +375,7 @@ struct channel * channel_allocate(int eltsize, int size, int flags)
             return NULL;
     }
 
-    if(size == 0)
-    {
-        // The channel is synchronous
-        chan->tmp = tmp_alloc(eltsize,flags);
-
-        if(chan->tmp == NULL)
-            goto fail_chan;
-    }
-    else
+    if(size > 0)
     {
         // The channel is asynchronous
         chan->data = allocate_array(eltsize,size,flags);
@@ -547,9 +511,7 @@ void channel_destroy(struct channel *channel)
     channel_cond_destroy(channel);
     channel_mutex_destroy(channel);
 
-    if(channel->size == 0)
-        tmp_free(channel->tmp,channel->eltsize, CHAN_ISSHARED(channel->flags));
-    else
+    if(channel->size > 0)
         free_array(channel->data,channel->eltsize,channel->size,channel->flags);
 
     channel_free(channel, CHAN_ISSHARED(channel->flags));
