@@ -14,7 +14,7 @@
 struct channel
 {
     int eltsize;                    // Size of an element
-    int size;                       // Number of elements
+    int size;                       // Number of elements (capacity)
     int flags;
     int closed;
     int nbwriters;
@@ -23,8 +23,8 @@ struct channel
     // Asynchronous channel
     int rd;                         // Read cursor
     int wr;                         // Write cursor
-    int nbdata;
-    void **data;                    // Data queue
+    int nbdata;                     // Current size
+    void **data;                    // Buffer
     pthread_mutex_t lock;
     pthread_cond_t cond;
 
@@ -37,19 +37,29 @@ struct channel
     pthread_cond_t rcond;
 };
 
+
 #define CHAN_MAX_ERROR(a,b) \
     ((a > b) ? a : b )
 
+// Check if the channel is shared
 #define CHAN_ISSHARED(flags) \
     (((flags) & CHANNEL_PROCESS_SHARED) == CHANNEL_PROCESS_SHARED)
 
+// Check if the channel is configured for batch communication
 #define CHAN_ISBATCHED(flags) \
     (((flags) & CHANNEL_PROCESS_BATCH) == CHANNEL_PROCESS_BATCH)
+
 
 #define CHAN_ISSINGLE(flags) \
     (((flags) & CHANNEL_PROCESS_SINGLE_COPY) == CHANNEL_PROCESS_SINGLE_COPY)
 
-/// Private functions
+
+// Synchronous communication
+int channel_sync_send(struct channel *channel, const void *data);
+int channel_sync_recv(struct channel *channel, void *data);
+
+
+// Internal functions
 
 int channel_closed_empty(struct channel *chan)
 {
@@ -67,6 +77,7 @@ int channel_is_empty(struct channel *chan)
 }
 
 
+// Create the mutex
 int channel_mutex_init(struct channel *chan, int flags)
 {
     int err;
@@ -87,6 +98,7 @@ int channel_mutex_init(struct channel *chan, int flags)
     pthread_mutexattr_destroy(&attrlock);
     return err;
 }
+
 
 // Create the condition variable for synchronous channels
 int channel_sync_cond_init(struct channel *chan,int flags)
@@ -157,6 +169,7 @@ int channel_cond_init(struct channel *chan, int flags)
         return channel_async_cond_init(chan,flags);
 }
 
+
 void channel_mutex_destroy(struct channel *chan)
 {
     pthread_mutex_destroy(&chan->lock);
@@ -175,6 +188,7 @@ void channel_cond_destroy(struct channel *chan)
 }
 
 
+// Allocation of the buffer in the asynchronous channels
 void ** allocate_array(int eltsize, int size, int flags)
 {
     int i, err;
@@ -274,86 +288,7 @@ void free_array(void **array, int eltsize, int size, int flags)
 }
 
 
-// Functions for synchronous channels
-int channel_sync_send(struct channel *channel, const void *data)
-{
-    pthread_mutex_lock(&channel->lock);
-
-    while(channel->wsync == 1 && channel->closed == 0)
-    {
-        channel->nbwriters++;
-        pthread_cond_wait(&channel->wcond,&channel->lock);
-        channel->nbwriters--;
-    }
-
-    if(channel->closed) { goto broken_channel; }
-    channel->wsync = 1;
-
-    if(channel->rsync == 0)                             // Wait for the reader
-        pthread_cond_wait(&channel->sync,&channel->lock);
-
-    if(channel->closed) { goto broken_channel; }        // Interrupt the operation
-    channel->tmp = (void *) data;
-    pthread_cond_signal(&channel->sync);                // Data was sent
-    pthread_cond_wait(&channel->sync,&channel->lock);
-
-    if(!channel->closed)
-    {
-        if(channel->nbwriters > 0)
-            pthread_cond_signal(&channel->wcond);
-
-        if(channel->nbreaders > 0)
-            pthread_cond_signal(&channel->rcond);
-    }
-
-    channel->wsync = 0;
-    pthread_mutex_unlock(&channel->lock);
-    return 1;
-
-    broken_channel :
-    {
-        channel->wsync = 0;
-        pthread_mutex_unlock(&channel->lock);
-        errno = EPIPE;
-        return -1;
-    }
-}
-
-int channel_sync_recv(struct channel *channel, void *data)
-{
-    pthread_mutex_lock(&channel->lock);
-
-    while(channel->rsync == 1 && channel->closed == 0)
-    {
-        channel->nbreaders++;
-        pthread_cond_wait(&channel->rcond,&channel->lock);
-        channel->nbreaders--;
-    }
-
-    channel->rsync = 1;
-
-    if(channel->wsync == 1)
-        pthread_cond_signal(&channel->sync);
-    else if(channel->closed)
-        goto closed_channel;
-
-    pthread_cond_wait(&channel->sync,&channel->lock);   // Wait for the writer
-    memcpy(data,channel->tmp,channel->eltsize);
-
-    channel->rsync = 0;
-    pthread_cond_signal(&channel->sync);                // Acknowledgement
-    pthread_mutex_unlock(&channel->lock);
-    return 1;
-
-    closed_channel :
-    {
-        channel->rsync = 0;
-        pthread_mutex_unlock(&channel->lock);
-        return 0;
-    }
-}
-
-// Creation of the channel
+// Allocation of the channel
 struct channel * channel_allocate(int eltsize, int size, int flags)
 {
     int err;
@@ -411,39 +346,14 @@ void channel_free(struct channel *chan, int shared)
     chan = NULL;
 }
 
-// Atomic operations called by channel_vsend
-int channel_bsend(struct channel *channel, const void *data)
-{
-    memcpy(channel->data[channel->wr], data, channel->eltsize);
+// Now the complete creation of the channel
 
-    if(channel->wr == channel->size-1)
-        channel->wr = 0;
-    else
-        channel->wr += 1;
+/*
+    Create a channel with a size of an element and a capacity specified by size.
+    Return value :
+        An allocated channel on success. NULL on failure, and errno is set.
 
-    channel->nbdata += 1;
-
-    return 1;
-}
-
-// Atomic operations called by channel_vrecv
-int channel_brecv(struct channel *channel, void *data)
-{
-    memcpy(data, channel->data[channel->rd], channel->eltsize);
-
-    if(channel->rd == channel->size-1)
-        channel->rd = 0;
-    else
-        channel->rd += 1;
-
-    channel->nbdata -= 1;
-
-    return 1;
-}
-
-
-/// Public functions
-
+*/
 struct channel *channel_create(int eltsize, int size, int flags)
 {
     int err;
@@ -500,6 +410,8 @@ struct channel *channel_create(int eltsize, int size, int flags)
 }
 
 /*
+    Destroy a channel that is already created.
+
     If the channel is not null but invalid,
     then the behaviour is undefined.
 */
@@ -518,6 +430,15 @@ void channel_destroy(struct channel *channel)
 }
 
 
+/*
+    Send data into the channel.
+
+    This function may block if the channel is synchonous.
+    It also may block if the channel is asynchronous and full.
+
+    Rerurn Value : 1 on success, -1 on error, and errno is set.
+
+*/
 int channel_send(struct channel *channel, const void *data)
 {
     if(channel == NULL || data == NULL)
@@ -571,41 +492,22 @@ int channel_send(struct channel *channel, const void *data)
     return 1;
 }
 
+/*
+    Receive data from the channel.
 
-// If the channel is not null but invalid, then the behaviour is unspecified
-int channel_close(struct channel *channel)
-{
-    // TODO: what is happening if the channel is synchronous ?
-    if(channel == NULL)
-    {
-        errno = EINVAL;
-        return -1;
-    }
+    This function may block if the channel is synchonous.
+    It also may block if the channel is asynchronous and empty.
 
-    pthread_mutex_lock(&channel->lock);
-    if(channel->closed == 1)
-    {
-        pthread_mutex_unlock(&channel->lock);
-        return 0;
-    }
+    Rerurn Value :  1 on success,
+                    0 if the channel is closed and empty,
+                    -1 on error, and errno is set.
 
-    channel->closed = 1;
+    Note : In synchronous channels, the function immediately returns if
+            the channel is closed. In asynchronous channels, if there are data
+            that need to be read, this function can read them even if
+            the channel is closed.
 
-    if(channel->size > 0)
-        pthread_cond_broadcast(&channel->cond);
-    else
-    {
-        pthread_cond_broadcast(&channel->wcond);
-        pthread_cond_broadcast(&channel->rcond);
-        pthread_cond_broadcast(&channel->sync);
-    }
-
-    pthread_mutex_unlock(&channel->lock);
-
-    return 1;
-}
-
-
+*/
 int channel_recv(struct channel *channel, void *data)
 {
     if(channel == NULL || data == NULL)
@@ -655,11 +557,196 @@ int channel_recv(struct channel *channel, void *data)
     return 1;
 }
 
+
+// If the channel is not null but invalid, then the behaviour is unspecified
 /*
-    Send at most size element in the channel using an array.
+    Close the current channel
+
+    If the channel is already closed. this function does nothing.
+    Otherwise, it closes it to prevent the writers threads/processes
+    from writing data.
+
+    Return value : 1 on success, 0 is the channel is empty, -1 on error,
+                    and errno is set.
+
+*/
+int channel_close(struct channel *channel)
+{
+    if(channel == NULL)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    pthread_mutex_lock(&channel->lock);
+    if(channel->closed == 1)
+    {
+        pthread_mutex_unlock(&channel->lock);
+        return 0;
+    }
+
+    channel->closed = 1;
+
+    if(channel->size > 0)
+        pthread_cond_broadcast(&channel->cond);
+    else
+    {
+        pthread_cond_broadcast(&channel->wcond);
+        pthread_cond_broadcast(&channel->rcond);
+        pthread_cond_broadcast(&channel->sync);
+    }
+
+    pthread_mutex_unlock(&channel->lock);
+
+    return 1;
+}
+
+
+/* ********************
+    Synchronous chanel
+   ******************** */
+
+/*
+    Send synchronously data to a reader.
+
+    This function may block if no reader is trying to read, or if there is
+    already a writer that is synchronizing with another reader.
+
+    Return value : 1 on success, -1 on error and errno is set.
+
+    Note : Actually, the function send -1 if the channel is empty
+*/
+int channel_sync_send(struct channel *channel, const void *data)
+{
+    pthread_mutex_lock(&channel->lock);
+
+    while(channel->wsync == 1 && channel->closed == 0)
+    {
+        channel->nbwriters++;
+        pthread_cond_wait(&channel->wcond,&channel->lock);
+        channel->nbwriters--;
+    }
+
+    if(channel->closed) { goto broken_channel; }
+    channel->wsync = 1;
+
+    if(channel->rsync == 0)                             // Wait for the reader
+        pthread_cond_wait(&channel->sync,&channel->lock);
+
+    if(channel->closed) { goto broken_channel; }        // Interrupt the operation
+    channel->tmp = (void *) data;
+    pthread_cond_signal(&channel->sync);                // Data was sent
+    pthread_cond_wait(&channel->sync,&channel->lock);
+
+    if(!channel->closed)
+    {
+        if(channel->nbwriters > 0)
+            pthread_cond_signal(&channel->wcond);
+
+        if(channel->nbreaders > 0)
+            pthread_cond_signal(&channel->rcond);
+    }
+
+    channel->wsync = 0;
+    pthread_mutex_unlock(&channel->lock);
+    return 1;
+
+    broken_channel :
+    {
+        channel->wsync = 0;
+        pthread_mutex_unlock(&channel->lock);
+        errno = EPIPE;
+        return -1;
+    }
+}
+
+/*
+    Receive synchronously data from a writer.
+
+    This function may block if no writer is trying to write, or if there is
+    already a reader that is synchronizing with another writer.
+
+    Return value : 1 on success, 0 if the channel is closed.
+
+*/
+int channel_sync_recv(struct channel *channel, void *data)
+{
+    pthread_mutex_lock(&channel->lock);
+
+    while(channel->rsync == 1 && channel->closed == 0)
+    {
+        channel->nbreaders++;
+        pthread_cond_wait(&channel->rcond,&channel->lock);
+        channel->nbreaders--;
+    }
+
+    channel->rsync = 1;
+
+    if(channel->wsync == 1)
+        pthread_cond_signal(&channel->sync);
+    else if(channel->closed)
+        goto closed_channel;
+
+    pthread_cond_wait(&channel->sync,&channel->lock);   // Wait for the writer
+    memcpy(data,channel->tmp,channel->eltsize);
+
+    channel->rsync = 0;
+    pthread_cond_signal(&channel->sync);                // Acknowledgement
+    pthread_mutex_unlock(&channel->lock);
+    return 1;
+
+    closed_channel :
+    {
+        channel->rsync = 0;
+        pthread_mutex_unlock(&channel->lock);
+        return 0;
+    }
+}
+
+
+/* *********************
+    Batch communication
+   ********************* */
+
+// Atomic operations called by channel_vsend()
+int channel_bsend(struct channel *channel, const void *data)
+{
+    memcpy(channel->data[channel->wr], data, channel->eltsize);
+
+    if(channel->wr == channel->size-1)
+        channel->wr = 0;
+    else
+        channel->wr += 1;
+
+    channel->nbdata += 1;
+
+    return 1;
+}
+
+// Atomic operations called by channel_vrecv()
+int channel_brecv(struct channel *channel, void *data)
+{
+    memcpy(data, channel->data[channel->rd], channel->eltsize);
+
+    if(channel->rd == channel->size-1)
+        channel->rd = 0;
+    else
+        channel->rd += 1;
+
+    channel->nbdata -= 1;
+
+    return 1;
+}
+
+
+/*
+    Send at most size elements in the channel using an array.
+
     It can write a number of elements less than the size of the buffer.
-    This functions fails if the given arguments are invalid ot if the channel is
-    synchronous or not configured for batch communication.
+    This functions must not be used if the channel is synchronous or
+    not configured for batch communication.
+
+    Return value : a number of written data on success, -1 on error and errno is set.
 */
 int channel_vsend(struct channel *channel, const void *array, int size)
 {
@@ -688,15 +775,6 @@ int channel_vsend(struct channel *channel, const void *array, int size)
         return -1;
     }
 
-    // Test if the call will block
-    if(channel->nbdata >= channel->size)
-    {
-        pthread_mutex_unlock(&channel->lock);
-        errno = EWOULDBLOCK;
-        return -1;
-    }
-
-
     nbwdata = channel->size - channel->nbdata;
     n = (size > nbwdata) ? nbwdata : size;
 
@@ -717,6 +795,15 @@ int channel_vsend(struct channel *channel, const void *array, int size)
 }
 
 
+/*
+    Receive at most size elements in the channel using an array.
+
+    It can reade a number of elements less than the size of the buffer.
+    This functions must not be used if the channel is synchronous or
+    not configured for batch communication.
+
+    Return value : a number of read data on success, -1 on error and errno is set.
+*/
 int channel_vrecv(struct channel *channel, void *array, int size)
 {
     int n, i;
@@ -739,14 +826,6 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     {
         pthread_mutex_unlock(&channel->lock);
         errno = EBADE;
-        return -1;
-    }
-
-    // Test if the call will block
-    if(channel->nbdata <= 0)
-    {
-        pthread_mutex_unlock(&channel->lock);
-        errno = EWOULDBLOCK;
         return -1;
     }
 
