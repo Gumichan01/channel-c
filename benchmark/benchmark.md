@@ -24,62 +24,6 @@ du noyau, une série de 8 mesures est effectué.
 Seul le meilleur résultat est retenu.
 
 
-### Programme Cat ###
-
-  Le programme *cat* multithread permet d'afficher le contenu d'un fichier
-en utilisant deux threads :
-  - un thread de lecture
-  - un thread d'affichage.
-
-
-#### Comparaison ####
-
-- Petit fichier
-
- * Version canal        : **real** 0.003s; **user** 0.000s; **sys** 0.000s;
- * Version tube         : **real** 0.003s; **user** 0.000s; **sys** 0.000s;
- * Version socket Unix  : **real** 0.005s; **user** 0.004s; **sys** 0.000s;
-
-
-- Gros fichier
-
- * Version canal        : **real** 18.104s; **user** 0.016s; **sys** 2.212s;
- * Version tube         : **real** 18.142s; **user** 0.009s; **sys** 1.980s;
- * Version socket Unix  : **real** 18.187s; **user** 0.008s; **sys** 2.020s;
-
-
-#### Moralité ####
-
-  Peu de différences quelque soit le fichier donné. Cette suite de tests n'importe
-rien de très pertinent.
-
-### Programme Copy ###
-
-  Le programme *copy* multithread copie un fichier vers un autre.
-Il utilise un thread de lecture du fichier source et un
-thread d'écriture du fichier destination.
-
-#### Comparaison ####
-
-- Petit fichier
-
- * Version canal        : **real** 0.003s; **user**	0.004s; **sys**	0.000s;
- * Version tube         : **real** 0.003s; **user** 0.004s; **sys** 0.000s;
- * Version socket Unix  : **real** 0.004s; **user** 0.000s; **sys** 0.000s;
-
-
- - Gros fichier
-
-  * Version canal        : **real** 0.063s; **user** 0.004s; **sys** 0.084s;
-  * Version tube         : **real** 0.057s; **user** 0.008s; **sys** 0.068s;
-  * Version socket Unix  : **real** 0.061s; **user** 0.004s; **sys** 0.072s;
-
-
-#### Moralité ####
-
-Même constat.
-
-
 ### Programme Forward ###
 
   Le programme *fwd* va permettre la communication entre
@@ -121,31 +65,31 @@ un tampon de taille équivalente à celui d'un tube (au moins 8192 d'après POSI
 
  - ***10 lecteurs / 10 écrivains***
 
- * Version canal        : **real** 0.237s; **user** 0.084s; **sys** 0.464s;
- * Version tube         : **real** 0.183s; **user** 0.000s; **sys** 0.444s;
+ * Version canal        : **real** 0.204s; **user** 0.048s; **sys** 0.376s;
+ * Version tube         : **real** 0.205s; **user** 0.000s; **sys** 0.528s;
  * Programme Go equiv.  : *TODO*
 
- - **100 lecteurs / 100 écrivains***
+ - ***100 lecteurs / 100 écrivains***
 
- * Version canal        : **real** 0.233s; **user** 0.450s; **sys** 0.428s;
- * Version tube         : **real** 1.185s; **user** 0.000s; **sys** 4.368s;
+ * Version canal        : **real** 0.303s; **user** 0.100s; **sys** 0.544s;
+ * Version tube         : **real** 1.205s; **user** 0.000s; **sys** 4.376s;
  * Programme Go equiv.  : *TODO*
 
  - ***1 000 lecteurs / 1 000 écrivains***
 
- * Version canal        : **real** 0.387s; **user** 0.132s; **sys** 0.728s;
- * Version tube         : **real** 42.039s; **user** 0.060s; **sys** 2:37.962s;
+ * Version canal        : **real** 0.420s; **user** 0.112s; **sys** 0.660s;
+ * Version tube         : **real** 42.843s; **user** 0.048s; **sys** 2:41.842s;
  * Programme Go equiv.  : *TODO*
 
  - ***5 000 lecteurs / 5 000 écrivains***
 
- * Version canal        : **real** 3.509s; **user** 0.736s; **sys** 4.396s;
- * Version tube         : **real** 4:32.062s; **user** 0.124s; **sys** 15:02.048s;
+ * Version canal        : **real** 5.505s; **user** 0.084s; **sys** 8.525s;
+ * Version tube         : **real** 4:32.062s; **user** 0.124s; **sys** 15:17.413s;
  * Programme Go equiv.  : *TODO*
 
  - ***10 000 lecteurs / 10 000 écrivains***
 
- * Version canal        : **real** 14.136s; **user** 3.140s; **sys** 37.222s;
+ * Version canal        : **real** 21.477s; **user** 0.204s; **sys** 48.899s;
  * Version tube         : **real** 10:8.340s; **user** 0.352s; **sys** 27:39.060s;
  * Programme Go equiv.  : *TODO*
 
@@ -159,42 +103,42 @@ en appel système que les version utilisant les tubes.
 
 |        | 1/1|  10/10| 100/100| 1000/1000|  5000/5000|  10000/10000|
 |--------|----|-------|--------|----------|-----------|-------------|
-|Facteur | x2 |  ~x1  |   x5   |   x108   |    x77    |     x43     |
+|Facteur | x2 |  ~x1  |   x3   |   x102   |    x49    |     x28     |
 
-*Facteur moyen* : ***~ 40***.
+*Facteur moyen* : ***~ 30***.
 
 **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
 
-|        | 1/1|  10/10| 100/100| 1000/1000|  5000/5000|  10000/10000|
-|--------|----|-------|--------|----------|-----------|-------------|
-|Facteur | x2 |  ~x1  |   x10  |   x354   |    x205   |     x44     |
+|        | 1/1|   10/10|  100/100| 1000/1000|  5000/5000|  10000/10000|
+|--------|----|--------|---------|----------|-----------|-------------|
+|Facteur | x2 |  x1.5  |    x8   |   x245   |    x108   |     x34     |
 
-*Facteur moyen* : ***~ 100***.
+*Facteur moyen* : ***~ 70***.
 
 
 ##### Plus d'écrivains que de lecteurs #####
 
  - 1 lecteur / 10 écrivains
 
- * Version canal        : **real** 0.143s; **user** 0.068s; **sys** 0.256s;
- * Version tube         : **real** 0.053s; **user** 0.008s; **sys** 0.140s;
+ * Version canal        : **real** 0.133s; **user** 0.020s; **sys** 0.224s;
+ * Version tube         : **real** 0.051s; **user** 0.004s; **sys** 0.148s;
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 100 écrivains
 
- * Version canal        : **real** 0.268s; **user** 0.068s; **sys** 0.480s;
- * Version tube         : **real** 0.124s; **user** 0.004s; **sys** 0.352s;
+ * Version canal        : **real** 0.254s; **user** 0.048s; **sys** 0.448s;
+ * Version tube         : **real** 0.116s; **user** 0.016s; **sys** 0.332s;
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 1 000 écrivains
 
- * Version canal        : **real** 0.293s; **user** 0.060s; **sys** 0.504s;
- * Version tube         : **real** 4.519s; **user** 0.012s; **sys** 17.581s;
+ * Version canal        : **real** 0.315s; **user** 0.136s; **sys** 0.460s;
+ * Version tube         : **real** 4.048s; **user** 0.008s; **sys** 15.553s;
  * Programme Go equiv.  : *TODO*
 
  - 1 lecteur / 10 000 écrivains
 
- * Version canal        : **real** 3.168s; **user** 0.184s; **sys** 4.128s;
+ * Version canal        : **real** 4.115s; **user** 0.10s; **sys** 4.735s;
  * Version tube         : **real** 3:46.253s; **user** 0.052s; **sys** 12:39.359s;
  * Programme Go equiv.  : *TODO*
 
@@ -202,11 +146,25 @@ en appel système que les version utilisant les tubes.
  efficaces que les canaux en dessous de 100 écrivains (x2).
  En revanche, lorsque le nombre d'écrivains devient plus important,
  les tubes deviennent inefficaces.
- Il s'est d'ailleurs avéré que vers ~250 écrivains,
- les performances de l'implémentation à base de tube était équivalentes à ce que
- faisait les canaux.
 
-##### Plus de lecteurs que d'écrivains #####
+
+ **Comparatif des différences de performances entre les canaux et les tubes (temps réel)** :
+
+ |        |     1/10|      1/100|    1/1000|      1/10000|
+ |--------|---------|-----------|----------|-------------|
+ |Facteur | ~x(1/3) |   x(1/2)  |   x12    |     x28     |
+
+ *Facteur moyen* : ***~ 10***.
+
+ **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
+
+ |        |      1/10|     1/100|     1/1000|     1/10000|
+ |--------|----------|----------|-----------|------------|
+ |Facteur |  ~x(1/3) |    ~x1   |    x34    |    x160    |
+
+*Facteur moyen* : ***~ 40-50***.
+
+##### Plus de lecteurs que d'écrivains (TODO ↓) #####
 
  - 10 lecteurs / 1 écrivain
 
@@ -254,37 +212,6 @@ l'on exécute les programmes dans un contexte multi-processus. De plus, il n'y a
 de comparaison avec les implémentations en Go.    
 Pour autant, les programmes multi-processu utilisant les canaux seront compilés
 avec l'option *-pthread*
-
-### Programme Cat - Comparaisons ###
-
-- Petit fichier
-
- * Version canal        : **real** 0.004s; **user** 0.000s; **sys** 0.004s;
- * Version tube         : **real** 0.003s; **user** 0.000s; **sys** 0.000s;
- * Version socket Unix  : **real** 0.003s; **user** 0.000s; **sys** 0.000s;
-
-
-- Gros fichier
-
- * Version canal        : **real** 18.058s; **user** 0.020s; **sys** 2.124s;
- * Version tube         : **real** 18.063s; **user** 0.012s; **sys** 1.668s;
- * Version socket Unix  : **real** 18.432s; **user** 0.012s; **sys** 1.860s;*TODO*
-
-
-### Programme Copy - Comparaisons ###
-
-- Petit fichier
-
- * Version canal        : **real** 0.002s; **user** 0.000s; **sys** 0.000s;
- * Version tube         : **real** 0.002s; **user** 0.000s; **sys** 0.000s;
- * Version socket Unix  : **real** 0.003s; **user** 0.000s; **sys** 0.000s;
-
-
-- Gros fichier
-
- * Version canal        : **real** 0.097s; **user** 0.032s; **sys** 0.068s;
- * Version tube         : **real** 0.089s; **user** 0.004s; **sys** 0.108s;
- * Version socket Unix  : **real** 0.109s; **user** 0.004s; **sys** 0.072s;
 
 
 ### Programme Forward - Comparaisons ###
@@ -386,7 +313,10 @@ avec l'option *-pthread*
 les éléments de comparaisons s'utilisent de manière asynchrone. Le seul élément
 de comparaison sur lequel le benchmark peut s'appuyer est la version Go de
 chaque programme. Il est important de noter que les options de compilation
-fourni lors de la création de l'exécutable Go peuventt influer sur les resultats.
+fourni lors de la création de l'exécutable Go peuvent influer sur les resultats.
+Un point intéressant serait de comparer les performance des canaux synchrones
+avec celles les canaux asynchrones, et ceux, aussi bien dans un contexte
+multi-thread que dans un contexte multi-processus.
 
 
 ### Programme Forward - Comparaisons ###
