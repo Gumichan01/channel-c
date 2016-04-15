@@ -9,9 +9,10 @@
 
 > - ***Communication par lots OK***
 
-> - - ***Canaux synchrones***
+> - ***Canaux synchrones***
 
 > - ***Canaux à copie unique (synchrones et asynchrones)***
+
 
 ## DOING ##
 
@@ -19,7 +20,6 @@
 
 > - Programme test performance (petites données avec/sans contention,
     grosses données) > faire programme exemple
-
 
 
 ## TODO ##
@@ -86,3 +86,5 @@ NB 4 : Le but de ce benchmark n'est pas seulement de savoir qui est plus rapide.
         programme.
 
 NB 5 : *strace* et *ltrace* sont nos amis (RTFM !).
+
+--
