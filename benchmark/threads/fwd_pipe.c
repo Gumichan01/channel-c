@@ -151,7 +151,7 @@ int main(int argc, char **argv)
   {
     pthread_join(thw[i],NULL);
   }
-  
+
   for(i = 0; i < nb_readers; i++)
   {
     pthread_join(thr[i],NULL);
@@ -159,8 +159,6 @@ int main(int argc, char **argv)
 
   pthread_join(th,NULL);
   close(fdreader[0]);
-  close(fdreader[1]);
-  close(fdwriter[0]);
   close(fdwriter[1]);
 
   printf("End of program\n");
