@@ -227,8 +227,7 @@ efficace qu'un programme équivalent basé sur les tubes.
 ### Conditions de test ###
 
   Les conditions de tests sont identiques. La seule différence vient du fait que
-l'on exécute les programmes dans un contexte multi-processus. De plus, il n'y a
-de comparaison avec les implémentations en Go.  
+l'on exécute les programmes dans un contexte multi-processus.  
 Pour autant, les programmes multi-processus utilisant les canaux seront compilés
 avec l'option *-pthread*
 
@@ -245,8 +244,8 @@ avec l'option *-pthread*
 
  - 10 lecteurs / 10 écrivains
 
- * Version canal        : **real** 0.225s; **user** 0.056s; **sys** 0.360s;
- * Version tube         : **real** 0.226s; **user** 0.004s; **sys** 0.484s;
+ * Version canal        : **real** 0.307s; **user** 0.056s; **sys** 0.624s;
+ * Version tube         : **real** 0.222s; **user** 0.004s; **sys** 0.548s;
 
 
  - 100 lecteurs / 100 écrivains
