@@ -26,7 +26,6 @@ typedef struct msg_t
 
 channel_t *chan_s = NULL;
 channel_t *chan_r = NULL;
-pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 int n = 0;
 
 void * receive(void * ptr)
@@ -71,7 +70,7 @@ void * sendm(void * ptr)
 
 void * forward(void * ptr)
 {
-    int err, s, no, i = 0;
+    int err, s, i = 0;
     msg_t tmp;
     msg_t vtmp[NB_MSG];
 
@@ -95,14 +94,11 @@ void * forward(void * ptr)
         {
             do{
                 s = channel_vsend(chan_r,vtmp,NB_MSG);
-                pthread_mutex_lock(&m);
-                no = errno;
-                pthread_mutex_unlock(&m);
 
                 if(s > -1)
                     n += s;
 
-            }while(n < MAX_FWD_MSG && (s != -1 || no == EWOULDBLOCK));
+            }while(s == 0);
 
             i = 0;
         }
