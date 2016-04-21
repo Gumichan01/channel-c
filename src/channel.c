@@ -188,7 +188,7 @@ void channel_cond_destroy(struct channel *chan)
 }
 
 
-// Allocation of the buffer in the asynchronous channels
+// Allocation of the buffer in asynchronous channels
 void ** allocate_array(int eltsize, int size, int flags)
 {
     int i, err;
@@ -558,13 +558,11 @@ int channel_recv(struct channel *channel, void *data)
 }
 
 
-// If the channel is not null but invalid, then the behaviour is unspecified
 /*
     Close the current channel
 
     If the channel is already closed. this function does nothing.
-    Otherwise, it closes it to prevent the writers threads/processes
-    from writing data.
+    Otherwise, it closes it to prevent the writers from writing data.
 
     Return value : 1 on success, 0 is the channel is empty, -1 on error,
                     and errno is set.
@@ -603,7 +601,7 @@ int channel_close(struct channel *channel)
 
 
 /* ********************
-    Synchronous chanel
+    Synchronous channel
    ******************** */
 
 /*
