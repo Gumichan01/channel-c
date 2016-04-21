@@ -121,7 +121,7 @@ int main(int argc, char **argv)
     srand(time(NULL));
     nb_writers = atoi(argv[1]);
     nb_readers = atoi(argv[2]);
-    chan_s = channel_create(sizeof(msg_t),NB_MSG,CHANNEL_PROCESS_SHARED|CHANNEL_PROCESS_BATCH);
+    chan_s = channel_create(sizeof(msg_t),NB_MSG,CHANNEL_PROCESS_SHARED);
     chan_r = channel_create(sizeof(msg_t),NB_MSG,CHANNEL_PROCESS_SHARED|CHANNEL_PROCESS_BATCH);
 
     if(chan_s == NULL)
