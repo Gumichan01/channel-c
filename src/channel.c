@@ -2,10 +2,15 @@
 
 #include "channel.h"
 
+// Standard C
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <errno.h>
+#include <time.h>
+
+// POSIX libraries
 #include <unistd.h>
 #include <sys/mman.h>
 #include <pthread.h>
@@ -37,6 +42,8 @@ struct channel
     pthread_cond_t rcond;
 };
 
+
+#define CHANNEL_SLEEP 10000
 
 #define CHAN_MAX_ERROR(a,b) \
     ((a > b) ? a : b )
@@ -846,16 +853,161 @@ int channel_vrecv(struct channel *channel, void *array, int size)
 }
 
 
+/* **********************
+    Non-blocking channel
+   ********************** */
+
+static long getCurrentTime()
+{
+    long ms;
+    time_t s;
+    struct timespec t;
+
+    clock_gettime(CLOCK_REALTIME, &t);
+
+    s  = t.tv_sec;
+    ms = round(t.tv_nsec / 1.0e6);
+
+    return s * 1000 + ms;
+}
+
+// Check if a channel is available according to an event given in argument
+static int channel_available(struct channel *chan, short ev)
+{
+    int err = 0;
+    int event = 0;
+
+    switch(ev)
+    {
+        case CHANNEL_EVENT_READ :
+        {
+            if(!channel_is_empty(chan))
+                event = 1;
+        }
+        break;
+
+        case CHANNEL_EVENT_WRITE :
+        {
+            if(!channel_is_full(chan))
+                event = 1;
+        }
+        break;
+
+        case CHANNEL_EVENT_NOEVT : break;
+
+        default :   errno = EINVAL; err = 1;
+                    break;
+    }
+
+    if(err)
+        return -1;
+
+    return event;
+}
+
+// Check an event and register it in the structure given in argument
+static int channel_event(struct channel_set *chset)
+{
+    int eventup = 0;
+
+    if(chset == NULL || chset->chan == NULL)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if((chset->events|CHANNEL_EVENT_READ) == CHANNEL_EVENT_READ)
+    {
+        eventup = channel_available(chset->chan,CHANNEL_EVENT_READ);
+
+        if(eventup)
+        {
+            chset->revents = CHANNEL_EVENT_READ;
+        }
+    }
+
+    if((chset->events|CHANNEL_EVENT_WRITE) == CHANNEL_EVENT_WRITE)
+    {
+        eventup = channel_available(chset->chan,CHANNEL_EVENT_WRITE);
+
+        if(eventup)
+        {
+            chset->revents = CHANNEL_EVENT_WRITE;
+        }
+    }
+
+    return eventup;
+}
+
+
+/*
+    Check events from each channel of the channel set given in argument
+
+    Return value : 1 if an event occurred, 0 if no event occurred, -1 on error
+                    and errno is set.
+*/
+int channel_select(struct channel_set *chsets, nchan_t nchannels, int timeout)
+{
+    nchan_t i;
+    int hasevent, stop;
+    long current;
+
+    if(chsets == NULL)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    stop = 0;
+    hasevent = 0;
+    current = getCurrentTime();
+
+    while(!stop)
+    {
+        for(i = 0; i < nchannels; i++)
+        {
+            hasevent = channel_event(&chsets[i]);
+        }
+
+        switch(hasevent)
+        {
+            case -1 : return 0;
+
+            case 0 :
+            {
+                if(timeout == CHANNEL_TIME_NOWAIT)
+                {
+                    // No event
+                    return 0;
+                }
+                else if(timeout > 0 && getCurrentTime() - current > timeout)
+                {
+                    // No event and timeout expired
+                    return 0;
+                }
+            }
+            usleep(CHANNEL_SLEEP);
+            break;
+
+            default: return 1;
+        }
+    }
+
+    // Unreachable
+    return hasevent;
+}
+
+
 // Uncomment it to test the implementation
 
 /*int main(void)
 {
     int err, q;
-    //int tab[] = {4,1,8};
-    int tab[3];
     int tab2[] = {2048,16,64,32};
     struct channel *chan = NULL;
-    chan = channel_create(sizeof(int),0,CHANNEL_PROCESS_BATCH);
+    channel_set set;
+
+    chan = channel_create(sizeof(int),5,CHANNEL_PROCESS_BATCH|CHANNEL_PROCESS_NONBLOCK);
 
     if(chan == NULL)
     {
@@ -865,21 +1017,21 @@ int channel_vrecv(struct channel *channel, void *array, int size)
 
     err = channel_vsend(chan,tab2,4);
 
-    err = channel_vsend(chan,tab,3);
+    set.chan = chan;
+    set.events = CHANNEL_EVENT_READ;
+    set.revents = CHANNEL_EVENT_NOEVT;
 
-    perror("vsend");
+    err = channel_select(&set,1,1000);
 
-    //channel_recv(chan,&q);
-    //
-    //channel_recv(chan,&q);
-    //
-    //channel_recv(chan,&q);
-    //
-
-    channel_vrecv(chan,tab,5);
-
-    for(q = 0; q < 3; q++)
-
+    if(err == 1 && set.revents == CHANNEL_EVENT_READ)
+    {
+        channel_recv(chan,&q);
+        printf("got : %d\n",q);
+    }
+    else if(err == 0)
+        printf("No event\n");
+    else
+        perror("channel_select");
 
     channel_close(chan);
     channel_destroy(chan);
