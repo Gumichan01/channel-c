@@ -58,38 +58,38 @@ un tampon de taille équivalente à celui d'un tube (au moins 8192 d'après POSI
 
  - ***1 lecteur / 1 écrivain***
 
- * Version canal        : **real** 0.010s; **user** 0.000s; **sys** 0.020s;
- * Version tube         : **real** 0.025s; **user** 0.004s; **sys** 0.048s;
+ * Version canal        : **real** 0.010s; **sys** 0.020s;
+ * Version tube         : **real** 0.025s; **sys** 0.048s;
 
 
  - ***10 lecteurs / 10 écrivains***
 
- * Version canal        : **real** 0.204s; **user** 0.048s; **sys** 0.376s;
- * Version tube         : **real** 0.205s; **user** 0.000s; **sys** 0.528s;
+ * Version canal        : **real** 0.204s; **sys** 0.376s;
+ * Version tube         : **real** 0.205s; **sys** 0.528s;
 
 
  - ***100 lecteurs / 100 écrivains***
 
- * Version canal        : **real** 0.303s; **user** 0.100s; **sys** 0.544s;
- * Version tube         : **real** 1.205s; **user** 0.000s; **sys** 4.376s;
+ * Version canal        : **real** 0.303s; **sys** 0.544s;
+ * Version tube         : **real** 1.205s; **sys** 4.376s;
 
 
  - ***1 000 lecteurs / 1 000 écrivains***
 
- * Version canal        : **real** 0.420s; **user** 0.112s; **sys** 0.660s;
- * Version tube         : **real** 42.843s; **user** 0.048s; **sys** 2:41.842s;
+ * Version canal        : **real** 0.420s; **sys** 0.660s;
+ * Version tube         : **real** 42.843s; **sys** 2:41.842s;
 
 
  - ***5 000 lecteurs / 5 000 écrivains***
 
- * Version canal        : **real** 5.505s; **user** 0.084s; **sys** 8.525s;
- * Version tube         : **real** 4:32.062s; **user** 0.124s; **sys** 15:17.413s;
+ * Version canal        : **real** 5.505s; **sys** 8.525s;
+ * Version tube         : **real** 4:32.062s; **sys** 15:17.413s;
 
 
  - ***10 000 lecteurs / 10 000 écrivains***
 
- * Version canal        : **real** 21.477s; **user** 0.204s; **sys** 48.899s;
- * Version tube         : **real** 10:8.340s; **user** 0.352s; **sys** 27:39.060s;
+ * Version canal        : **real** 21.477s; **sys** 48.899s;
+ * Version tube         : **real** 10:8.340s; **sys** 27:39.060s;
 
 
 *Moralité* : Avec peu de lecteurs/écrivains, la différence de performance est très minime
@@ -119,26 +119,26 @@ en appel système que les version utilisant les tubes.
 
  - 1 lecteur / 10 écrivains
 
- * Version canal        : **real** 0.133s; **user** 0.020s; **sys** 0.224s;
- * Version tube         : **real** 0.051s; **user** 0.004s; **sys** 0.148s;
+ * Version canal        : **real** 0.133s; **sys** 0.224s;
+ * Version tube         : **real** 0.051s; **sys** 0.148s;
 
 
  - 1 lecteur / 100 écrivains
 
- * Version canal        : **real** 0.254s; **user** 0.048s; **sys** 0.448s;
- * Version tube         : **real** 0.116s; **user** 0.016s; **sys** 0.332s;
+ * Version canal        : **real** 0.254s; **sys** 0.448s;
+ * Version tube         : **real** 0.116s; **sys** 0.332s;
 
 
  - 1 lecteur / 1 000 écrivains
 
- * Version canal        : **real** 0.315s; **user** 0.136s; **sys** 0.460s;
- * Version tube         : **real** 4.048s; **user** 0.008s; **sys** 15.553s;
+ * Version canal        : **real** 0.315s; **sys** 0.460s;
+ * Version tube         : **real** 4.048s; **sys** 15.553s;
 
 
  - 1 lecteur / 10 000 écrivains
 
- * Version canal        : **real** 4.115s; **user** 0.10s; **sys** 4.735s;
- * Version tube         : **real** 3:46.253s; **user** 0.052s; **sys** 12:39.359s;
+ * Version canal        : **real** 4.115s; **sys** 4.735s;
+ * Version tube         : **real** 3:46.253s; **sys** 12:39.359s;
 
 
  *Moralité* : Pour un petit nombre d'écrivains, les tubes sont légèrement plus
@@ -167,26 +167,26 @@ en appel système que les version utilisant les tubes.
 
  - 10 lecteurs / 1 écrivain
 
- * Version canal        : **real** 0.118s; **user** 0.040s; **sys** 0.220s;
- * Version tube         : **real** 0.182s; **user** 0.004s; **sys** 0.452s;
+ * Version canal        : **real** 0.118s; **sys** 0.220s;
+ * Version tube         : **real** 0.182s; **sys** 0.452s;
 
 
  - 100 lecteurs / 1 écrivain
 
- * Version canal        : **real** 0.218s; **user** 0.060s; **sys** 0.492s;
- * Version tube         : **real** 1.424s; **user** 0.012s; **sys** 4.168s;
+ * Version canal        : **real** 0.218s; **sys** 0.492s;
+ * Version tube         : **real** 1.424s; **sys** 4.168s;
 
 
  - 1 000 lecteurs / 1 écrivain
 
- * Version canal        : **real** 0.332s; **user** 0.096s; **sys** 0.544s;
- * Version tube         : **real** 31.015s; **user** 0.020s; **sys** 1:40.190s;
+ * Version canal        : **real** 0.332s; **sys** 0.544s;
+ * Version tube         : **real** 31.015s; **sys** 1:40.190s;
 
 
  - 10 000 lecteurs / 1 écrivain
 
- * Version canal        : **real** 2.257s; **user** 0.112s; **sys** 2.652s;
- * Version tube         : **real** 5:49.263s; **user** 0.148s; **sys** 19:03.803s;
+ * Version canal        : **real** 2.257s; **sys** 2.652s;
+ * Version tube         : **real** 5:49.263s; **sys** 19:03.803s;
 
 
 *Moralité* : Avec plus de lecteurs que d'écrivans, le programme utilisant
@@ -229,92 +229,128 @@ efficace qu'un programme équivalent basé sur les tubes.
   Les conditions de tests sont identiques. La seule différence vient du fait que
 l'on exécute les programmes dans un contexte multi-processus.  
 Pour autant, les programmes multi-processus utilisant les canaux seront compilés
-avec l'option *-pthread*
+avec l'option *-pthread*, du fait que les canauxc utilisent des fonctions relatives
+à ***pthread***.
 
 
 ### Programme Forward - Comparaisons ###
 
-##### Autant de lecteurs que d'écrivains (TODO ↓) #####
+##### Autant de lecteurs que d'écrivains #####
 
  - 1 lecteur / 1 écrivain
 
- * Version canal        : **real** 0.026s; **user** 0.008s; **sys** 0.036s;
- * Version tube         : **real** 0.022s; **user** 0.004s; **sys** 0.048s;
+ * Version canal        : **real** 0.026s; **sys** 0.036s;
+ * Version tube         : **real** 0.022s; **sys** 0.048s;
 
 
  - 10 lecteurs / 10 écrivains
 
- * Version canal        : **real** 0.307s; **user** 0.056s; **sys** 0.624s;
- * Version tube         : **real** 0.222s; **user** 0.004s; **sys** 0.548s;
+ * Version canal        : **real** 0.307s; **sys** 0.624s;
+ * Version tube         : **real** 0.222s; **sys** 0.548s;
 
 
  - 100 lecteurs / 100 écrivains
 
- * Version canal        : **real** 0.367s; **user** 0.040s; **sys** 0.152s;
- * Version tube         : **real** 1.413s; **user** 0.048s; **sys** 3.772s;
+ * Version canal        : **real** 0.478s; **sys** 0.652s;
+ * Version tube         : **real** 1.283s; **sys** 4.168s;
 
 
  - 1 000 lecteurs / 1 000 écrivains
 
- * Version canal        : **real** 0.958s; **user** 0.004s; **sys** 0.648s;
- * Version tube         : **real** 44.224s; **user** 0.064s; **sys** 2:23.929s;
+ * Version canal        : **real** 0.958s; **sys** 0.648s;
+ * Version tube         : **real** 44.224s; **sys** 2:23.929s;
 
 
  - 10 000 lecteurs / 10 000 écrivains
  (Pas de test -> la version canal fait planter la machine)
 
 
+ **Comparatif des différences de performances entre les canaux et les tubes (temps réel)** :
+
+ |        | 1/1| 10/10| 100/100|  1000/1000|
+ |--------|----|------|--------|-----------|
+ |Facteur | <1 |  <1  |   x3   |    x46    |
+
+
+ **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
+
+ |        | 1/1| 10/10|  100/100| 1000/1000|
+ |--------|----|------|---------|----------|
+ |Facteur | <1 |  <1  |    x6   |   x222   |
+
+
+*Moralité* : Sur un petit nombre d'écrivains/lecteurs, le programme utilisant
+les tubes est légèrement plus efficace que son équivalent avec les canaux.
+En revanche, la version tube devient beaucoup moins efficace que la version canal
+autour de 1000 écrivains.
+
 ##### Plus d'écrivains que de lecteurs #####
 
  - 1 lecteur / 10 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.234s; **sys** 0.460s;
+ * Version tube         : **real** 0.039s; **sys** 0.088s;
 
 
  - 1 lecteur / 100 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.411s; **sys** 0.452s;
+ * Version tube         : **real** 0.114s; **sys** 0.032s;
 
 
  - 1 lecteur / 1 000 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.710s; **sys** 0.392s;
+ * Version tube         : **real** 4.002s; **sys** 12.977s;
 
 
  - 1 lecteur / 10 000 écrivains
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 4.177s; **sys** 3.368s;
+ * Version tube         : **real** 3:34.840s; **sys** 12:1.953s;
 
+
+ **Comparatif des différences de performances entre les canaux et les tubes (temps réel)** :
+
+ |        |    1/10|   1/100| 1/1000|    1/10000|
+ |--------|--------|--------|-------|-----------|
+ |Facteur | x(1/6) | x(1/3) |   x6  |    x51    |
+
+ *Facteur moyen* : ***~ 15***.
+
+ **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
+
+ |        |     1/10|    1/100|   1/1000|   1/10000|
+ |--------|---------|---------|---------|----------|
+ |Facteur |  x(1/5) | x(1/14) |   x33   |   x214   |
+
+*Facteur moyen* : ***~ 60***.
 
 
 ##### Plus de lecteurs que d'écrivains #####
 
  - 10 lecteurs / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.206s; **sys** 0.376s;
+ * Version tube         : **real** 0.183s; **sys** 0.432s;
 
 
  - 100 lecteurs / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.396s; **sys** 0.424s;
+ * Version tube         : **real** 1.438s; **sys** 4.908s;
 
 
  - 1 000 lecteurs / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 0.735s; **sys** 0.428s;
+ * Version tube         : **real** 31.991s; **sys** 1:59.679s;
 
 
  - 10 000 lecteurs / 1 écrivain
 
- * Version canal        : *TODO*
- * Version tube         : *TODO*
+ * Version canal        : **real** 4.107s; **sys** 3.248s;
+ * Version tube         : **real** 6:0.354s; **sys** 20:12.560s;
 
 
 
@@ -327,50 +363,114 @@ avec l'option *-pthread*
 
 ### Conditions de test ###
 
-  Il est difficile de faire un benchmark sur ce type de canal dans la mesure où
-les éléments de comparaisons s'utilisent de manière asynchrone. Le seul élément
-de comparaison sur lequel le benchmark peut s'appuyer est la version Go de
-chaque programme. Il est important de noter que les options de compilation
-fourni lors de la création de l'exécutable Go peuvent influer sur les resultats.
-Un point intéressant serait de comparer les performance des canaux synchrones
-avec celles les canaux asynchrones, et ceux, aussi bien dans un contexte
-multi-thread que dans un contexte multi-processus.
+  Içi seront testées les performances des canaux synchrones
+avec celles les canaux asynchrones, et ceux, dans un contexte
+multi-thread. Pour la version synchrone, seule la communication entre un écrivain
+et le transmetteur est synchrone. La communication via le canal des lecteurs reste
+quant à lui asynchrone.
 
 
 ### Programme Forward - Comparaisons ###
 
-*TODO*
+
+|Ecrivains/Lecteurs|Asynchrone (temps réel)|Asynchrone (temps système)|Synchrone (temps réel)| Synchrone (temps système) |
+|------------------|-----------------------|--------------------------|-----------------------|--------------------------|
+|1/1               |         0.015s        |        **0.012s**        |         1.100s        |         **0.940s**       |
+|10/10             |         0.271s        |        **0.556s**        |         1.332s        |         **1.624s**       |
+|100/100           |         0.304s        |        **0.568s**        |         1.351s        |         **1.720s**       |
+|1000/1000         |         0.442s        |        **0.660s**        |         1.500s        |         **1.808s**       |
+|10000/10000       |        22.172s        |       **51.895s**        |        25.311s        |        **59.940s**       |
+|10/1              |         0.117s        |        **0.208s**        |         1.228s        |         **1.308s**       |
+|100/1             |         0.310s        |        **0.544s**        |         1.250s        |         **1.332s**       |
+|1000/1            |         0.327s        |        **0.552s**        |         1.303s        |         **1.456s**       |
+|10000/1           |         3.399s        |        **4.192s**        |         7.164s        |        **11.940s**       |
+|1/10              |         0.113s        |        **0.232s**        |         1.232s        |         **1.184s**       |
+|1/100             |         0.259s        |        **0.440s**        |         1.257s        |         **1.344s**       |
+|1/1000            |         0.329s        |        **0.544s**        |         1.290s        |         **1.480s**       |
+|1/10000           |         4.437s        |        **6.396s**        |         6.043s        |         **8.905s**       |
+
+
+**Comparatif des différences de performances entre les canaux et les tubes (temps réel)** :
+
+| Ecrivain ø Lecteurs |   ==  | > |  <  |
+|---------------------|-------|---|-----|
+|       Facteur       |  x17  | x5|  x8 |
+
+*Facteur moyen* : ***~ 10***.
+
+**Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
+
+| Ecrivain ø Lecteurs |   ==  | > |  <  |
+|---------------------|-------|---|-----|
+|       Facteur       |  x17  | x4|  x3 |
+
+*Facteur moyen* : ***~ 8***.
+
 
 ### Moralité ###
 
-*TODO*
+  Les canaux synchrones ne sont pas plus efficaces que les canaux asynchrones
+vis-à-vis du programme test.
 
 
 ## Communication par lots ##
 
 ### Conditions de test ###
 
-  Içi, on peut aisément effectuer des comparaisons avec les versions utilisant
-les tubes dans la mesure où le système fourni des fonctions pour l'envoi de
-données par lots (*readv()* et *writev()*). La vérification d'une version Go
-pour cela n'a pas encore été faite.  
-Pour autant il est intéressant de comparer les performances de cette
-implémentation avec les versions *"classiques"* des canaux dans différents
-contextes d'exécution.
+Içi, seront comparées les performances des canaux avec l'interface de
+communication par lots avec les canaux *"classiques"* dans différents
+contextes d'exécution. Il est imortant de noter que dans la communication
+par lots, l'envoi de données par le transmeteur au lecteur se fait par lots,
+tandis que le lecture se fait normalement.
+La communication ecrivain/transmetteur reste asynchrone.
 
 ### Programme Forward - Comparaisons ###
 
-> *TODO*
+#### Multi-thread ####
 
-> - Canaux normaux multi-thread
+|Ecrivains/Lecteurs|Normaux (temps réel)|Normaux (temps système)|Par lots (temps réel)|Par lots (temps système)|
+|------------------|--------------------|-----------------------|---------------------|------------------------|
+|***1/1***         |         0.015s     |        **0.012s**     |        0.013s       |        **0.004s**      |
+|10/10             |         0.271s     |        **0.556s**     |        0.076s       |        **0.104s**      |
+|100/100           |         0.304s     |        **0.568s**     |        0.315s       |        **0.480s**      |
+|1000/1000         |         0.442s     |        **0.660s**     |        0.458s       |        **0.608s**      |
+|10000/10000       |        22.172s     |       **51.895s**     |       22.535s       |       **54.891s**      |
+|10/1              |         0.117s     |        **0.208s**     |        0.069s       |        **0.120s**      |
+|100/1             |         0.310s     |        **0.544s**     |        0.313s       |        **0.476s**      |
+|1000/1            |         0.327s     |        **0.552s**     |        0.308s       |        **0.468s**      |
+|10000/1           |         3.399s     |        **4.192s**     |        4.207s       |        **5.664s**      |
+|***1/10***        |         0.113s     |        **0.232s**     |        0.012s       |        **0.016s**      |
+|***1/100***       |         0.259s     |        **0.440s**     |        0.018s       |        **0.028s**      |
+|***1/1000***      |         0.329s     |        **0.544s**     |        0.047s       |        **0.044s**      |
+|***1/10000***     |         4.437s     |        **6.396s**     |        3.310s       |        **4.340s**      |
 
-> - Canaux normaux multi-processus
+  Dans l'ensemble, la communication par lots ne semble pas apporter un gain
+important en terme de performance.
+Pour autant, en observant les cas où l'on a un seul thread écrivain,
+on constate un gain de performace non négligeable des canaux avec communication
+par lots par rapports au canaux normaux. Ce gain est en grande partie dû au fait
+que le transmetteur renvoie les messages aux lecteurs si, et seulement si son
+tableau de messages à envoyer est plein.
+De plus, le fait qu'il y ait un seul thread écrivain limite grandement
+les situations de concurrence à l'envoi des données au transmetteur.
 
-> - Par lot multi-thread
 
-> - Par lot multi-processus
+#### Multi-process (TODO ↓) ####
 
-> - Tube
+|Ecrivains/Lecteurs|Normaux (temps réel)|Normaux (temps système)|Par lots (temps réel)|Par lots (temps système)|
+|------------------|--------------------|-----------------------|---------------------|------------------------|
+|1/1               |         0.015s     |        **0.012s**     |        1.100s       |        **0.940s**      |
+|10/10             |         0.271s     |        **0.556s**     |        1.332s       |        **1.624s**      |
+|100/100           |         0.304s     |        **0.568s**     |        1.351s       |        **1.720s**      |
+|1000/1000         |         0.442s     |        **0.660s**     |        1.500s       |        **1.808s**      |
+|10/1              |         0.117s     |        **0.208s**     |        1.228s       |        **1.308s**      |
+|100/1             |         0.310s     |        **0.544s**     |        1.250s       |        **1.332s**      |
+|1000/1            |         0.327s     |        **0.552s**     |        1.303s       |        **1.456s**      |
+|10000/1           |         3.399s     |        **4.192s**     |        7.164s       |       **11.940s**      |
+|1/10              |         0.113s     |        **0.232s**     |        1.232s       |        **1.184s**      |
+|1/100             |         0.259s     |        **0.440s**     |        1.257s       |        **1.344s**      |
+|1/1000            |         0.329s     |        **0.544s**     |        1.290s       |        **1.480s**      |
+|1/10000           |         4.437s     |        **6.396s**     |        6.043s       |        **8.905s**      |
 
 
 ### Moralité ###
