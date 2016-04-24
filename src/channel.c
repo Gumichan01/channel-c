@@ -57,13 +57,20 @@ struct channel
     (((flags) & CHANNEL_PROCESS_BATCH) == CHANNEL_PROCESS_BATCH)
 
 
+// Check if the channel is configured for single copy
 #define CHAN_ISSINGLE(flags) \
     (((flags) & CHANNEL_PROCESS_SINGLE_COPY) == CHANNEL_PROCESS_SINGLE_COPY)
 
+#define CHAN_ISNONBLOCKING(flags) \
+    (((flags) & CHANNEL_PROCESS_NONBLOCK) == CHANNEL_PROCESS_NONBLOCK)
 
 // Synchronous communication
 int channel_sync_send(struct channel *channel, const void *data);
 int channel_sync_recv(struct channel *channel, void *data);
+
+// Non-blocking channel
+static int channel_noblock_send(struct channel *channel, const void *data);
+static int channel_noblock_recv(struct channel *channel, void *data);
 
 
 // Internal functions
@@ -357,8 +364,17 @@ void channel_free(struct channel *chan, int shared)
 
 /*
     Create a channel with a size of an element and a capacity specified by size.
+
     Return value :
         An allocated channel on success. NULL on failure, and errno is set.
+
+    Notes :
+        A synchronous channel cannot be used as a single-copy channel or
+        for batch communication.
+        A single-copy channel cannot be used for batched communication
+        and vice versa.
+        A non-blocking channel cannot be used as a single-copy channel
+        and vice versa.
 
 */
 struct channel *channel_create(int eltsize, int size, int flags)
@@ -369,6 +385,15 @@ struct channel *channel_create(int eltsize, int size, int flags)
     if(eltsize <= 0 || size < 0)
     {
         errno = EINVAL;
+        return NULL;
+    }
+
+    if(( size == 0 && (CHAN_ISBATCHED(flags) || CHAN_ISSINGLE(flags)
+                        || CHAN_ISNONBLOCKING(flags)) )
+        || (CHAN_ISBATCHED(flags) && CHAN_ISSINGLE(flags))
+        || (CHAN_ISNONBLOCKING(flags) && CHAN_ISSINGLE(flags)))
+    {
+        errno = ENOSYS;
         return NULL;
     }
 
@@ -457,6 +482,9 @@ int channel_send(struct channel *channel, const void *data)
     if(channel->size == 0)
         return channel_sync_send(channel,data);
 
+    if(CHAN_ISNONBLOCKING(channel->flags))
+        return channel_noblock_send(channel,data);
+
     pthread_mutex_lock(&channel->lock);
     if(channel->closed == 1)
     {
@@ -525,6 +553,9 @@ int channel_recv(struct channel *channel, void *data)
 
     if(channel->size == 0)
         return channel_sync_recv(channel,data);
+
+    if(CHAN_ISNONBLOCKING(channel->flags))
+        return channel_noblock_recv(channel,data);
 
     pthread_mutex_lock(&channel->lock);
 
@@ -776,7 +807,7 @@ int channel_vsend(struct channel *channel, const void *array, int size)
     if(!CHAN_ISBATCHED(channel->flags) || channel->size == 0)
     {
         pthread_mutex_unlock(&channel->lock);
-        errno = EBADE;
+        errno = EOPNOTSUPP;
         return -1;
     }
 
@@ -830,7 +861,7 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     if(!CHAN_ISBATCHED(channel->flags) || channel->size == 0)
     {
         pthread_mutex_unlock(&channel->lock);
-        errno = EBADE;
+        errno = EOPNOTSUPP;
         return -1;
     }
 
@@ -856,6 +887,66 @@ int channel_vrecv(struct channel *channel, void *array, int size)
 /* **********************
     Non-blocking channel
    ********************** */
+
+static int channel_noblock_send(struct channel *channel, const void *data)
+{
+    pthread_mutex_lock(&channel->lock);
+    if(channel->closed == 1)
+    {
+        pthread_mutex_unlock(&channel->lock);
+        errno = EPIPE;
+        return -1;
+    }
+
+    if(channel_is_full(channel))
+    {
+        pthread_mutex_unlock(&channel->lock);
+        errno = EWOULDBLOCK;
+        return -1;
+    }
+
+    memcpy(channel->data[channel->wr], data, channel->eltsize);
+
+    if(channel->wr == channel->size-1)
+        channel->wr = 0;
+    else
+        channel->wr += 1;
+
+    channel->nbdata += 1;
+    pthread_mutex_unlock(&channel->lock);
+
+    return 1;
+}
+
+static int channel_noblock_recv(struct channel *channel, void *data)
+{
+    pthread_mutex_lock(&channel->lock);
+
+    if(channel_closed_empty(channel))
+    {
+        pthread_mutex_unlock(&channel->lock);
+        return 0;
+    }
+
+    if(channel_is_empty(channel))
+    {
+        pthread_mutex_unlock(&channel->lock);
+        errno = EWOULDBLOCK;
+        return -1;
+    }
+
+    memcpy(data, channel->data[channel->rd], channel->eltsize);
+
+    if(channel->rd == channel->size-1)
+        channel->rd = 0;
+    else
+        channel->rd += 1;
+
+    channel->nbdata -= 1;
+    pthread_mutex_unlock(&channel->lock);
+    return 1;
+}
+
 
 static long getCurrentTime()
 {
@@ -1002,12 +1093,12 @@ int channel_select(struct channel_set *chsets, nchan_t nchannels, int timeout)
 
 /*int main(void)
 {
-    int err, q;
+    int err, q = 16;
     int tab2[] = {2048,16,64,32};
     struct channel *chan = NULL;
     channel_set set;
 
-    chan = channel_create(sizeof(int),5,CHANNEL_PROCESS_BATCH|CHANNEL_PROCESS_NONBLOCK);
+    chan = channel_create(sizeof(int),1,CHANNEL_PROCESS_BATCH|CHANNEL_PROCESS_NONBLOCK);
 
     if(chan == NULL)
     {
@@ -1015,7 +1106,8 @@ int channel_select(struct channel_set *chsets, nchan_t nchannels, int timeout)
         return -1;
     }
 
-    err = channel_vsend(chan,tab2,4);
+    //err = channel_vsend(chan,tab2,4);
+    channel_send(chan,&q);
 
     set.chan = chan;
     set.events = CHANNEL_EVENT_READ;
