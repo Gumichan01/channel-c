@@ -2,9 +2,9 @@
 
 CC=gcc
 MANDEL_CFLAGS=-g -O3 -std=gnu99 -ffast-math -Wall -pthread `pkg-config --cflags gtk+-3.0`
-MANDEL_LFLAGS=`pkg-config --libs gtk+-3.0` -lm
+MANDEL_LFLAGS=`pkg-config --libs gtk+-3.0` -lm -lrt
 CFLAGS=-Wall -g -pthread
-LFLAGS=
+LFLAGS=-lm -lrt
 
 
 # Directories
@@ -37,4 +37,5 @@ clean :
 	rm -rf *.o
 
 clear : clean
+	rm -rf $(CHANNEL_LIB)
 	rm -rf mandelbrot

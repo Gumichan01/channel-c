@@ -1,7 +1,7 @@
 
 CC=gcc
 CFLAGS=-g -Wall -O3
-LFLAGS=
+LFLAGS=-lm -lrt
 
 
 EXE=cat_chan cp_chan fwd_chan cat_pipe cp_pipe fwd_pipe cat_sock cp_sock \
