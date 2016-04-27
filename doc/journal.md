@@ -28,15 +28,11 @@
 
 **Luxon**
 
-> Benchmark
-
-> - Programmer le *forward* en Go (synchrone et asynchrone)
-
-> - Faire le bfwd_chan en multi-processus
+> Benchmark (finir canaux à une sseule copie + canaux non-bloquants)
 
 > Faire le rapport
 
-**Luxon**, **Somaya**, **Kenny**
+**Somaya**, **Kenny**
 
 > Benchmark
 
@@ -58,7 +54,7 @@
   Comparaison avec les canaux bloquants classiques en multi-thread.
 
 
-NB 1 : canal classique : canal minimal ou global.
+NB 1 : canal classique/normal : canal minimal ou global.
 
 NB 2 : Protocol à suivre pour le benchmark :
         - Utiliser la commande ***time*** ou ***/bin/time***
