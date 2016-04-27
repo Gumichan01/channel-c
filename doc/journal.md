@@ -78,9 +78,6 @@ NB 4 : Le but de ce benchmark n'est pas seulement de savoir qui est plus rapide.
         - En quoi tel type de canal fait mieux/moins bien que les tubes dans tel
         contexte d'exécution ?
 
-        N'héitez pas à faire une analyse approfondie de la trace d'exécution du
-        programme.
-
 NB 5 : *strace* et *ltrace* sont nos amis (RTFM !).
 
 --
