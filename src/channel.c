@@ -65,8 +65,8 @@ struct channel
     (((flags) & CHANNEL_PROCESS_NONBLOCK) == CHANNEL_PROCESS_NONBLOCK)
 
 // Synchronous communication
-int channel_sync_send(struct channel *channel, const void *data);
-int channel_sync_recv(struct channel *channel, void *data);
+static int channel_sync_send(struct channel *channel, const void *data);
+static int channel_sync_recv(struct channel *channel, void *data);
 
 // Non-blocking channel
 static int channel_noblock_send(struct channel *channel, const void *data);
@@ -75,30 +75,30 @@ static int channel_noblock_recv(struct channel *channel, void *data);
 
 // Internal functions
 
-int channel_is_closed(struct channel *chan)
+static int channel_is_closed(struct channel *chan)
 {
     return chan->closed == 1;
 }
 
-int channel_closed_empty(struct channel *chan)
+static int channel_closed_empty(struct channel *chan)
 {
     return (chan->closed == 1 && chan->nbdata == 0);
 }
 
 
-int channel_is_full(struct channel *chan)
+static int channel_is_full(struct channel *chan)
 {
     return (chan->rd == chan->wr) && (chan->nbdata == chan->size);
 }
 
-int channel_is_empty(struct channel *chan)
+static int channel_is_empty(struct channel *chan)
 {
     return (chan->rd == chan->wr) && (chan->nbdata == 0);
 }
 
 
 // Create the mutex
-int channel_mutex_init(struct channel *chan, int flags)
+static int channel_mutex_init(struct channel *chan, int flags)
 {
     int err;
     pthread_mutexattr_t attrlock;
@@ -121,7 +121,7 @@ int channel_mutex_init(struct channel *chan, int flags)
 
 
 // Create the condition variable for synchronous channels
-int channel_sync_cond_init(struct channel *chan,int flags)
+static int channel_sync_cond_init(struct channel *chan,int flags)
 {
     int werr = 0, rerr = 0, serr, err = 0;
     pthread_condattr_t attrcond;
@@ -155,7 +155,7 @@ int channel_sync_cond_init(struct channel *chan,int flags)
 }
 
 // Create the condition variable for asynchronous channels
-int channel_async_cond_init(struct channel *chan,int flags)
+static int channel_async_cond_init(struct channel *chan,int flags)
 {
     int err;
     pthread_condattr_t attrcond;
@@ -181,7 +181,7 @@ int channel_async_cond_init(struct channel *chan,int flags)
     }
 }
 
-int channel_cond_init(struct channel *chan, int flags)
+static int channel_cond_init(struct channel *chan, int flags)
 {
     if(chan->size == 0)
         return channel_sync_cond_init(chan,flags);
@@ -190,12 +190,12 @@ int channel_cond_init(struct channel *chan, int flags)
 }
 
 
-void channel_mutex_destroy(struct channel *chan)
+static void channel_mutex_destroy(struct channel *chan)
 {
     pthread_mutex_destroy(&chan->lock);
 }
 
-void channel_cond_destroy(struct channel *chan)
+static void channel_cond_destroy(struct channel *chan)
 {
     pthread_cond_destroy(&chan->cond);
 
@@ -209,7 +209,7 @@ void channel_cond_destroy(struct channel *chan)
 
 
 // Allocation of the buffer in asynchronous channels
-void ** allocate_array(int eltsize, int size, int flags)
+static void ** allocate_array(int eltsize, int size, int flags)
 {
     int i, err;
     void ** array = NULL;
@@ -279,7 +279,7 @@ void ** allocate_array(int eltsize, int size, int flags)
 }
 
 
-void free_array(void **array, int eltsize, int size, int flags)
+static void free_array(void **array, int eltsize, int size, int flags)
 {
     int i;
 
@@ -309,7 +309,7 @@ void free_array(void **array, int eltsize, int size, int flags)
 
 
 // Allocation of the channel
-struct channel * channel_allocate(int eltsize, int size, int flags)
+static struct channel * channel_allocate(int eltsize, int size, int flags)
 {
     int err;
     struct channel *chan = NULL;
@@ -354,7 +354,7 @@ struct channel * channel_allocate(int eltsize, int size, int flags)
 }
 
 
-void channel_free(struct channel *chan, int shared)
+static void channel_free(struct channel *chan, int shared)
 {
     if(shared == 1)
     {
@@ -658,7 +658,7 @@ int channel_close(struct channel *channel)
 
     Note : Actually, the function send -1 if the channel is empty
 */
-int channel_sync_send(struct channel *channel, const void *data)
+static int channel_sync_send(struct channel *channel, const void *data)
 {
     pthread_mutex_lock(&channel->lock);
 
@@ -711,7 +711,7 @@ int channel_sync_send(struct channel *channel, const void *data)
     Return value : 1 on success, 0 if the channel is closed.
 
 */
-int channel_sync_recv(struct channel *channel, void *data)
+static int channel_sync_recv(struct channel *channel, void *data)
 {
     pthread_mutex_lock(&channel->lock);
 
@@ -751,7 +751,7 @@ int channel_sync_recv(struct channel *channel, void *data)
    ********************* */
 
 // Atomic operations called by channel_vsend()
-int channel_bsend(struct channel *channel, const void *data)
+static int channel_bsend(struct channel *channel, const void *data)
 {
     memcpy(channel->data[channel->wr], data, channel->eltsize);
 
@@ -766,7 +766,7 @@ int channel_bsend(struct channel *channel, const void *data)
 }
 
 // Atomic operations called by channel_vrecv()
-int channel_brecv(struct channel *channel, void *data)
+static int channel_brecv(struct channel *channel, void *data)
 {
     memcpy(data, channel->data[channel->rd], channel->eltsize);
 
