@@ -894,16 +894,6 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     Non-blocking channel
    ********************** */
 
-#define CHAN_CLOSE_EVT(ev) \
-    (((ev) & CHANNEL_EVENT_CLOSE) == CHANNEL_EVENT_CLOSE)
-
-#define CHAN_WRITE_EVT(ev) \
-    (((ev) & CHANNEL_EVENT_WRITE) == CHANNEL_EVENT_WRITE)
-
-#define CHAN_READ_EVT(ev) \
-    (((ev) & CHANNEL_EVENT_READ) == CHANNEL_EVENT_READ)
-
-
 static int channel_noblock_send(struct channel *channel, const void *data)
 {
     pthread_mutex_lock(&channel->lock);
@@ -1067,7 +1057,7 @@ static int channel_poll_event(struct channel_set *chset)
 int channel_select(struct channel_set *chsets, nchan_t nchannels, int timeout)
 {
     nchan_t i;
-    int hasevent, stop;
+    int hasevent, ev;
     long current;
 
     if(chsets == NULL)
@@ -1076,43 +1066,39 @@ int channel_select(struct channel_set *chsets, nchan_t nchannels, int timeout)
         return -1;
     }
 
-    stop = 0;
+    ev = 0;
     hasevent = 0;
     current = getCurrentTime();
 
-    while(!stop)
+    while(1)
     {
         for(i = 0; i < nchannels; i++)
         {
-            hasevent = channel_poll_event(&chsets[i]);
+            if((ev = channel_poll_event(&chsets[i])) == -1)
+            {
+                return -1;
+            }
+            else if(ev == 1)
+                hasevent = ev;
         }
 
-        switch(hasevent)
+        if(!hasevent)
         {
-            case -1 : return -1;
-
-            case 0 :
+            if(timeout == CHANNEL_TIME_NOWAIT)
             {
-                if(timeout == CHANNEL_TIME_NOWAIT)
-                {
-                    // No event
-                    return 0;
-                }
-                else if(timeout > 0 && getCurrentTime() - current > timeout)
-                {
-                    // No event and timeout expired
-                    return 0;
-                }
+                // No event
+                return 0;
+            }
+            else if(timeout > 0 && getCurrentTime() - current > timeout)
+            {
+                // No event and timeout expired
+                return 0;
             }
             usleep(CHANNEL_SLEEP);
-            break;
-
-            default: return 1;
         }
+        else
+            return hasevent;    // 1
     }
-
-    // Unreachable
-    return hasevent;
 }
 
 

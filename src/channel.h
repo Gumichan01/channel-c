@@ -23,6 +23,16 @@ typedef unsigned long nchan_t;
 #define CHANNEL_TIME_NOWAIT  0
 
 
+#define CHAN_CLOSE_EVT(ev) \
+    (((ev) & CHANNEL_EVENT_CLOSE) == CHANNEL_EVENT_CLOSE)
+
+#define CHAN_WRITE_EVT(ev) \
+    (((ev) & CHANNEL_EVENT_WRITE) == CHANNEL_EVENT_WRITE)
+
+#define CHAN_READ_EVT(ev) \
+    (((ev) & CHANNEL_EVENT_READ) == CHANNEL_EVENT_READ)
+
+
 struct channel *channel_create(int eltsize, int size, int flags);
 void channel_destroy(struct channel *channel);
 int channel_send(struct channel *channel, const void *data);
