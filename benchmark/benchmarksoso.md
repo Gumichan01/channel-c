@@ -49,7 +49,6 @@ On effectuera 5 mesures différentes et seule la meilleure sera retenue.
  * Version tube         : **real** 6:28.249s; **sys** 14:21.866s;
 
 
-
 ##### Plus d'écrivains que de lecteurs #####
 
  - 1 lecteur / 10 écrivains
@@ -101,5 +100,87 @@ On effectuera 5 mesures différentes et seule la meilleure sera retenue.
  * Version tube         : **real** 4:56.827s; **sys** 8:54.541s;
 
 
-
+## Canaux globaux ##
  
+### Programme forward les process ###
+
+##### Autant de lecteurs que d'écrivains #####
+
+ - 1 lecteur / 1 écrivain
+
+ * Version canal        : **real** 0.040s; **sys** 0.048s;
+ * Version tube         : **real** 0.023s; **sys** 0.048s;
+
+
+ - 10 lecteurs / 10 écrivains
+
+ * Version canal        : **real** 0.117s; **sys** 0.212s;
+ * Version tube         : **real** 0.229s; **sys** 0.720s;
+
+
+ - 100 lecteurs / 100 écrivains
+
+ * Version canal        : **real** 0.218s; **sys** 0.148s;
+ * Version tube         : **real** 1.708s; **sys** 5.988s;
+
+
+ - 1 000 lecteurs / 1 000 écrivains
+
+ * Version canal        : **real** 0.650s; **sys** 0.428s;
+ * Version tube         : **real** 35.082s; **sys** 1:59.967s;
+
+
+ - 10 000 lecteurs / 10 000 écrivains
+ (Pas de test -> la version canal fait planter la machine)
+
+
+##### Plus d'écrivains que de lecteurs #####
+
+ - 1 lecteur / 10 écrivains
+
+ * Version canal        : **real** 0.136s; **sys** 0.196s;
+ * Version tube         : **real** 0.037s; **sys** 0.056s;
+
+
+ - 1 lecteur / 100 écrivains
+
+ * Version canal        : **real** 0.186s; **sys** 0.144s;
+ * Version tube         : **real** 0.429s; **sys** 1.172s;
+
+
+ - 1 lecteur / 1 000 écrivains
+
+ * Version canal        : **real** 0.444s; **sys** 0.308s;
+ * Version tube         : **real** 1.906s; **sys** 2.980s;
+
+
+ - 1 lecteur / 10 000 écrivains
+
+ * Version canal        : **real** 3.379s; **sys** 2.816s;
+ * Version tube         : **real** 2:20.636s; **sys** 4:35.281s;
+
+##### Plus de lecteurs que d'écrivains #####
+
+ - 10 lecteurs / 1 écrivain
+
+ * Version canal        : **real** 0.132s; **sys** 0.252s;
+ * Version tube         : **real** 0.188s; **sys** 0.480s;
+
+
+ - 100 lecteurs / 1 écrivain
+
+ * Version canal        : **real** 0.190s; **sys** 0.164s;
+ * Version tube         : **real** 1.745s; **sys** 4.740s;
+
+
+ - 1 000 lecteurs / 1 écrivain
+
+ * Version canal        : **real** 0.459s; **sys** 0.292s;
+ * Version tube         : **real** 27.670s; **sys** 1:19.589s;
+
+
+ - 10 000 lecteurs / 1 écrivain
+
+ * Version canal        : **real** 3.471s; **sys** 2.576s;
+ * Version tube         : **real** 5:12.422s; **sys** 9:42.376s;
+
