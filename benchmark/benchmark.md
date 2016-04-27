@@ -36,7 +36,7 @@ thread "transmetteur". Concrétement, tous les écrivains écriront un message
 au thread transmetteur. Ce thread, qui aura reçu les messages,
 les enverra au groupe de lecteurs.
 
-Le message aura la forme (id_processus,contenu_message[16]).  
+Le message aura la forme (id_processus,contenu_message[64]).  
 Le nombre de lecteurs/écrivains sera déterminé par l'utilisateur.  
 Un groupe d'écrivains enverra au maximum 30 000 messages.
 Un groupe de lecteurs recevra autant de messages que possible.
@@ -45,11 +45,11 @@ Au-delà, il ferme les canaux de transmission.
 Il y aura toujours un seul thread "transmetteur".  
 *NB*: Dans le cadre du benchmark, aucun message relatif au messages reçus
 ne sera affiché, à part les messages "Working..." et "End of program",
-et ce, afin d'éviter des résultats parasites.
+et ce, afin de minimiser au maximum les résultats parasites.
 
 Pour la version implémentant les canaux, les tests seront effectués avec
 au maximum 256 messages par canal, et ceux afin d'avoir
-un tampon de taille équivalente à celui d'un tube (au moins 8192 d'après POSIX).
+un tampon de taille équivalente à celle d'un tube (au moins 8192 d'après POSIX).
 
 
 #### Comparaison ####
@@ -267,17 +267,19 @@ avec l'option *-pthread*, du fait que les canauxc utilisent des fonctions relati
 
  **Comparatif des différences de performances entre les canaux et les tubes (temps réel)** :
 
- |        | 1/1| 10/10| 100/100|  1000/1000|
- |--------|----|------|--------|-----------|
- |Facteur | <1 |  <1  |   x3   |    x46    |
+ |        | 1/1|   10/10| 100/100|  1000/1000|
+ |--------|----|--------|--------|-----------|
+ |Facteur | ~1 |  x1.3  |   x3   |    x46    |
 
+*Facteur moyen* : ***~ 13***.
 
  **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
 
  |        | 1/1| 10/10|  100/100| 1000/1000|
  |--------|----|------|---------|----------|
- |Facteur | <1 |  <1  |    x6   |   x222   |
+ |Facteur | ~1 |  ~1  |    x6   |   x222   |
 
+*Facteur moyen* : ***~ 57***.
 
 *Moralité* : Sur un petit nombre d'écrivains/lecteurs, le programme utilisant
 les tubes est légèrement plus efficace que son équivalent avec les canaux.
@@ -353,10 +355,32 @@ autour de 1000 écrivains.
  * Version tube         : **real** 6:0.354s; **sys** 20:12.560s;
 
 
+ **Comparatif des différences de performances entre les canaux et les tubes (temps réel)** :
+
+ |        |    1/10| 1/100| 1/1000|    1/10000|
+ |--------|--------|------|-------|-----------|
+ |Facteur | x(1/5) |  x4  |  x43  |    x87    |
+
+ *Facteur moyen* : ***~ 34***.
+
+ **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
+
+ |        |   1/10|  1/100|   1/1000|   1/10000|
+ |--------|-------|-------|---------|----------|
+ |Facteur |  x1.1 |  x11  |   x33   |   x279   |
+
+*Facteur moyen* : ***~ 80***.
+
+> En moyenne (de tous les cas)
+
+*Facteur moyen (temps réel)* : ***~ 20***.
+*Facteur moyen (temps système)* : ***~ 66***.
+
 
 ### Moralité ###
 
-*TODO*
+  Dans un contexte multi-processus, le programme utilisant les canaux globaux est,
+dans l'ensemble, plus efficaces que le programme équivalent avec les tubes.
 
 
 ## Canaux synchrones ##
@@ -415,9 +439,16 @@ vis-à-vis du programme test.
 
 ## Communication par lots ##
 
+### Précisions concernant la communication par lot ###
+
+  Les canaux avec communication par lots sont conçus de manière à envoyer
+un ensemble de données en un appel de fonction.
+Dans le cas présent, une interface spécifique à la communication par lots a
+été défini.
+
 ### Conditions de test ###
 
-Içi, seront comparées les performances des canaux avec l'interface de
+  Içi, seront comparées les performances des canaux avec l'interface de
 communication par lots avec les canaux *"classiques"* dans différents
 contextes d'exécution. Il est imortant de noter que dans la communication
 par lots, l'envoi de données par le transmeteur au lecteur se fait par lots,
@@ -450,7 +481,8 @@ Pour autant, en observant les cas où l'on a un seul thread écrivain,
 on constate un gain de performace non négligeable des canaux avec communication
 par lots par rapports au canaux normaux. Ce gain est en grande partie dû au fait
 que le transmetteur renvoie les messages aux lecteurs si, et seulement si son
-tableau de messages à envoyer est plein.
+tableau de messages à envoyer est plein.  
+Par conséquent, le nombre total d'envoi de données est réduit.
 De plus, le fait qu'il y ait un seul thread écrivain limite grandement
 les situations de concurrence à l'envoi des données au transmetteur.
 
