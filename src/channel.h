@@ -16,6 +16,7 @@ typedef unsigned long nchan_t;
 #define CHANNEL_EVENT_NOEVT 0
 #define CHANNEL_EVENT_READ  1
 #define CHANNEL_EVENT_WRITE 2
+#define CHANNEL_EVENT_CLOSE 4
 
 // Time
 #define CHANNEL_TIME_WAIT   -1
