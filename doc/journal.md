@@ -13,6 +13,8 @@
 
 > - ***Canaux à copie unique (synchrones et asynchrones)***
 
+> - ***Canaux non-bloquants***
+
 
 ## DOING ##
 
@@ -26,7 +28,7 @@
 
 **Luxon**
 
-> - ***Canaux non-bloquants*** +  Benchmark
+> Benchmark
 
 > - Programmer le *forward* en Go (synchrone et asynchrone)
 
@@ -38,25 +40,22 @@
 
 > Benchmark
 
-> - Version minimale (finir certains benchmark)
-
 > - Canaux globaux
-  Dans un contexte multi-processus. Cela ne sert pas à grand chose de le tester
-  en multi-thread, c'est forcément moins efficace.
+  Dans un contexte multi-processus.
 
 > - Communication par lots
   Comparer les canaux avec communication par lots avec les cannaux classiques
-  dans un contexte multi-thread et multi-processus.
+  dans un contexte multi-thread.
 
 > - Canaux synchrones
   Comparer les canaux synchrones avec les canaux asynchrones dans un
- contexte multi-thread et multi-processus.
+ contexte multi-thread.
 
 > - Canaux à une seule copie
-  Comparaison avec les canux classiques en multi-thread et multi-processus
+  Comparaison avec les canux classiques en multi-thread.
 
 > - Canaux non-bloquants
-  Comparaison avec les canaux bloquants classiques
+  Comparaison avec les canaux bloquants classiques en multi-thread.
 
 
 NB 1 : canal classique : canal minimal ou global.
@@ -69,6 +68,7 @@ NB 2 : Protocol à suivre pour le benchmark :
 
 NB 3 : Il est important que l'on fasse tous (tous les 3) les benchmarks.
 Avec 3 machines différentes, on pourra faire des comparaisons.
+***ATTENTION*** : Il faut respecter le protocol à suivre pour le benchmark.
 
 NB 4 : Le but de ce benchmark n'est pas seulement de savoir qui est plus rapide.
         Il faut aussi savoir expliquer **en quoi telle implémentation est plus rapide**,
