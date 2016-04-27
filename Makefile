@@ -34,7 +34,7 @@ mandelbrot : $(MANDEL_SRC) $(CHAN_SRC)
 
 # Clean
 clean :
-	rm -rf *.o
+	rm -rf *.o $(SRC_DIR)$(CHAN_OBJ)
 
 clear : clean
 	rm -rf $(CHANNEL_LIB)
