@@ -81,19 +81,25 @@ void forward(channel_t *chan_s, channel_t *chan_r)
         {
             memcpy(&vtmp[i],&tmp,sizeof(msg_t));
             i++;
-            continue;
+            if((n + i) >= NB_MSG)
+                goto send_data;
+            else
+                continue;
         }
         else
         {
-            do{
-                s = channel_vsend(chan_r,vtmp,NB_MSG);
+            send_data :
+            {
+                do{
+                    s = channel_vsend(chan_r,vtmp,i);
 
-                if(s > -1)
-                    n += s;
+                    if(s > -1)
+                        n += s;
 
-            }while(s == 0);
+                }while(s == 0);
 
-            i = 0;
+                i = 0;
+            }
         }
 
         if(n >= MAX_FWD_MSG)
