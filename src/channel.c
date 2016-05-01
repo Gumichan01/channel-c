@@ -427,12 +427,15 @@ struct channel *channel_create(int eltsize, int size, int flags)
     if(err != 0)
         goto fail_atomic;
 
-    err = channel_cond_init(chan,flags);
-
-    if(err != 0)
+    if(!CHAN_ISNONBLOCKING(flags))
     {
-        channel_mutex_destroy(chan);
-        goto fail_atomic;
+        err = channel_cond_init(chan,flags);
+
+        if(err != 0)
+        {
+            channel_mutex_destroy(chan);
+            goto fail_atomic;
+        }
     }
 
     return chan;
@@ -458,7 +461,9 @@ void channel_destroy(struct channel *channel)
     if(channel == NULL)
         return;
 
-    channel_cond_destroy(channel);
+    if(!CHAN_ISNONBLOCKING(channel->flags))
+        channel_cond_destroy(channel);
+
     channel_mutex_destroy(channel);
 
     if(channel->size > 0)
