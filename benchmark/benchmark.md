@@ -450,10 +450,10 @@ Dans le cas présent, une interface spécifique à la communication par lots a
 
   Içi, seront comparées les performances des canaux avec l'interface de
 communication par lots avec les canaux *"classiques"* dans différents
-contextes d'exécution. Il est imortant de noter que dans la communication
-par lots, l'envoi de données par le transmeteur au lecteur se fait par lots,
-tandis que le lecture se fait normalement.
-La communication ecrivain/transmetteur reste asynchrone.
+contextes d'exécution. Il est important de noter que l'envoi de données
+par le transmeteur au lecteur se fait par lots, tandis que
+la lecture se fait normalement.
+La communication ecrivain/transmetteur reste classique.
 
 ### Programme Forward - Comparaisons ###
 
@@ -476,41 +476,55 @@ La communication ecrivain/transmetteur reste asynchrone.
 |***1/10000***     |         4.437s     |        **6.396s**     |        3.310s       |        **4.340s**      |
 
   Dans l'ensemble, la communication par lots ne semble pas apporter un gain
-important en terme de performance.
-Pour autant, en observant les cas où l'on a un seul thread écrivain,
-on constate un gain de performace non négligeable des canaux avec communication
-par lots par rapports au canaux normaux. Ce gain est en grande partie dû au fait
-que le transmetteur renvoie les messages aux lecteurs si, et seulement si son
-tableau de messages à envoyer est plein.  
+important en terme de performance. Pour autant, en observant les cas où
+l'on a un seul thread écrivain,on constate un gain de performace non négligeable
+des canaux avec communication par lots par rapports au canaux normaux.
+On sait que le transmetteur renvoie les messages aux lecteurs si, et seulement si,
+son tableau de messages à envoyer est plein.
+On sait aussi que les lecteurs, doivent attendre une donnée disponible
+en s'endormant sur une variable de conition. Au vu du fait que l'envoi de message
+aux lecteurs se fait par lots, l'essentiel du travail d'envoi se fait au niveau
+de l'écrivain. De ce fait, plus il y a d'écrivains, plus la performance diminue.  
 Par conséquent, le nombre total d'envoi de données est réduit.
 De plus, le fait qu'il y ait un seul thread écrivain limite grandement
 les situations de concurrence à l'envoi des données au transmetteur.
 
 
-#### Multi-process (TODO ↓) ####
+#### Multi-processus ####
 
 |Ecrivains/Lecteurs|Normaux (temps réel)|Normaux (temps système)|Par lots (temps réel)|Par lots (temps système)|
 |------------------|--------------------|-----------------------|---------------------|------------------------|
-|1/1               |         0.015s     |        **0.012s**     |        1.100s       |        **0.940s**      |
-|10/10             |         0.271s     |        **0.556s**     |        1.332s       |        **1.624s**      |
-|100/100           |         0.304s     |        **0.568s**     |        1.351s       |        **1.720s**      |
-|1000/1000         |         0.442s     |        **0.660s**     |        1.500s       |        **1.808s**      |
-|10/1              |         0.117s     |        **0.208s**     |        1.228s       |        **1.308s**      |
-|100/1             |         0.310s     |        **0.544s**     |        1.250s       |        **1.332s**      |
-|1000/1            |         0.327s     |        **0.552s**     |        1.303s       |        **1.456s**      |
-|10000/1           |         3.399s     |        **4.192s**     |        7.164s       |       **11.940s**      |
-|1/10              |         0.113s     |        **0.232s**     |        1.232s       |        **1.184s**      |
-|1/100             |         0.259s     |        **0.440s**     |        1.257s       |        **1.344s**      |
-|1/1000            |         0.329s     |        **0.544s**     |        1.290s       |        **1.480s**      |
-|1/10000           |         4.437s     |        **6.396s**     |        6.043s       |        **8.905s**      |
+|1/1               |         0.026s     |        **0.036s**     |        0.026s       |        **0.032s**      |
+|10/10             |         0.307s     |        **0.624s**     |        0.116s       |        **0.208s**      |
+|100/100           |         0.478s     |        **0.652s**     |        0.395s       |        **0.416s**      |
+|1000/1000         |         0.958s     |        **0.648s**     |        1.043s       |        **0.560s**      |
+|10/1              |         0.234s     |        **0.460s**     |        0.101s       |        **0.152s**      |
+|100/1             |         0.411s     |        **0.452s**     |        0.422s       |        **0.388s**      |
+|1000/1            |         0.710s     |        **0.392s**     |        0.753s       |        **0.340s**      |
+|10000/1           |         4.177s     |        **3.368s**     |        4.238s       |        **3.292s**      |
+|***1/10***        |         0.206s     |        **0.376s**     |        0.027s       |        **0.028s**      |
+|1/100             |         0.396s     |        **0.424s**     |        0.422s       |        **0.480s**      |
+|1/1000            |         0.735s     |        **0.428s**     |        0.732s       |        **0.388s**      |
+|1/10000           |         4.107s     |        **3.248s**     |        4.316s       |        **3.288s**      |
+
+  Les différences sont très minimes dans l'ensemble entre les canaux avec
+communication par lots et les canaux normaux. En revanche, on constate que dans
+le cas d'un petit nombre d'écrivains/lecteurs que la communication par lots est
+plus efficac que la communication basique.
 
 
 ### Moralité ###
 
-*TODO*
+Pour un petit nombre de threads/processus, les canaux avec communication
+par lots sont plus efficaces que les canaux classiques (x2). Pour un grand nombre
+de threads/processus, la différence est très minime entre les deux implémentations.
+
 
 ## Conclusion ##
 
-***TODO***
+   Les canaux, dans leur version la plus minimale, sont beaucoup plus performants
+ que les tubes, aussi bien dans un contexte multi-thread que multi-processus.  
+ Certaines extensions permettent, si elles sont utilisées à bon escient,
+ d'améliorer ces performances (la communication par lots, mais dans un cas bien précis).
 
 --
