@@ -520,6 +520,42 @@ par lots sont plus efficaces que les canaux classiques (x2). Pour un grand nombr
 de threads/processus, la différence est très minime entre les deux implémentations.
 
 
+## Canaux à une seule copie ##
+
+### Précisions concernant les canaux à une seule copie ###
+
+Les canaux basique fournis effectuait en interne deux copies
+(ecrivain -> canal et canal -> lecteur). Les canaux à une seul copie suppriment
+une de ces deux copies.
+Dans le cas résent, l'adresse de la donnée est directement stockée dans le canal.
+
+
+### Conditions de test ###
+
+  Içi, seront comparées les performances des canaux à une seule copie
+avec les canaux *"classiques"* dans un contexte ulti-thread.
+les deux canaux sont à une seule copie.
+
+### Programme Forward - Comparaisons ###
+
+|Ecrivains/Lecteurs|Normaux (temps réel)|Normaux (temps système)| 1 copie (temps réel)| 1 copie (temps système)|
+|------------------|--------------------|-----------------------|---------------------|------------------------|
+|1/1               |         0.015s     |        **0.012s**     |        0.016s       |        **0.020s**      |
+|10/10             |         0.271s     |        **0.556s**     |        0.270s       |        **0.500s**      |
+|100/100           |         0.304s     |        **0.568s**     |        0.306s       |        **0.552s**      |
+|1000/1000         |         0.442s     |        **0.660s**     |        0.416s       |        **0.580s**      |
+|10000/10000       |        22.172s     |       **51.895s**     |       22.073s       |       **50.767s**      |
+|10/1              |         0.117s     |        **0.208s**     |        0.098s       |        **0.160s**      |
+|100/1             |         0.310s     |        **0.544s**     |        0.308s       |        **0.484s**      |
+|1000/1            |         0.327s     |        **0.552s**     |        0.343s       |        **0.532s**      |
+|10000/1           |         3.399s     |        **4.192s**     |        5.608s       |        **8.769s**      |
+|1/10              |         0.113s     |        **0.232s**     |        0.115s       |        **0.196s**      |
+|1/100             |         0.259s     |        **0.440s**     |        0.295s       |        **0.508s**      |
+|1/1000            |         0.329s     |        **0.544s**     |        0.336s       |        **0.516s**      |
+|1/10000           |         4.437s     |        **6.396s**     |        4.917s       |        **7.364s**      |
+
+Peu de différence entre les deux implémentations.
+
 ## Conclusion ##
 
    Les canaux, dans leur version la plus minimale, sont beaucoup plus performants
