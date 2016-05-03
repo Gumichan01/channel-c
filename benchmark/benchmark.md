@@ -414,7 +414,7 @@ quant à lui asynchrone.
 |1/10000           |         4.437s        |        **6.396s**        |         6.043s        |         **8.905s**       |
 
 
-**Comparatif des différences de performances entre les canaux et les tubes (temps réel)** :
+**Comparatif des différences de performances entre les canaux synchrones et asynchrones (temps réel)** :
 
 | Ecrivain ø Lecteurs |   ==  | > |  <  |
 |---------------------|-------|---|-----|
@@ -422,7 +422,7 @@ quant à lui asynchrone.
 
 *Facteur moyen* : ***~ 10***.
 
-**Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
+**Comparatif des différences de performances entre les canaux synchrones et asynchrones (temps système)** :
 
 | Ecrivain ø Lecteurs |   ==  | > |  <  |
 |---------------------|-------|---|-----|
@@ -510,7 +510,7 @@ les situations de concurrence à l'envoi des données au transmetteur.
   Les différences sont très minimes dans l'ensemble entre les canaux avec
 communication par lots et les canaux normaux. En revanche, on constate que dans
 le cas d'un petit nombre d'écrivains/lecteurs que la communication par lots est
-plus efficac que la communication basique.
+plus efficace que la communication basique.
 
 
 ### Moralité ###
@@ -556,11 +556,51 @@ les deux canaux sont à une seule copie.
 
 Peu de différence entre les deux implémentations.
 
+## Canaux non-bloquants ##
+
+### Précisions concernant les canaux non-bloquants ###
+
+Les canaux non-bloquants permettent, comme leur nom l'indique, d'effectuer une
+communication inter-thread/inter-processus non bloquante.
+La définition de ce type de communication implique le développement d'une fonction
+permettant d'effectuer une attente "passive" de la disponibilité d'un ensemble de
+canaux.
+
+
+### Conditions de test ###
+
+  Içi, seront comparées les performances des canaux non-bloquants avec les canaux
+bloquants *"classiques"* dans le programme forward multi-thread.
+Les deux canaux du programmee sont non-bloquants.
+
+
+### Programme Forward - Comparaisons ###
+
+|Ecrivains/Lecteurs|Normaux (temps réel)|Normaux (temps système)| Non-bloquant (réel) | Non-bloquant (système) |
+|------------------|--------------------|-----------------------|---------------------|------------------------|
+|1/1               |         0.015s     |        **0.012s**     |        0.016s       |        **0.020s**      |
+|10/10             |         0.271s     |        **0.556s**     |        0.270s       |        **0.500s**      |
+|100/100           |         0.304s     |        **0.568s**     |        0.306s       |        **0.552s**      |
+|1000/1000         |         0.442s     |        **0.660s**     |        0.416s       |        **0.580s**      |
+|10000/10000       |        22.172s     |       **51.895s**     |       22.073s       |       **50.767s**      |
+|10/1              |         0.117s     |        **0.208s**     |        0.098s       |        **0.160s**      |
+|100/1             |         0.310s     |        **0.544s**     |        0.308s       |        **0.484s**      |
+|1000/1            |         0.327s     |        **0.552s**     |        0.343s       |        **0.532s**      |
+|10000/1           |         3.399s     |        **4.192s**     |        5.608s       |        **8.769s**      |
+|1/10              |         0.113s     |        **0.232s**     |        0.115s       |        **0.196s**      |
+|1/100             |         0.259s     |        **0.440s**     |        0.295s       |        **0.508s**      |
+|1/1000            |         0.329s     |        **0.544s**     |        0.336s       |        **0.516s**      |
+|1/10000           |         4.437s     |        **6.396s**     |        4.917s       |        **7.364s**      |
+
+  Il y a peu de différence entre les canaux bloquants et les canaux non-bloquants
+à l'utilisation.
+
+
 ## Conclusion ##
 
-   Les canaux, dans leur version la plus minimale, sont beaucoup plus performants
- que les tubes, aussi bien dans un contexte multi-thread que multi-processus.  
- Certaines extensions permettent, si elles sont utilisées à bon escient,
- d'améliorer ces performances (la communication par lots, mais dans un cas bien précis).
+  Les canaux, dans leur version la plus minimale, sont beaucoup plus performants
+que les tubes, aussi bien dans un contexte multi-thread que multi-processus.  
+Certaines extensions permettent, si elles sont utilisées à bon escient,
+d'améliorer ces performances (la communication par lots, mais dans un cas bien précis).
 
 --

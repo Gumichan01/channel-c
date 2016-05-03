@@ -110,7 +110,7 @@ void * forward(void * ptr)
 
 int main(int argc, char **argv)
 {
-    int i, err;
+    int i;
     int nb_writers, nb_readers;
     pthread_t th;
     pthread_t thr[MAX_THREADS];
@@ -131,10 +131,7 @@ int main(int argc, char **argv)
     // Create every threads
     for(i = 0; i < nb_writers; i++)
     {
-        err = pthread_create(&thw[i],NULL,sendm,NULL);
-
-        if(err != 0)
-            perror("pthread_create");
+        pthread_create(&thw[i],NULL,sendm,NULL);
     }
 
     for(i = 0; i < nb_readers; i++)
