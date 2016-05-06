@@ -3,7 +3,6 @@
 #include "channel.h"
 
 // Standard C
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -24,22 +23,21 @@ struct channel
     int closed;
     int nbwriters;
     int nbreaders;
+    pthread_mutex_t lock;
+    pthread_cond_t wcond;
+    pthread_cond_t rcond;
 
     // Asynchronous channel
     int rd;                         // Read cursor
     int wr;                         // Write cursor
     int nbdata;                     // Current size
     void **data;                    // Buffer
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
 
     // Synchronous channel
     int wsync;
     int rsync;
     void *tmp;
     pthread_cond_t sync;
-    pthread_cond_t wcond;
-    pthread_cond_t rcond;
 };
 
 
@@ -123,16 +121,12 @@ static int channel_mutex_init(struct channel *chan, int flags)
 // Create the condition variable for synchronous channels
 static int channel_sync_cond_init(struct channel *chan,int flags)
 {
-    int werr = 0, rerr = 0, serr, err = 0;
+    int err = 0;
     pthread_condattr_t attrcond;
 
     if(!CHAN_ISSHARED(flags))
     {
-        werr = pthread_cond_init(&chan->wcond,NULL);
-        rerr = pthread_cond_init(&chan->rcond,NULL);
-        serr = pthread_cond_init(&chan->sync,NULL);
-
-        return (werr != 0 || rerr != 0) ? CHAN_MAX_ERROR(werr, rerr) : 0;
+        return pthread_cond_init(&chan->sync,NULL);
     }
 
     // Condition variable creation for synchronous shared channels
@@ -140,53 +134,63 @@ static int channel_sync_cond_init(struct channel *chan,int flags)
         return err;
 
     err = pthread_condattr_setpshared(&attrcond,PTHREAD_PROCESS_SHARED);
-    werr = pthread_cond_init(&chan->wcond,&attrcond);
-    rerr = pthread_cond_init(&chan->rcond,&attrcond);
-    serr = pthread_cond_init(&chan->sync,&attrcond);
-
-    pthread_condattr_destroy(&attrcond);
 
     if(err != 0)
-        return err;
-    else if (serr != 0)
-        return serr;
-
-    return CHAN_MAX_ERROR(werr,rerr);
-}
-
-// Create the condition variable for asynchronous channels
-static int channel_async_cond_init(struct channel *chan,int flags)
-{
-    int err;
-    pthread_condattr_t attrcond;
-
-    if(!CHAN_ISSHARED(flags))
-        return pthread_cond_init(&chan->cond,NULL);
-
-    // Condition variable creation for asynchronous shared channels
-    if((err = pthread_condattr_init(&attrcond)) != 0)
-        return err;
-
-    err = pthread_condattr_setpshared(&attrcond,PTHREAD_PROCESS_SHARED);
-
-    if(err != 0)
-        goto async_cond;
-
-    err = pthread_cond_init(&chan->cond,&attrcond);
-
-    async_cond :
     {
         pthread_condattr_destroy(&attrcond);
         return err;
     }
+
+    err = pthread_cond_init(&chan->sync,&attrcond);
+    pthread_condattr_destroy(&attrcond);
+
+    return err;
 }
+
 
 static int channel_cond_init(struct channel *chan, int flags)
 {
-    if(chan->size == 0)
-        return channel_sync_cond_init(chan,flags);
+    int werr = 0, rerr = 0, err = 0;
+    pthread_condattr_t attrcond;
+
+    if(!CHAN_ISSHARED(flags))
+    {
+        if((werr = pthread_cond_init(&chan->wcond,NULL)) != 0)
+            return werr;
+
+        if((rerr = pthread_cond_init(&chan->rcond,NULL)) != 0)
+            return rerr;
+    }
     else
-        return channel_async_cond_init(chan,flags);
+    {
+        // Condition variable creation for shared channels
+        if((err = pthread_condattr_init(&attrcond)) != 0)
+            return err;
+
+        err = pthread_condattr_setpshared(&attrcond,PTHREAD_PROCESS_SHARED);
+
+        if(err == 0)
+        {
+            pthread_condattr_destroy(&attrcond);
+            return err;
+        }
+
+        if((werr = pthread_cond_init(&chan->wcond,&attrcond)) != 0)
+        {
+            pthread_condattr_destroy(&attrcond);
+            return werr;
+        }
+
+        if((rerr = pthread_cond_init(&chan->rcond,&attrcond)) != 0)
+        {
+            pthread_condattr_destroy(&attrcond);
+            return rerr;
+        }
+
+        pthread_condattr_destroy(&attrcond);
+    }
+
+    return (chan->size == 0) ? channel_sync_cond_init(chan,flags) : 0;
 }
 
 
@@ -197,13 +201,12 @@ static void channel_mutex_destroy(struct channel *chan)
 
 static void channel_cond_destroy(struct channel *chan)
 {
-    pthread_cond_destroy(&chan->cond);
+    pthread_cond_destroy(&chan->wcond);
+    pthread_cond_destroy(&chan->rcond);
 
     if(chan->size == 0)
     {
         pthread_cond_destroy(&chan->sync);
-        pthread_cond_destroy(&chan->wcond);
-        pthread_cond_destroy(&chan->rcond);
     }
 }
 
@@ -394,7 +397,8 @@ struct channel *channel_create(int eltsize, int size, int flags)
         return NULL;
     }
 
-    if(( size == 0 && (CHAN_ISBATCHED(flags) || CHAN_ISSINGLE(flags)
+    if(( size == 0 && (CHAN_ISBATCHED(flags)
+                        || CHAN_ISSINGLE(flags)
                         || CHAN_ISNONBLOCKING(flags)) )
         || (CHAN_ISBATCHED(flags) && CHAN_ISSINGLE(flags))
         || (CHAN_ISNONBLOCKING(flags) && CHAN_ISSINGLE(flags)))
@@ -507,7 +511,7 @@ int channel_send(struct channel *channel, const void *data)
     while(channel_is_full(channel) && channel->closed == 0)
     {
         channel->nbwriters += 1;
-        pthread_cond_wait(&channel->cond, &channel->lock);
+        pthread_cond_wait(&channel->wcond, &channel->lock);
         channel->nbwriters -= 1;
     }
 
@@ -531,7 +535,7 @@ int channel_send(struct channel *channel, const void *data)
     channel->nbdata += 1;
 
     if(channel->nbreaders > 0)
-        pthread_cond_signal(&channel->cond);
+        pthread_cond_signal(&channel->rcond);
 
     pthread_mutex_unlock(&channel->lock);
 
@@ -573,7 +577,7 @@ int channel_recv(struct channel *channel, void *data)
     while(channel_is_empty(channel) && channel->closed == 0)
     {
         channel->nbreaders += 1;
-        pthread_cond_wait(&channel->cond, &channel->lock);
+        pthread_cond_wait(&channel->rcond, &channel->lock);
         channel->nbreaders -= 1;
     }
 
@@ -600,7 +604,7 @@ int channel_recv(struct channel *channel, void *data)
     channel->nbdata -= 1;
 
     if(channel->nbwriters > 0)
-        pthread_cond_signal(&channel->cond);
+        pthread_cond_signal(&channel->wcond);
 
     pthread_mutex_unlock(&channel->lock);
     return 1;
@@ -634,14 +638,11 @@ int channel_close(struct channel *channel)
 
     channel->closed = 1;
 
-    if(channel->size > 0)
-        pthread_cond_broadcast(&channel->cond);
-    else
-    {
-        pthread_cond_broadcast(&channel->wcond);
-        pthread_cond_broadcast(&channel->rcond);
+    pthread_cond_broadcast(&channel->wcond);
+    pthread_cond_broadcast(&channel->rcond);
+
+    if(channel->size == 0)
         pthread_cond_broadcast(&channel->sync);
-    }
 
     pthread_mutex_unlock(&channel->lock);
 
@@ -835,7 +836,7 @@ int channel_vsend(struct channel *channel, const void *array, int size)
     }
 
     if(channel->nbreaders > 0)
-        pthread_cond_signal(&channel->cond);
+        pthread_cond_signal(&channel->rcond);
 
     pthread_mutex_unlock(&channel->lock);
     return written;
@@ -888,7 +889,7 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     }
 
     if(channel->nbwriters > 0)
-        pthread_cond_signal(&channel->cond);
+        pthread_cond_signal(&channel->wcond);
 
     pthread_mutex_unlock(&channel->lock);
     return read;
