@@ -62,6 +62,7 @@ struct channel
 #define CHAN_ISNONBLOCKING(flags) \
     (((flags) & CHANNEL_PROCESS_NONBLOCK) == CHANNEL_PROCESS_NONBLOCK)
 
+
 // Synchronous communication
 static int channel_sync_send(struct channel *channel, const void *data);
 static int channel_sync_recv(struct channel *channel, void *data);
@@ -169,7 +170,7 @@ static int channel_cond_init(struct channel *chan, int flags)
 
         err = pthread_condattr_setpshared(&attrcond,PTHREAD_PROCESS_SHARED);
 
-        if(err == 0)
+        if(err != 0)
         {
             pthread_condattr_destroy(&attrcond);
             return err;
