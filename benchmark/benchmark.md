@@ -578,22 +578,24 @@ Les deux canaux du programmee sont non-bloquants.
 
 |Ecrivains/Lecteurs|Normaux (temps réel)|Normaux (temps système)| Non-bloquant (réel) | Non-bloquant (système) |
 |------------------|--------------------|-----------------------|---------------------|------------------------|
-|1/1               |         0.015s     |        **0.012s**     |        0.016s       |        **0.020s**      |
-|10/10             |         0.271s     |        **0.556s**     |        0.270s       |        **0.500s**      |
-|100/100           |         0.304s     |        **0.568s**     |        0.306s       |        **0.552s**      |
-|1000/1000         |         0.442s     |        **0.660s**     |        0.416s       |        **0.580s**      |
-|10000/10000       |        22.172s     |       **51.895s**     |       22.073s       |       **50.767s**      |
-|10/1              |         0.117s     |        **0.208s**     |        0.098s       |        **0.160s**      |
-|100/1             |         0.310s     |        **0.544s**     |        0.308s       |        **0.484s**      |
-|1000/1            |         0.327s     |        **0.552s**     |        0.343s       |        **0.532s**      |
-|10000/1           |         3.399s     |        **4.192s**     |        5.608s       |        **8.769s**      |
-|1/10              |         0.113s     |        **0.232s**     |        0.115s       |        **0.196s**      |
-|1/100             |         0.259s     |        **0.440s**     |        0.295s       |        **0.508s**      |
-|1/1000            |         0.329s     |        **0.544s**     |        0.336s       |        **0.516s**      |
-|1/10000           |         4.437s     |        **6.396s**     |        4.917s       |        **7.364s**      |
+|1/1               |         0.015s     |        **0.012s**     |        0.641s       |        **0.008s**      |
+|10/10             |         0.271s     |        **0.556s**     |        0.015s       |        **0.008s**      |
+|100/100           |         0.304s     |        **0.568s**     |        0.031s       |        **0.012s**      |
+|1000/1000         |         0.442s     |        **0.660s**     |        0.085s       |        **0.112s**      |
+|10/1              |         0.117s     |        **0.208s**     |        0.013s       |        **0.000s**      |
+|100/1             |         0.310s     |        **0.544s**     |        0.018s       |        **0.016s**      |
+|1000/1            |         0.327s     |        **0.552s**     |        0.046s       |        **0.044s**      |
+|10000/1           |         3.399s     |        **4.192s**     |        0.355s       |        **0.444s**      |
+|1/10              |         0.113s     |        **0.232s**     |        0.640s       |        **0.000s**      |
+|1/100             |         0.259s     |        **0.440s**     |        0.643s       |        **0.020s**      |
+|1/1000            |         0.329s     |        **0.544s**     |        0.648s       |        **0.452s**      |
 
-  Il y a peu de différence entre les canaux bloquants et les canaux non-bloquants
-à l'utilisation.
+  On constate que les canaux non-bloquants sont bien plus efficaces que
+les canaux canaux bloquants dans les deux premier cas de figure.
+On notera tout de même qu'avec 1 écrivain et 1 lecteur, mais aussi avec
+plus de lecteurs que d'écrivains, le temps d'éxecution consacré à
+la synchronisation des threads affecte la performance
+global du programme, d'où le temps élevé.
 
 
 ## Conclusion ##
