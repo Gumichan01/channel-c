@@ -5,7 +5,7 @@
 ### Condition de test ###
 
 - Compilateur utilisé : *gcc*.
-- Options gcc : *-Wall -O3*.
+- Options gcc : *-Wall -O3 -lm -lrt*.
 
   Sauf mention contraire, tous les tests sont effectué avec
 l'option d'optimisation *-O3*.
@@ -15,12 +15,12 @@ Pour les programme multithreads, l'option *-pthread* a été ajouté.
 un processeur Intel Core I3 quadri-coeurs à 2.53GHz, 4 Gio de mémoire vive,
 sur la distribution Ubuntu 12.04 64bits.
 Deux machines témoins ont également été utilisées pour
-affiner les résultats.  
+affiner les résultats.
 En terme de calcul, la commande */bin/time* est utilisée. Mais un script sera utilisé
 afin d'automatiser les tests.
 Afin d'éviter les fausses mesures inhérents à la politique d'ordonnancement
 du noyau, une série de 8 mesures est effectué.
-Seul le meilleur résultat est retenu.
+On prendra la valeur médiane de ces mesures.
 
 
 ### Programme Forward ###
@@ -36,20 +36,22 @@ thread "transmetteur". Concrétement, tous les écrivains écriront un message
 au thread transmetteur. Ce thread, qui aura reçu les messages,
 les enverra au groupe de lecteurs.
 
-Le message aura la forme (id_processus,contenu_message[64]).  
-Le nombre de lecteurs/écrivains sera déterminé par l'utilisateur.  
+Le message aura la forme (id_processus,contenu_message[64]).
+Le nombre de lecteurs/écrivains sera déterminé par l'utilisateur.
 Un groupe d'écrivains enverra au maximum 30 000 messages.
 Un groupe de lecteurs recevra autant de messages que possible.
 Le thread transmetteur devra transiter au maximum 15 000 messages.
 Au-delà, il ferme les canaux de transmission.
-Il y aura toujours un seul thread "transmetteur".  
+Il y aura toujours un seul thread "transmetteur".
 *NB*: Dans le cadre du benchmark, aucun message relatif au messages reçus
 ne sera affiché, à part les messages "Working..." et "End of program",
 et ce, afin de minimiser au maximum les résultats parasites.
 
-Pour la version implémentant les canaux, les tests seront effectués avec
-au maximum 256 messages par canal, et ceux afin d'avoir
-un tampon de taille équivalente à celle d'un tube (au moins 8192 d'après POSIX).
+Pour la version implémentant les canaux,
+en prenant en compte la taille de la donnée envoyée via le canal,
+les tests seront effectués avec au maximum 256 messages par canal,
+et ceux afin d'avoir un tampon de taille équivalente à
+celle d'un tube (au moins 8192 octets d'après POSIX).
 
 
 #### Comparaison ####
@@ -227,9 +229,9 @@ efficace qu'un programme équivalent basé sur les tubes.
 ### Conditions de test ###
 
   Les conditions de tests sont identiques. La seule différence vient du fait que
-l'on exécute les programmes dans un contexte multi-processus.  
+l'on exécute les programmes dans un contexte multi-processus.
 Pour autant, les programmes multi-processus utilisant les canaux seront compilés
-avec l'option *-pthread*, du fait que les canauxc utilisent des fonctions relatives
+avec l'option *-pthread*, du fait que les canaux utilisent des fonctions relatives
 à ***pthread***.
 
 
@@ -484,7 +486,7 @@ son tableau de messages à envoyer est plein.
 On sait aussi que les lecteurs, doivent attendre une donnée disponible
 en s'endormant sur une variable de conition. Au vu du fait que l'envoi de message
 aux lecteurs se fait par lots, l'essentiel du travail d'envoi se fait au niveau
-de l'écrivain. De ce fait, plus il y a d'écrivains, plus la performance diminue.  
+de l'écrivain. De ce fait, plus il y a d'écrivains, plus la performance diminue.
 Par conséquent, le nombre total d'envoi de données est réduit.
 De plus, le fait qu'il y ait un seul thread écrivain limite grandement
 les situations de concurrence à l'envoi des données au transmetteur.
@@ -601,7 +603,7 @@ global du programme, d'où le temps élevé.
 ## Conclusion ##
 
   Les canaux, dans leur version la plus minimale, sont beaucoup plus performants
-que les tubes, aussi bien dans un contexte multi-thread que multi-processus.  
+que les tubes, aussi bien dans un contexte multi-thread que multi-processus.
 Certaines extensions permettent, si elles sont utilisées à bon escient,
 d'améliorer ces performances (la communication par lots, mais dans un cas bien précis).
 
