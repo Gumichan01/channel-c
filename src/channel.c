@@ -23,7 +23,7 @@ struct channel
     int closed;
     int nbwriters;
     int nbreaders;
-    pthread_mutex_t lock;
+    pthread_mutex_t mutex;
     pthread_cond_t wcond;
     pthread_cond_t rcond;
 
@@ -103,7 +103,7 @@ static int channel_mutex_init(struct channel *chan, int flags)
     pthread_mutexattr_t attrlock;
 
     if(!CHAN_ISSHARED(flags))
-        return pthread_mutex_init(&chan->lock,NULL);
+        return pthread_mutex_init(&chan->mutex,NULL);
 
     // Mutex for shared channels
     if((err = pthread_mutexattr_init(&attrlock)) != 0)
@@ -112,7 +112,7 @@ static int channel_mutex_init(struct channel *chan, int flags)
     err = pthread_mutexattr_setpshared(&attrlock,PTHREAD_PROCESS_SHARED);
 
     if(err == 0)
-        err = pthread_mutex_init(&chan->lock,&attrlock);
+        err = pthread_mutex_init(&chan->mutex,&attrlock);
 
     pthread_mutexattr_destroy(&attrlock);
     return err;
@@ -197,7 +197,7 @@ static int channel_cond_init(struct channel *chan, int flags)
 
 static void channel_mutex_destroy(struct channel *chan)
 {
-    pthread_mutex_destroy(&chan->lock);
+    pthread_mutex_destroy(&chan->mutex);
 }
 
 static void channel_cond_destroy(struct channel *chan)
@@ -501,10 +501,10 @@ int channel_send(struct channel *channel, const void *data)
     if(CHAN_ISNONBLOCKING(channel->flags))
         return channel_noblock_send(channel,data);
 
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
     if(channel->closed == 1)
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EPIPE;
         return -1;
     }
@@ -512,13 +512,13 @@ int channel_send(struct channel *channel, const void *data)
     while(channel_is_full(channel) && channel->closed == 0)
     {
         channel->nbwriters += 1;
-        pthread_cond_wait(&channel->wcond, &channel->lock);
+        pthread_cond_wait(&channel->wcond, &channel->mutex);
         channel->nbwriters -= 1;
     }
 
     if(channel->nbdata >= channel->size || channel->closed == 1)
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EPIPE;
         return -1;
     }
@@ -538,7 +538,7 @@ int channel_send(struct channel *channel, const void *data)
     if(channel->nbreaders > 0)
         pthread_cond_signal(&channel->rcond);
 
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
 
     return 1;
 }
@@ -573,24 +573,24 @@ int channel_recv(struct channel *channel, void *data)
     if(CHAN_ISNONBLOCKING(channel->flags))
         return channel_noblock_recv(channel,data);
 
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
 
     while(channel_is_empty(channel) && channel->closed == 0)
     {
         channel->nbreaders += 1;
-        pthread_cond_wait(&channel->rcond, &channel->lock);
+        pthread_cond_wait(&channel->rcond, &channel->mutex);
         channel->nbreaders -= 1;
     }
 
     if(channel_closed_empty(channel))
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         return 0;
     }
 
     if(channel->nbdata == 0)
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EPIPE;
         return -1;
     }
@@ -607,7 +607,7 @@ int channel_recv(struct channel *channel, void *data)
     if(channel->nbwriters > 0)
         pthread_cond_signal(&channel->wcond);
 
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
     return 1;
 }
 
@@ -630,10 +630,10 @@ int channel_close(struct channel *channel)
         return -1;
     }
 
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
     if(channel->closed == 1)
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         return 0;
     }
 
@@ -645,7 +645,7 @@ int channel_close(struct channel *channel)
     if(channel->size == 0)
         pthread_cond_broadcast(&channel->sync);
 
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
 
     return 1;
 }
@@ -667,12 +667,12 @@ int channel_close(struct channel *channel)
 */
 static int channel_sync_send(struct channel *channel, const void *data)
 {
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
 
     while(channel->wsync == 1 && channel->closed == 0)
     {
         channel->nbwriters++;
-        pthread_cond_wait(&channel->wcond,&channel->lock);
+        pthread_cond_wait(&channel->wcond,&channel->mutex);
         channel->nbwriters--;
     }
 
@@ -680,12 +680,12 @@ static int channel_sync_send(struct channel *channel, const void *data)
     channel->wsync = 1;
 
     if(channel->rsync == 0)                             // Wait for the reader
-        pthread_cond_wait(&channel->sync,&channel->lock);
+        pthread_cond_wait(&channel->sync,&channel->mutex);
 
     if(channel->closed) { goto broken_channel; }        // Interrupt the operation
     channel->tmp = (void *) data;
     pthread_cond_signal(&channel->sync);                // Data was sent
-    pthread_cond_wait(&channel->sync,&channel->lock);
+    pthread_cond_wait(&channel->sync,&channel->mutex);
 
     if(!channel->closed)
     {
@@ -697,13 +697,13 @@ static int channel_sync_send(struct channel *channel, const void *data)
     }
 
     channel->wsync = 0;
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
     return 1;
 
     broken_channel :
     {
         channel->wsync = 0;
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EPIPE;
         return -1;
     }
@@ -720,12 +720,12 @@ static int channel_sync_send(struct channel *channel, const void *data)
 */
 static int channel_sync_recv(struct channel *channel, void *data)
 {
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
 
     while(channel->rsync == 1 && channel->closed == 0)
     {
         channel->nbreaders++;
-        pthread_cond_wait(&channel->rcond,&channel->lock);
+        pthread_cond_wait(&channel->rcond,&channel->mutex);
         channel->nbreaders--;
     }
 
@@ -736,18 +736,18 @@ static int channel_sync_recv(struct channel *channel, void *data)
     else if(channel->closed)
         goto closed_channel;
 
-    pthread_cond_wait(&channel->sync,&channel->lock);   // Wait for the writer
+    pthread_cond_wait(&channel->sync,&channel->mutex);   // Wait for the writer
     memcpy(data,channel->tmp,channel->eltsize);
 
     channel->rsync = 0;
     pthread_cond_signal(&channel->sync);                // Acknowledgement
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
     return 1;
 
     closed_channel :
     {
         channel->rsync = 0;
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         return 0;
     }
 }
@@ -808,18 +808,18 @@ int channel_vsend(struct channel *channel, const void *array, int size)
         return -1;
     }
 
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
 
     if(channel->closed == 1)
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EPIPE;
         return -1;
     }
 
     if(!CHAN_ISBATCHED(channel->flags) || channel->size == 0)
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EOPNOTSUPP;
         return -1;
     }
@@ -839,7 +839,7 @@ int channel_vsend(struct channel *channel, const void *array, int size)
     if(channel->nbreaders > 0)
         pthread_cond_signal(&channel->rcond);
 
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
     return written;
 }
 
@@ -864,16 +864,16 @@ int channel_vrecv(struct channel *channel, void *array, int size)
         return -1;
     }
 
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
 
     if(channel->closed == 1 && channel->nbdata == 0){
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         return 0;
     }
 
     if(!CHAN_ISBATCHED(channel->flags) || channel->size == 0)
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EOPNOTSUPP;
         return -1;
     }
@@ -892,7 +892,7 @@ int channel_vrecv(struct channel *channel, void *array, int size)
     if(channel->nbwriters > 0)
         pthread_cond_signal(&channel->wcond);
 
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
     return read;
 }
 
@@ -903,17 +903,17 @@ int channel_vrecv(struct channel *channel, void *array, int size)
 
 static int channel_noblock_send(struct channel *channel, const void *data)
 {
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
     if(channel->closed == 1)
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EPIPE;
         return -1;
     }
 
     if(channel_is_full(channel))
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EWOULDBLOCK;
         return -1;
     }
@@ -926,24 +926,24 @@ static int channel_noblock_send(struct channel *channel, const void *data)
         channel->wr += 1;
 
     channel->nbdata += 1;
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
 
     return 1;
 }
 
 static int channel_noblock_recv(struct channel *channel, void *data)
 {
-    pthread_mutex_lock(&channel->lock);
+    pthread_mutex_lock(&channel->mutex);
 
     if(channel_closed_empty(channel))
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         return 0;
     }
 
     if(channel_is_empty(channel))
     {
-        pthread_mutex_unlock(&channel->lock);
+        pthread_mutex_unlock(&channel->mutex);
         errno = EWOULDBLOCK;
         return -1;
     }
@@ -956,7 +956,7 @@ static int channel_noblock_recv(struct channel *channel, void *data)
         channel->rd += 1;
 
     channel->nbdata -= 1;
-    pthread_mutex_unlock(&channel->lock);
+    pthread_mutex_unlock(&channel->mutex);
     return 1;
 }
 
