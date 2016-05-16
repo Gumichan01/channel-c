@@ -580,10 +580,10 @@ Les deux canaux du programmee sont non-bloquants.
 
 |Ecrivains/Lecteurs|Normaux (temps réel)|Normaux (temps système)| Non-bloquant (réel) | Non-bloquant (système) |
 |------------------|--------------------|-----------------------|---------------------|------------------------|
-|1/1               |         0.015s     |        **0.012s**     |        0.641s       |        **0.008s**      |
-|10/10             |         0.271s     |        **0.556s**     |        0.015s       |        **0.008s**      |
-|100/100           |         0.304s     |        **0.568s**     |        0.031s       |        **0.012s**      |
-|1000/1000         |         0.442s     |        **0.660s**     |        0.085s       |        **0.112s**      |
+|1/1               |         0.015s     |        **0.012s**     |        0.640s       |        **0.008s**      |
+|10/10             |         0.271s     |        **0.556s**     |        0.623s       |        **0.032s**      |
+|100/100           |         0.304s     |        **0.568s**     |        0.648s       |        **0.104s**      |
+|1000/1000         |         0.442s     |        **0.660s**     |        0.586s       |        **0.932s**      |
 |10/1              |         0.117s     |        **0.208s**     |        0.013s       |        **0.000s**      |
 |100/1             |         0.310s     |        **0.544s**     |        0.018s       |        **0.016s**      |
 |1000/1            |         0.327s     |        **0.552s**     |        0.046s       |        **0.044s**      |
@@ -592,12 +592,8 @@ Les deux canaux du programmee sont non-bloquants.
 |1/100             |         0.259s     |        **0.440s**     |        0.643s       |        **0.020s**      |
 |1/1000            |         0.329s     |        **0.544s**     |        0.648s       |        **0.452s**      |
 
-  On constate que les canaux non-bloquants sont bien plus efficaces que
-les canaux canaux bloquants dans les deux premiers cas de figure.
-On notera tout de même qu'avec 1 écrivain et 1 lecteur, mais aussi avec
-plus de lecteurs que d'écrivains, le temps d'éxecution consacré à
-la synchronisation des threads affecte la performance
-global du programme, d'où le temps élevé.
+  On constate que les canaux non-bloquants sont moins efficaces que les canaux
+bloquants.
 
 
 ## Conclusion ##
