@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -40,7 +41,7 @@ void * receive(void * ptr)
     while(1)
     {
         chset.revents = CHANNEL_EVENT_NOEVT;
-        err = channel_select(&chset,1,500);
+        err = channel_select(&chset,1,-1);
 
         if(err == -1)
         {
@@ -104,6 +105,10 @@ void * sendm(void * ptr)
 
             if(err == -1)
             {
+                if(errno == EWOULDBLOCK)
+                    continue;
+
+                perror("sendm channel_send()");
                 channel_close(chan_s);
                 break;
             }
@@ -192,6 +197,7 @@ void * forward(void * ptr)
 
             if(n >= MAX_FWD_MSG)
             {
+                //printf("n : %d OK \n",n);
                 channel_close(chan_s);
                 channel_close(chan_r);
             }
