@@ -737,6 +737,7 @@ static int channel_sync_recv(struct channel *channel, void *data)
         goto closed_channel;
 
     pthread_cond_wait(&channel->sync,&channel->mutex);   // Wait for the writer
+    if(channel->closed) {goto closed_channel;}
     memcpy(data,channel->tmp,channel->eltsize);
 
     channel->rsync = 0;
