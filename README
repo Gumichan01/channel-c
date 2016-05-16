@@ -17,7 +17,7 @@ différents threads/processus à travers les canaux à la [*Go*](https://golang.
  - Canaux globaux pour la communication inter-processus
  - Communication par lots
  - Canaux synchrones
- - Canaux à copie unique (! ne fonctionnera probablement pas avec des threads "deamon")
+ - Canaux à copie unique (expérimental)
  - Canaux non-bloquants
 
 ## Compilation ##
@@ -42,6 +42,7 @@ Dans chacun de ces repertoires vous trouverez un *Makefile*. La commande :
     $ make
 
 devrait suffir pour compiler l'ensemble des programmes benchmark.
+La procédure est identique pour exécuter le programme exemple.
 
 
 ## Benchmark ##
@@ -51,8 +52,9 @@ Voir le fichier *benchmark/benchmark.md*.
 
 ## Bugs ##
 
-  Les canaux à une seule copie ne fonctionneront probablement pas dans
-le cadre où les threads sont détachés.
-En effet, à la mort de ces derniers, les variables locales qui ont pu servir
-lors de l'envoi de données sur le canal sont détruites.
-De ce fait, leur adresses deviennent invalides.
+  Les canaux à une seule copie ne fonctionneront probablement pas dans certains
+cas. Pour une données qui existent dans la pile d'exécution du thread/processus,
+le problème est minime. Pour autant, la question de la cohérence du programme
+se pose dans le cas un thread/processus écrivain ayant envoyé une donnée
+meurt avant que le contenu de la donnée en question ne soit lue
+par un thread/processus lecteur.
