@@ -1,7 +1,7 @@
 
 CC=gcc
 CFLAGS=-Wall -g -pthread
-LFLAGS=
+LFLAGS=-lm -lrt
 
 
 EXE=prod
