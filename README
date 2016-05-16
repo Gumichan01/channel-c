@@ -48,13 +48,3 @@ La procédure est identique pour exécuter le programme exemple.
 ## Benchmark ##
 
 Voir le fichier *benchmark/benchmark.md*.
-
-
-## Bugs ##
-
-  Les canaux à une seule copie ne fonctionneront probablement pas dans certains
-cas. Pour une données qui existent dans la pile d'exécution du thread/processus,
-le problème est minime. Pour autant, la question de la cohérence du programme
-se pose dans le cas un thread/processus écrivain ayant envoyé une donnée
-meurt avant que le contenu de la donnée en question ne soit lue
-par un thread/processus lecteur.
