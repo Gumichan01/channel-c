@@ -390,10 +390,10 @@ dans l'ensemble, plus efficaces que le programme équivalent avec les tubes.
 ### Conditions de test ###
 
   Içi seront testées les performances des canaux synchrones
-avec celles les canaux asynchrones, et ceux, dans un contexte
-multi-thread. Pour la version synchrone, seule la communication entre un écrivain
-et le transmetteur est synchrone. La communication via le canal des lecteurs reste
-quant à lui asynchrone.
+avec celles les canaux asynchrones, et ceux, dans un contexte multi-thread. 
+Ce tpe de canal ne fonctionne pas en multi-processus.
+Seule la communication entre un écrivain et le transmetteur est synchrone.
+La communication via le canal des lecteurs reste quant à lui asynchrone.
 
 
 ### Programme Forward - Comparaisons ###
