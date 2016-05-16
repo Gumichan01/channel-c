@@ -119,7 +119,7 @@ void recv()
 
     do{
         err = channel_recv(chan_r,&tmp);
-        printf("err : %d",err);
+
         if(err > 0)
             printf("%s",tmp.content);
 
@@ -137,7 +137,7 @@ void sm(int nb_prod)
     while(nb < nb_prod)
     {
         err = channel_send(chan_s,&tmp);
-        printf("\nsent -> %s\n",tmp.content);
+
         if(err == -1)
         {
             perror("SEND - error channel_send");
@@ -145,7 +145,6 @@ void sm(int nb_prod)
             break;
         }
         nb++;
-        sleep(1);
     }
 }
 
@@ -162,7 +161,6 @@ void fwd(int prods, int nb_writers)
             break;
         }
 
-        printf("\nfwd -> %s\n",tmp.content);
         err = channel_send(chan_r,&tmp);
 
         if(err == -1)
