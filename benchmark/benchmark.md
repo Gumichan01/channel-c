@@ -390,7 +390,7 @@ dans l'ensemble, plus efficaces que le programme équivalent avec les tubes.
 ### Conditions de test ###
 
   Içi seront testées les performances des canaux synchrones
-avec celles les canaux asynchrones, et ceux, dans un contexte multi-thread. 
+avec celles les canaux asynchrones, et ceux, dans un contexte multi-thread.
 Ce tpe de canal ne fonctionne pas en multi-processus.
 Seule la communication entre un écrivain et le transmetteur est synchrone.
 La communication via le canal des lecteurs reste quant à lui asynchrone.
@@ -583,7 +583,7 @@ Les deux canaux du programmee sont non-bloquants.
 |1/1               |         0.015s     |        **0.012s**     |        0.640s       |        **0.008s**      |
 |10/10             |         0.271s     |        **0.556s**     |        0.623s       |        **0.032s**      |
 |100/100           |         0.304s     |        **0.568s**     |        0.648s       |        **0.104s**      |
-|1000/1000         |         0.442s     |        **0.660s**     |        0.586s       |        **0.932s**      |
+|1000/1000         |         0.442s     |        **0.660s**     |        0.415s       |        **0.616s**      |
 |10/1              |         0.117s     |        **0.208s**     |        0.013s       |        **0.000s**      |
 |100/1             |         0.310s     |        **0.544s**     |        0.018s       |        **0.016s**      |
 |1000/1            |         0.327s     |        **0.552s**     |        0.046s       |        **0.044s**      |
