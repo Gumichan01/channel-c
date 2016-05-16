@@ -402,7 +402,8 @@ struct channel *channel_create(int eltsize, int size, int flags)
                         || CHAN_ISSINGLE(flags)
                         || CHAN_ISNONBLOCKING(flags)) )
         || (CHAN_ISBATCHED(flags) && CHAN_ISSINGLE(flags))
-        || (CHAN_ISNONBLOCKING(flags) && CHAN_ISSINGLE(flags)))
+        || (CHAN_ISNONBLOCKING(flags) && CHAN_ISSINGLE(flags))
+        || (size == 0 && CHAN_ISSHARED(flags)))
     {
         errno = ENOSYS;
         return NULL;
