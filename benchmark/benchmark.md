@@ -444,7 +444,7 @@ vis-à-vis du programme test.
 ### Précisions concernant la communication par lot ###
 
   Les canaux avec communication par lots sont conçus de manière à envoyer
-un ensemble de données en un appel de fonction.
+une suite de données en un appel de fonction.
 Dans le cas présent, une interface spécifique à la communication par lots a
 été défini.
 
@@ -527,15 +527,15 @@ de threads/processus, la différence est très minime entre les deux implémenta
 ### Précisions concernant les canaux à une seule copie ###
 
 Les canaux basique fournis effectuait en interne deux copies
-(ecrivain -> canal et canal -> lecteur). Les canaux à une seul copie suppriment
+(ecrivain → canal et canal → lecteur). Les canaux à une seule copie suppriment
 une de ces deux copies.
-Dans le cas résent, l'adresse de la donnée est directement stockée dans le canal.
+Dans le cas présent, l'adresse de la donnée est directement stockée dans le canal.
 
 
 ### Conditions de test ###
 
   Içi, seront comparées les performances des canaux à une seule copie
-avec les canaux *"classiques"* dans un contexte ulti-thread.
+avec les canaux *"classiques"* dans un contexte multi-thread.
 les deux canaux sont à une seule copie.
 
 ### Programme Forward - Comparaisons ###
@@ -593,7 +593,7 @@ Les deux canaux du programmee sont non-bloquants.
 |1/1000            |         0.329s     |        **0.544s**     |        0.648s       |        **0.452s**      |
 
   On constate que les canaux non-bloquants sont bien plus efficaces que
-les canaux canaux bloquants dans les deux premier cas de figure.
+les canaux canaux bloquants dans les deux premiers cas de figure.
 On notera tout de même qu'avec 1 écrivain et 1 lecteur, mais aussi avec
 plus de lecteurs que d'écrivains, le temps d'éxecution consacré à
 la synchronisation des threads affecte la performance
@@ -605,6 +605,6 @@ global du programme, d'où le temps élevé.
   Les canaux, dans leur version la plus minimale, sont beaucoup plus performants
 que les tubes, aussi bien dans un contexte multi-thread que multi-processus.
 Certaines extensions permettent, si elles sont utilisées à bon escient,
-d'améliorer ces performances (la communication par lots, mais dans un cas bien précis).
+d'améliorer ces performances (la communication par lots, les canaux non-bloquants).
 
 --
