@@ -9,6 +9,7 @@ LFLAGS=-lm -lrt
 
 # Directories
 SRC_DIR=./src/
+TEST_DIR=./test/
 BENCH_DIR=./benchmark/
 BENCH_THREAD_DIR=$(BENCH_DIR)threads/
 BENCH_PROC_DIR=$(BENCH_DIR)process/
@@ -17,6 +18,7 @@ BENCH_PROC_DIR=$(BENCH_DIR)process/
 CHAN_HEADER=$(SRC_DIR)channel.h
 CHAN_SRC=$(SRC_DIR)channel.c
 MANDEL_SRC=$(SRC_DIR)mandelbrot.c
+TEST_SRC=$(TEST_DIR)chan-test.c
 CHAN_OBJ=channel.o
 CHANNEL_LIB=channel.a
 
@@ -31,6 +33,17 @@ $(CHAN_OBJ) : $(CHAN_SRC) $(CHAN_HEADER)
 
 mandelbrot : $(MANDEL_SRC) $(CHAN_SRC)
 	$(CC) $(MANDEL_CFLAGS) $^ -o $@ $(MANDEL_LFLAGS)
+
+test : chan-test
+	@echo "Launch test. ... "
+	@echo "Testing ... "
+	./chan-test
+
+
+chan-test : $(TEST_SRC) $(CHAN_SRC)
+	@echo $@" - Compiling "$(TEST_SRC)"... "
+	$(CC) $(CFLAGS) $^ -o $@ $(LFLAGS)
+	@echo $@" -  done."
 
 # Clean
 clean :
