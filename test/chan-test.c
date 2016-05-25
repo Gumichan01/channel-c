@@ -193,7 +193,7 @@ main()
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
         perror("channel_create");
-        exit(1);
+        exit(2);
     }
     pthread_create(&thr0, NULL, writer, &chan);
     pthread_create(&thr1, NULL, writer, &chan);
@@ -221,7 +221,7 @@ main()
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
         perror("channel_create");
-        exit(1);
+        exit(3);
     }
     pthread_create(&thr0, NULL, reader, &chan);
     pthread_create(&thr1, NULL, reader, &chan);
@@ -248,7 +248,7 @@ main()
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
         perror("channel_create");
-        exit(1);
+        exit(4);
     }
     rc = channel_send(chan, &one);
     if(rc < 0) {
@@ -282,7 +282,7 @@ main()
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
         perror("channel_create");
-        exit(1);
+        exit(5);
     }
     pthread_create(&thr0, NULL, writer_close, &chan);
     n = 0;
@@ -311,7 +311,7 @@ main()
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
         perror("channel_create");
-        exit(1);
+        exit(6);
     }
     pthread_create(&thr0, NULL, writer_sleep_close, &chan);
     n = 0;
@@ -344,12 +344,12 @@ main()
                 break;
             }
             perror("channel_create");
-            exit(1);
+            exit(7);
         }
         chans[1] = channel_create(sizeof(int), synchrone ? 0 : M, 0);
         if(chans[1] == NULL) {
             perror("channel_create");
-            exit(1);
+            exit(8);
         }
         pthread_create(&thr0, NULL, echo_int, &chansp);
         ok = 1;
@@ -358,12 +358,12 @@ main()
             rc = channel_send(chans[0], &i);
             if(rc <= 0) {
                 perror("channel_send");
-                exit(1);
+                exit(9);
             }
             rc = channel_recv(chans[1], &j);
             if(rc <= 0) {
                 perror("channel_recv");
-                exit(1);
+                exit(10);
             }
             if(i != j)
                 ok = 0;
@@ -385,22 +385,22 @@ main()
         big1 = malloc(BIG_SIZE);
         if(big1 == NULL) {
             perror("malloc");
-            exit(1);
+            exit(11);
         }
         big2 = malloc(BIG_SIZE);
         if(big1 == NULL) {
             perror("malloc");
-            exit(1);
+            exit(12);
         }
         chans[0] = channel_create(BIG_SIZE, synchrone ? 0 : M, 0);
         if(chans[0] == NULL) {
             perror("channel_create");
-            exit(1);
+            exit(13);
         }
         chans[1] = channel_create(BIG_SIZE, synchrone ? 0 : M, 0);
         if(chans[1] == NULL) {
             perror("channel_create");
-            exit(1);
+            exit(14);
         }
         pthread_create(&thr0, NULL, echo_big, &chansp);
         ok = 1;
@@ -409,12 +409,12 @@ main()
             rc = channel_send(chans[0], big1);
             if(rc <= 0) {
                 perror("channel_send");
-                exit(1);
+                exit(15);
             }
             rc = channel_recv(chans[1], big2);
             if(rc <= 0) {
                 perror("channel_recv");
-                exit(1);
+                exit(16);
             }
             if(big2[i % BIG_SIZE] != (i & 0xFF))
                 ok = 0;
