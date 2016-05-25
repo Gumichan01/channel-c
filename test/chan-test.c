@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <pthread.h>
-#include "channel.h"
+#include "../src/channel.h"
 
 #ifndef N
 #define N 10000
@@ -158,7 +158,7 @@ main()
 
     setvbuf(stdout, NULL, _IONBF, 0);
 
-    printf("Test tout bête... ");
+    printf("Basic test... ");
     TIMER_START;
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
@@ -183,12 +183,12 @@ main()
     TIMER_STOP;
 
     if(n == N && s == (long)N * (N - 1) / 2)
-        printf("ok (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
+        printf("success (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
     else
-        printf("pas ok: %d %ld.\n", n, s);
+        printf("failure: %d %ld.\n", n, s);
 
 
-    printf("Test avec deux écrivains... ");
+    printf("Test using two writers... ");
     TIMER_START;
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
@@ -211,12 +211,12 @@ main()
     TIMER_STOP;
 
     if(s == 2L * N * (N - 1) / 2)
-        printf("ok (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
+        printf("success (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
     else
-        printf("pas ok: %ld.\n", s);
+        printf("failure: %ld.\n", s);
 
 
-    printf("Test avec deux lecteurs... ");
+    printf("Test using two readers... ");
     TIMER_START;
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
@@ -238,12 +238,12 @@ main()
 
     s = (long)p1 + (long)p2;
     if(s == N * (2L * N - 1))
-        printf("ok (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
+        printf("success (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
     else
-        printf("pas ok: %ld.\n", s);
+        printf("failure: %ld.\n", s);
 
 
-    printf("Test avec canal fermé... ");
+    printf("Test using a closed channel... ");
     ok = 1;
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
@@ -273,12 +273,12 @@ main()
     }
     channel_destroy(chan);
     if(ok)
-        printf("ok (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
+        printf("success (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
     else
-        printf("pas ok.\n");
+        printf("failure.\n");
 
 
-    printf("Test avec blocage en écriture... ");
+    printf("Test on a full channel (write data)... ");
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
         perror("channel_create");
@@ -303,11 +303,11 @@ main()
     channel_destroy(chan);
 
     if(n == N && s == (long)N * (N - 1) / 2)
-        printf("ok.\n");
+        printf("success.\n");
     else
-        printf("pas ok: %d %ld.\n", n, s);
+        printf("failure: %d %ld.\n", n, s);
 
-    printf("Test avec blocage en lecture... ");
+    printf("Test on an empty channel (read data)... ");
     chan = channel_create(sizeof(int), M, 0);
     if(chan == NULL) {
         perror("channel_create");
@@ -330,17 +330,17 @@ main()
     channel_destroy(chan);
 
     if(n == N && s == (long)N * (N - 1) / 2)
-        printf("ok.\n");
+        printf("success.\n");
     else
-        printf("pas ok: %d %ld.\n", n, s);
+        printf("failure: %d %ld.\n", n, s);
 
     for(int synchrone = 0; synchrone < 2; synchrone++) {
-        printf("Test echo%s... ", synchrone ? " synchrone" : "");
+        printf("Test echo%s... ", synchrone ? " synchronous channel" : "");
         TIMER_START;
         chans[0] = channel_create(sizeof(int), synchrone ? 0 : M, 0);
         if(chans[0] == NULL) {
             if(synchrone && errno == EINVAL) {
-                printf("non implémenté.\n");
+                printf("not implemented.\n");
                 break;
             }
             perror("channel_create");
@@ -375,12 +375,12 @@ main()
         TIMER_STOP;
 
         if(ok)
-            printf("ok (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
+            printf("success (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
         else
-            printf("pas ok.\n");
+            printf("failure.\n");
 
 
-        printf("Test echo big%s... ", synchrone ? " synchrone" : "");
+        printf("Test echo big%s... ", synchrone ? " synchronous" : "");
         TIMER_START;
         big1 = malloc(BIG_SIZE);
         if(big1 == NULL) {
@@ -428,9 +428,9 @@ main()
         TIMER_STOP;
 
         if(ok)
-            printf("ok (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
+            printf("success (%lfs, %lfµs).\n", TIME, TIME / N * 1E6);
         else
-            printf("pas ok.\n");
+            printf("failure.\n");
     }
 
     return 0;
