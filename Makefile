@@ -35,9 +35,6 @@ mandelbrot : $(MANDEL_SRC) $(CHAN_SRC)
 	$(CC) $(MANDEL_CFLAGS) $^ -o $@ $(MANDEL_LFLAGS)
 
 test : chan-test
-	@echo "Launch test."
-	@echo "Testing ... "
-	./chan-test
 
 
 chan-test : $(TEST_SRC) $(CHAN_SRC)
