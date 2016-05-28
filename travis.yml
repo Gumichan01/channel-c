@@ -1,0 +1,11 @@
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+script:
+  - make test
+  - echo "Launch test."
+  - echo "Testing ... "
+  - ./chan-test
