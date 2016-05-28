@@ -6,6 +6,4 @@ compiler:
 
 script:
   - make test
-  - echo "Launch test."
-  - echo "Testing ... "
   - ./chan-test
