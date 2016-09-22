@@ -35,7 +35,8 @@ writer(void *arg)
     struct channel *chan = *(struct channel**)arg;
     int rc;
 
-    for(int i = 0; i < N; i++) {
+    for(int i = 0; i < N; i++)
+    {
         rc = channel_send(chan, &i);
         if(rc <= 0)
             perror("channel_send");
@@ -49,7 +50,8 @@ writer_close(void *arg)
     struct channel *chan = *(struct channel**)arg;
     int rc;
 
-    for(int i = 0; i < N; i++) {
+    for(int i = 0; i < N; i++)
+    {
         rc = channel_send(chan, &i);
         if(rc <= 0)
             perror("channel_send");
@@ -64,7 +66,8 @@ writer_sleep_close(void *arg)
     struct channel *chan = *(struct channel**)arg;
     int rc;
 
-    for(int i = 0; i < N; i++) {
+    for(int i = 0; i < N; i++)
+    {
         if(i % (N / 20) == 0)
             nap();
         rc = channel_send(chan, &i);
@@ -82,9 +85,11 @@ reader(void *arg)
     int i, rc;
     long int s = 0;
 
-    while(1) {
+    while(1)
+    {
         rc = channel_recv(chan, &i);
-        if(rc <= 0) {
+        if(rc <= 0)
+        {
             if(rc < 0)
                 perror("channel_recv");
             break;
@@ -99,16 +104,19 @@ echo_int(void *arg)
 {
     struct channel **chans = *(struct channel ***)arg;
 
-    while(1) {
+    while(1)
+    {
         int rc, val;
         rc = channel_recv(chans[0], &val);
-        if(rc <= 0) {
+        if(rc <= 0)
+        {
             if(rc < 0)
                 perror("channel_recv");
             return NULL;
         }
         rc = channel_send(chans[1], &val);
-        if(rc <= 0) {
+        if(rc <= 0)
+        {
             perror("channel_send");
             return NULL;
         }
@@ -120,22 +128,26 @@ echo_big(void *arg)
 {
     struct channel **chans = *(struct channel ***)arg;
     void *big = malloc(BIG_SIZE);
-    if(big == NULL) {
+    if(big == NULL)
+    {
         perror("malloc");
         return NULL;
     }
 
-    while(1) {
+    while(1)
+    {
         int rc;
         rc = channel_recv(chans[0], big);
-        if(rc <= 0) {
+        if(rc <= 0)
+        {
             if(rc < 0)
                 perror("channel_recv");
             free(big);
             return NULL;
         }
         rc = channel_send(chans[1], big);
-        if(rc <= 0) {
+        if(rc <= 0)
+        {
             perror("channel_send");
             free(big);
             return NULL;
@@ -161,14 +173,16 @@ main()
     printf("Basic test... ");
     TIMER_START;
     chan = channel_create(sizeof(int), M, 0);
-    if(chan == NULL) {
+    if(chan == NULL)
+    {
         perror("channel_create");
         exit(1);
     }
     pthread_create(&thr0, NULL, writer_close, &chan);
     n = 0;
     s = 0;
-    while(1) {
+    while(1)
+    {
         int j;
         rc = channel_recv(chan, &j);
         if(rc < 0)
@@ -191,14 +205,16 @@ main()
     printf("Test using two writers... ");
     TIMER_START;
     chan = channel_create(sizeof(int), M, 0);
-    if(chan == NULL) {
+    if(chan == NULL)
+    {
         perror("channel_create");
         exit(2);
     }
     pthread_create(&thr0, NULL, writer, &chan);
     pthread_create(&thr1, NULL, writer, &chan);
     s = 0;
-    for(int i = 0; i < 2 * N; i++) {
+    for(int i = 0; i < 2 * N; i++)
+    {
         int j;
         rc = channel_recv(chan, &j);
         if(rc <= 0)
@@ -219,13 +235,15 @@ main()
     printf("Test using two readers... ");
     TIMER_START;
     chan = channel_create(sizeof(int), M, 0);
-    if(chan == NULL) {
+    if(chan == NULL)
+    {
         perror("channel_create");
         exit(3);
     }
     pthread_create(&thr0, NULL, reader, &chan);
     pthread_create(&thr1, NULL, reader, &chan);
-    for(int i = 0; i < 2 * N; i++) {
+    for(int i = 0; i < 2 * N; i++)
+    {
         rc = channel_send(chan, &i);
         if(rc <= 0)
             perror("channel_recv");
@@ -246,28 +264,33 @@ main()
     printf("Test using a closed channel... ");
     ok = 1;
     chan = channel_create(sizeof(int), M, 0);
-    if(chan == NULL) {
+    if(chan == NULL)
+    {
         perror("channel_create");
         exit(4);
     }
     rc = channel_send(chan, &one);
-    if(rc < 0) {
+    if(rc < 0)
+    {
         perror("channel_send");
         ok = 0;
     }
     channel_close(chan);
     rc = channel_recv(chan, &v);
-    if(rc < 0 || v != 1) {
+    if(rc < 0 || v != 1)
+    {
         perror("channel_recv");
         ok = 0;
     }
     rc = channel_send(chan, &one);
-    if(rc != -1 || errno != EPIPE) {
+    if(rc != -1 || errno != EPIPE)
+    {
         fprintf(stderr, "channel_send(closed): %d %d\n", rc, errno);
         ok = 0;
     }
     rc = channel_recv(chan, &v);
-    if(rc != 0) {
+    if(rc != 0)
+    {
         fprintf(stderr, "channel_recv(closed): %d %d\n", rc, errno);
         ok = 0;
     }
@@ -280,14 +303,16 @@ main()
 
     printf("Test on a full channel (write data)... ");
     chan = channel_create(sizeof(int), M, 0);
-    if(chan == NULL) {
+    if(chan == NULL)
+    {
         perror("channel_create");
         exit(5);
     }
     pthread_create(&thr0, NULL, writer_close, &chan);
     n = 0;
     s = 0;
-    while(1) {
+    while(1)
+    {
         int j;
         if(n % (N / 20) == 0)
             nap();
@@ -309,14 +334,16 @@ main()
 
     printf("Test on an empty channel (read data)... ");
     chan = channel_create(sizeof(int), M, 0);
-    if(chan == NULL) {
+    if(chan == NULL)
+    {
         perror("channel_create");
         exit(6);
     }
     pthread_create(&thr0, NULL, writer_sleep_close, &chan);
     n = 0;
     s = 0;
-    while(1) {
+    while(1)
+    {
         int j;
         rc = channel_recv(chan, &j);
         if(rc < 0)
@@ -334,12 +361,15 @@ main()
     else
         printf("failure: %d %ld.\n", n, s);
 
-    for(int synchrone = 0; synchrone < 2; synchrone++) {
+    for(int synchrone = 0; synchrone < 2; synchrone++)
+    {
         printf("Test echo%s... ", synchrone ? " synchronous channel" : "");
         TIMER_START;
         chans[0] = channel_create(sizeof(int), synchrone ? 0 : M, 0);
-        if(chans[0] == NULL) {
-            if(synchrone && errno == EINVAL) {
+        if(chans[0] == NULL)
+        {
+            if(synchrone && errno == EINVAL)
+            {
                 printf("not implemented.\n");
                 break;
             }
@@ -347,21 +377,25 @@ main()
             exit(7);
         }
         chans[1] = channel_create(sizeof(int), synchrone ? 0 : M, 0);
-        if(chans[1] == NULL) {
+        if(chans[1] == NULL)
+        {
             perror("channel_create");
             exit(8);
         }
         pthread_create(&thr0, NULL, echo_int, &chansp);
         ok = 1;
-        for(int i = 0; i < N; i++) {
+        for(int i = 0; i < N; i++)
+        {
             int j;
             rc = channel_send(chans[0], &i);
-            if(rc <= 0) {
+            if(rc <= 0)
+            {
                 perror("channel_send");
                 exit(9);
             }
             rc = channel_recv(chans[1], &j);
-            if(rc <= 0) {
+            if(rc <= 0)
+            {
                 perror("channel_recv");
                 exit(10);
             }
@@ -383,36 +417,43 @@ main()
         printf("Test echo big%s... ", synchrone ? " synchronous" : "");
         TIMER_START;
         big1 = malloc(BIG_SIZE);
-        if(big1 == NULL) {
+        if(big1 == NULL)
+        {
             perror("malloc");
             exit(11);
         }
         big2 = malloc(BIG_SIZE);
-        if(big1 == NULL) {
+        if(big1 == NULL)
+        {
             perror("malloc");
             exit(12);
         }
         chans[0] = channel_create(BIG_SIZE, synchrone ? 0 : M, 0);
-        if(chans[0] == NULL) {
+        if(chans[0] == NULL)
+        {
             perror("channel_create");
             exit(13);
         }
         chans[1] = channel_create(BIG_SIZE, synchrone ? 0 : M, 0);
-        if(chans[1] == NULL) {
+        if(chans[1] == NULL)
+        {
             perror("channel_create");
             exit(14);
         }
         pthread_create(&thr0, NULL, echo_big, &chansp);
         ok = 1;
-        for(int i = 0; i < N; i++) {
+        for(int i = 0; i < N; i++)
+        {
             big1[i % BIG_SIZE] = (i & 0xFF);
             rc = channel_send(chans[0], big1);
-            if(rc <= 0) {
+            if(rc <= 0)
+            {
                 perror("channel_send");
                 exit(15);
             }
             rc = channel_recv(chans[1], big2);
-            if(rc <= 0) {
+            if(rc <= 0)
+            {
                 perror("channel_recv");
                 exit(16);
             }

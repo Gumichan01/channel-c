@@ -1,5 +1,4 @@
 
-
 #include "channel.h"
 
 // Standard C
@@ -221,7 +220,7 @@ static void ** allocate_array(int eltsize, int size, int flags)
     if(CHAN_ISSHARED(flags))
     {
         array = mmap(NULL, sizeof(void*) * size, PROT_READ|PROT_WRITE,
-                        MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+                     MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 
         if(array == MAP_FAILED)
             return NULL;
@@ -278,8 +277,8 @@ static void ** allocate_array(int eltsize, int size, int flags)
         }
     }
 
-    channel_allocation :
-        return array;
+channel_allocation :
+    return array;
 }
 
 
@@ -348,7 +347,7 @@ static struct channel * channel_allocate(int eltsize, int size, int flags)
     return chan;
 
     // Deal with errors
-    fail_chan :
+fail_chan :
     {
         err = errno;
         free(chan);
@@ -399,11 +398,11 @@ struct channel *channel_create(int eltsize, int size, int flags)
     }
 
     if(( size == 0 && (CHAN_ISBATCHED(flags)
-                        || CHAN_ISSINGLE(flags)
-                        || CHAN_ISNONBLOCKING(flags)) )
-        || (CHAN_ISBATCHED(flags) && CHAN_ISSINGLE(flags))
-        || (CHAN_ISNONBLOCKING(flags) && CHAN_ISSINGLE(flags))
-        || (size == 0 && CHAN_ISSHARED(flags)))
+                       || CHAN_ISSINGLE(flags)
+                       || CHAN_ISNONBLOCKING(flags)) )
+            || (CHAN_ISBATCHED(flags) && CHAN_ISSINGLE(flags))
+            || (CHAN_ISNONBLOCKING(flags) && CHAN_ISSINGLE(flags))
+            || (size == 0 && CHAN_ISSHARED(flags)))
     {
         errno = ENOSYS;
         return NULL;
@@ -447,7 +446,7 @@ struct channel *channel_create(int eltsize, int size, int flags)
     return chan;
 
     // Deal with errors while creating mutex or condition variable
-    fail_atomic:
+fail_atomic:
     {
         free_array(chan->data,eltsize,size,flags);
         free(chan);
@@ -677,13 +676,19 @@ static int channel_sync_send(struct channel *channel, const void *data)
         channel->nbwriters--;
     }
 
-    if(channel->closed) { goto broken_channel; }
+    if(channel->closed)
+    {
+        goto broken_channel;
+    }
     channel->wsync = 1;
 
     if(channel->rsync == 0)                             // Wait for the reader
         pthread_cond_wait(&channel->sync,&channel->mutex);
 
-    if(channel->closed) { goto broken_channel; }        // Interrupt the operation
+    if(channel->closed)
+    {
+        goto broken_channel;    // Interrupt the operation
+    }
     channel->tmp = (void *) data;
     pthread_cond_signal(&channel->sync);                // Data was sent
     pthread_cond_wait(&channel->sync,&channel->mutex);
@@ -701,7 +706,7 @@ static int channel_sync_send(struct channel *channel, const void *data)
     pthread_mutex_unlock(&channel->mutex);
     return 1;
 
-    broken_channel :
+broken_channel :
     {
         channel->wsync = 0;
         pthread_mutex_unlock(&channel->mutex);
@@ -738,7 +743,10 @@ static int channel_sync_recv(struct channel *channel, void *data)
         goto closed_channel;
 
     pthread_cond_wait(&channel->sync,&channel->mutex);   // Wait for the writer
-    if(channel->closed) {goto closed_channel;}
+    if(channel->closed)
+    {
+        goto closed_channel;
+    }
     memcpy(data,channel->tmp,channel->eltsize);
 
     channel->rsync = 0;
@@ -746,7 +754,7 @@ static int channel_sync_recv(struct channel *channel, void *data)
     pthread_mutex_unlock(&channel->mutex);
     return 1;
 
-    closed_channel :
+closed_channel :
     {
         channel->rsync = 0;
         pthread_mutex_unlock(&channel->mutex);
@@ -868,7 +876,8 @@ int channel_vrecv(struct channel *channel, void *array, int size)
 
     pthread_mutex_lock(&channel->mutex);
 
-    if(channel->closed == 1 && channel->nbdata == 0){
+    if(channel->closed == 1 && channel->nbdata == 0)
+    {
         pthread_mutex_unlock(&channel->mutex);
         return 0;
     }
@@ -984,28 +993,29 @@ static int channel_event_occurred(struct channel *chan, short ev)
 
     switch(ev)
     {
-        case CHANNEL_EVENT_CLOSE :
-        {
-            if(channel_is_closed(chan))
-                event = 1;
-        }
-        break;
+    case CHANNEL_EVENT_CLOSE :
+    {
+        if(channel_is_closed(chan))
+            event = 1;
+    }
+    break;
 
-        case CHANNEL_EVENT_READ :
-        {
-            if(!channel_is_empty(chan))
-                event = 1;
-        }
-        break;
+    case CHANNEL_EVENT_READ :
+    {
+        if(!channel_is_empty(chan))
+            event = 1;
+    }
+    break;
 
-        case CHANNEL_EVENT_WRITE :
-        {
-            if(!channel_is_full(chan) && !channel_is_closed(chan))
-                event = 1;
-        }
-        break;
+    case CHANNEL_EVENT_WRITE :
+    {
+        if(!channel_is_full(chan) && !channel_is_closed(chan))
+            event = 1;
+    }
+    break;
 
-        default :   break;
+    default :
+        break;
     }
 
     return event;

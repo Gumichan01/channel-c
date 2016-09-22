@@ -1,4 +1,3 @@
-
 #include "../src/channel.h"
 
 #include <stdio.h>
@@ -22,7 +21,7 @@ typedef struct msg_t
     pid_t pid;
     char content[SIZE_MSG];
 
-}msg_t;
+} msg_t;
 
 channel_t *chan_s = NULL;
 channel_t *chan_r = NULL;
@@ -65,8 +64,8 @@ void * sendm(void * ptr)
 
         if(err == -1)
         {
-          channel_close(chan_s);
-          break;
+            channel_close(chan_s);
+            break;
         }
         nb++;
     }
@@ -117,13 +116,15 @@ void recv()
     int err;
     msg_t tmp;
 
-    do{
+    do
+    {
         err = channel_recv(chan_r,&tmp);
 
         if(err > 0)
             printf("%s",tmp.content);
 
-    }while(err > 0);
+    }
+    while(err > 0);
 }
 
 void sm(int nb_prod)
@@ -259,8 +260,14 @@ void multiprocess(int nb_prod, int nb_writers, int nb_readers)
     }
 
     fwd(nb_prod, nb_writers);
-    for(i = 0; i < nb_writers; i++){ waitpid(-1,NULL,0); }
-    for(i = 0; i < nb_readers; i++){ waitpid(-1,NULL,0); }
+    for(i = 0; i < nb_writers; i++)
+    {
+        waitpid(-1,NULL,0);
+    }
+    for(i = 0; i < nb_readers; i++)
+    {
+        waitpid(-1,NULL,0);
+    }
 }
 
 
@@ -281,7 +288,8 @@ int main(int argc, char **argv)
         if(opt < 0)
             break;
 
-        switch(opt) {
+        switch(opt)
+        {
         case 'p':
             multiproc = 1;
             break;
@@ -308,7 +316,7 @@ int main(int argc, char **argv)
     }
 
     if(nb_writers == 0 || nb_readers == 0 || nb_prod == 0
-        || (sync == 1 && multiproc == 1))
+            || (sync == 1 && multiproc == 1))
     {
         fprintf(stderr, "%s\n", usage);
         exit(1);
