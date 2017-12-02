@@ -106,7 +106,7 @@ en appel système que les version utilisant les tubes.
 |--------|----|-------|--------|----------|-----------|-------------|
 |Facteur | x2 |  ~x1  |   x3   |   x102   |    x49    |     x28     |
 
-*Facteur moyen* : ***~ 30***.
+*Facteur moyen* : ***~30***.
 
 **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
 
@@ -114,7 +114,7 @@ en appel système que les version utilisant les tubes.
 |--------|----|--------|---------|----------|-----------|-------------|
 |Facteur | x2 |  x1.5  |    x8   |   x245   |    x108   |     x34     |
 
-*Facteur moyen* : ***~ 70***.
+*Facteur moyen* : ***~70***.
 
 
 ##### Plus d'écrivains que de lecteurs #####
@@ -155,7 +155,7 @@ en appel système que les version utilisant les tubes.
  |--------|---------|-----------|----------|-------------|
  |Facteur | ~x(1/3) |   x(1/2)  |   x12    |     x28     |
 
- *Facteur moyen* : ***~ 10***.
+ *Facteur moyen* : ***~10***.
 
  **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
 
@@ -163,7 +163,7 @@ en appel système que les version utilisant les tubes.
  |--------|----------|----------|-----------|------------|
  |Facteur |  ~x(1/3) |    ~x1   |    x34    |    x160    |
 
-*Facteur moyen* : ***~ 40-50***.
+*Facteur moyen* : ***~40-50***.
 
 ##### Plus de lecteurs que d'écrivains #####
 
@@ -200,7 +200,7 @@ les canaux est bien plus efficace que celui utilisant les tubes.
 |--------|------|------|---------|------------|
 |Facteur | x1.5 |  x6  |   x90   |    x154    |
 
-*Facteur moyen* : ***~ 62***.
+*Facteur moyen* : ***~62***.
 
 **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
 
@@ -208,12 +208,12 @@ les canaux est bien plus efficace que celui utilisant les tubes.
 |--------|-----|---------|-----------|------------|
 |Facteur |  x2 |    x8   |    x184   |    x431    |
 
-*Facteur moyen* : ***~ 156***.
+*Facteur moyen* : ***~156***.
 
 > En moyenne (de tous les cas)
 
- *Facteur moyen (temps réel)* : ***~ 30-40***.
- *Facteur moyen (temps système)* : ***~ 100***.
+ *Facteur moyen (temps réel)* : ***~30-40***.
+ *Facteur moyen (temps système)* : ***~100***.
 
 #### Moralité ####
 
@@ -273,7 +273,7 @@ avec l'option *-pthread*, du fait que les canaux utilisent des fonctions relativ
  |--------|----|--------|--------|-----------|
  |Facteur | ~1 |  x1.3  |   x3   |    x46    |
 
-*Facteur moyen* : ***~ 13***.
+*Facteur moyen* : ***~13***.
 
  **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
 
@@ -281,7 +281,7 @@ avec l'option *-pthread*, du fait que les canaux utilisent des fonctions relativ
  |--------|----|------|---------|----------|
  |Facteur | ~1 |  ~1  |    x6   |   x222   |
 
-*Facteur moyen* : ***~ 57***.
+*Facteur moyen* : ***~57***.
 
 *Moralité* : Sur un petit nombre d'écrivains/lecteurs, le programme utilisant
 les tubes est légèrement plus efficace que son équivalent avec les canaux.
@@ -320,7 +320,7 @@ autour de 1000 écrivains.
  |--------|--------|--------|-------|-----------|
  |Facteur | x(1/6) | x(1/3) |   x6  |    x51    |
 
- *Facteur moyen* : ***~ 15***.
+ *Facteur moyen* : ***~15***.
 
  **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
 
@@ -328,7 +328,7 @@ autour de 1000 écrivains.
  |--------|---------|---------|---------|----------|
  |Facteur |  x(1/5) | x(1/14) |   x33   |   x214   |
 
-*Facteur moyen* : ***~ 60***.
+*Facteur moyen* : ***~60***.
 
 
 ##### Plus de lecteurs que d'écrivains #####
@@ -363,7 +363,7 @@ autour de 1000 écrivains.
  |--------|--------|------|-------|-----------|
  |Facteur | x(1/5) |  x4  |  x43  |    x87    |
 
- *Facteur moyen* : ***~ 34***.
+ *Facteur moyen* : ***~34***.
 
  **Comparatif des différences de performances entre les canaux et les tubes (temps système)** :
 
@@ -371,12 +371,12 @@ autour de 1000 écrivains.
  |--------|-------|-------|---------|----------|
  |Facteur |  x1.1 |  x11  |   x33   |   x279   |
 
-*Facteur moyen* : ***~ 80***.
+*Facteur moyen* : ***~80***.
 
 > En moyenne (de tous les cas)
 
-*Facteur moyen (temps réel)* : ***~ 20***.
-*Facteur moyen (temps système)* : ***~ 66***.
+*Facteur moyen (temps réel)* : ***~20***.
+*Facteur moyen (temps système)* : ***~66***.
 
 
 ### Moralité ###
@@ -422,7 +422,7 @@ La communication via le canal des lecteurs reste quant à lui asynchrone.
 |---------------------|-------|---|-----|
 |       Facteur       |  x17  | x5|  x8 |
 
-*Facteur moyen* : ***~ 10***.
+*Facteur moyen* : ***~10***.
 
 **Comparatif des différences de performances entre les canaux synchrones et asynchrones (temps système)** :
 
@@ -430,7 +430,7 @@ La communication via le canal des lecteurs reste quant à lui asynchrone.
 |---------------------|-------|---|-----|
 |       Facteur       |  x17  | x4|  x3 |
 
-*Facteur moyen* : ***~ 8***.
+*Facteur moyen* : ***~8***.
 
 
 ### Moralité ###
@@ -592,8 +592,8 @@ Les deux canaux du programmee sont non-bloquants.
 |1/100             |         0.259s     |        **0.440s**     |        0.643s       |        **0.020s**      |
 |1/1000            |         0.329s     |        **0.544s**     |        0.648s       |        **0.452s**      |
 
-  On constate que les canaux non-bloquants sont moins efficaces que les canaux
-bloquants.
+  On constate que globalement, les canaux non-bloquants sont à peu près autant efficaces que les canaux
+bloquants, sur certains cas d'utilisations.
 
 
 ## Conclusion ##
